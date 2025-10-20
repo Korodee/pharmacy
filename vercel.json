@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && pnpm run build",
-  "outputDirectory": "frontend/.next",
   "installCommand": "pnpm install --no-frozen-lockfile",
+  "buildCommand": "pnpm run build",
   "builds": [
     {
       "src": "frontend/package.json",
