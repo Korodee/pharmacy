@@ -1,4 +1,7 @@
+"use client";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 type Step = {
   title: string;
@@ -34,16 +37,23 @@ const steps: Step[] = [
 export default function HowItWorksSection() {
   return (
     <section id="how-it-works" className="w-full bg-[#F1FAFD]">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-20">
-        <h3 className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-12">
+      <motion.div
+        className="max-w-7xl mx-auto px-6 md:px-10 py-20"
+        variants={containerStagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+      >
+        <motion.h3 variants={fadeUp} className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-12">
           How Our Refill Works
-        </h3>
+        </motion.h3>
 
         <div className="grid md:grid-cols-3 gap-6">
           {steps.map((step, idx) => (
-            <div
+            <motion.div
               key={idx}
               className="bg-white rounded-[18px] border border-[#E6EEF7] shadow-sm py-4 px-8 flex flex-col"
+              variants={fadeUp}
             >
               <div className="flex justify-center mb-8">
                 <Image
@@ -60,10 +70,10 @@ export default function HowItWorksSection() {
               <p className="text-[#11122C] font-[300] leading-relaxed">
                 {step.description}
               </p>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

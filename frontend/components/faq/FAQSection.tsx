@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 type FAQ = { question: string; answer: string };
 
@@ -36,16 +38,22 @@ export default function FAQSection() {
 
   return (
     <section id="faq" className="w-full bg-white py-20">
-      <div className="max-w-5xl mx-auto px-6 md:px-10">
-        <h3 className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
+      <motion.div
+        className="max-w-5xl mx-auto px-6 md:px-10"
+        variants={containerStagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+      >
+        <motion.h3 variants={fadeUp} className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
           Frequently Asked Questions
-        </h3>
+        </motion.h3>
 
         <div className="space-y-4">
           {faqs.map((f, i) => {
             const isOpen = openIndex === i;
             return (
-              <div key={i} className="rounded-[12px] border border-[#E6EEF7] bg-[#F1FAFD] overflow-hidden">
+              <motion.div key={i} className="rounded-[12px] border border-[#E6EEF7] bg-[#F1FAFD] overflow-hidden" variants={fadeUp}>
                 <button
                   className="w-full flex items-center justify-between text-left px-5 py-4 text-[17px] text-[#0A438C] font-medium"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
@@ -72,11 +80,11 @@ export default function FAQSection() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

@@ -72,7 +72,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80svh] md:max-h-[90vh] overflow-y-auto scrollbar-hide">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-2xl font-medium text-[#0A438C]">

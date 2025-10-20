@@ -1,5 +1,8 @@
+"use client";
 import { HeroContent as HeroContentType } from "@/lib/data/heroData";
 import Button from "./Button";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 interface HeroContentProps {
   content: HeroContentType;
@@ -9,28 +12,33 @@ interface HeroContentProps {
 
 export default function HeroContent({ content, isModalOpen, setIsModalOpen }: HeroContentProps) {
   return (
-    <div className="max-w-2xl mt-[30%] mb-[30%] md:my-0">
+    <motion.div
+      className="max-w-2xl mt-[40px] md:my-0"
+      variants={containerStagger}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Primary Heading */}
-      <h1 className="text-center md:text-left text-4xl md:text-6xl lg:text-6xl font-medium text-white leading-tight mb-5">
+      <motion.h1 variants={fadeUp} className="text-center md:text-left text-4xl md:text-6xl lg:text-6xl font-medium text-white leading-tight mb-5">
         {content.primaryHeading}
-      </h1>
+      </motion.h1>
 
       {/* Secondary Heading */}
-      <h2 className="text-center md:text-left text-4xl md:text-[49px] font-medium text-primary-200 mb-6">
+      <motion.h2 variants={fadeUp} className="text-center md:text-left text-4xl md:text-[49px] font-medium text-primary-200 mb-6">
         {content.secondaryHeading}
-      </h2>
+      </motion.h2>
 
       {/* Description */}
-      <p className="text-xl text-center md:text-left font-light md:text-2xl text-[#D4F4FF] mb-16 leading-relaxed">
+      <motion.p variants={fadeUp} className="text-xl text-center md:text-left font-light md:text-2xl text-[#D4F4FF] mb-16 leading-relaxed">
         {content.description}
-      </p>
+      </motion.p>
 
       {/* Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4">
         {content.buttons.map((button, index) => (
           <Button key={index} button={button} className="text-center" isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

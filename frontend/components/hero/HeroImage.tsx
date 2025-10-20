@@ -1,8 +1,16 @@
+"use client";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { slideInRight } from "@/lib/anim";
 
 export default function HeroImage() {
   return (
-    <div className="relative w-full h-full flex items-end justify-center">
+    <motion.div
+      className="relative w-full h-full flex items-end justify-center"
+      variants={slideInRight}
+      initial="hidden"
+      animate="visible"
+    >
       <div className="relative z-10">
         <Image
           src="/hero-img.png"
@@ -13,6 +21,6 @@ export default function HeroImage() {
           priority
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

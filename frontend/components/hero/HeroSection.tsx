@@ -6,6 +6,7 @@ import HeroContent from "./HeroContent";
 import HeroImage from "./HeroImage";
 import { useState, useEffect } from "react";
 import RefillModal from "../modal/RefillModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HeroSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -111,86 +112,126 @@ export default function HeroSection() {
       </div>
 
       {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        >
-          <div className="absolute top-0 right-0 w-72 h-full bg-white shadow-2xl transform transition-all duration-300 ease-out">
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">Menu</h3>
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-md md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ 
+                type: "spring", 
+                damping: 25, 
+                stiffness: 200,
+                duration: 0.4 
+              }}
+              className="absolute top-0 right-0 w-72 h-full bg-white shadow-2xl"
+            >
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <motion.div
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                  className="flex items-center justify-between p-6 border-b border-gray-100"
                 >
-                  <svg
-                    className="w-5 h-5 text-gray-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                  <h3 className="text-lg font-semibold text-gray-900">Menu</h3>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Navigation Links */}
-              <nav className="flex-1 px-6 py-8">
-                <div className="space-y-2">
-                  {heroData.navigation.map((item, index) => (
-                    <a
-                      key={index}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="block px-4 py-4 rounded-xl text-base font-medium text-gray-700 hover:bg-[#0A438C]/5 hover:text-[#0A438C] transition-all duration-200 group"
+                    <svg
+                      className="w-5 h-5 text-gray-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <span className="flex items-center justify-between">
-                        {item.label}
-                        <svg
-                          className="w-4 h-4 text-gray-400 group-hover:text-[#0A438C] transition-colors"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              </nav>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </motion.div>
 
-              {/* Footer with CTA */}
-              <div className="p-6 border-t border-gray-100 bg-gray-50/50">
-                <button
-                  onClick={() => {
-                    setIsModalOpen(true);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full bg-[#0A438C] text-white px-6 py-4 rounded-xl text-base font-semibold hover:bg-[#0A438C]/90 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                {/* Navigation Links */}
+                <nav className="flex-1 px-6 py-8">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.3 }}
+                    className="space-y-2"
+                  >
+                    {heroData.navigation.map((item, index) => (
+                      <motion.a
+                        key={index}
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ 
+                          delay: 0.3 + (index * 0.1), 
+                          duration: 0.3 
+                        }}
+                        href={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="block px-4 py-4 rounded-xl text-base font-medium text-gray-700 hover:bg-[#0A438C]/5 hover:text-[#0A438C] transition-all duration-200 group"
+                      >
+                        <span className="flex items-center justify-between">
+                          {item.label}
+                          <svg
+                            className="w-4 h-4 text-gray-400 group-hover:text-[#0A438C] transition-colors"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
+                          </svg>
+                        </span>
+                      </motion.a>
+                    ))}
+                  </motion.div>
+                </nav>
+
+                {/* Footer with CTA */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5, duration: 0.3 }}
+                  className="p-6 border-t border-gray-100 bg-gray-50/50"
                 >
-                  Request A Refill
-                </button>
-                <p className="text-xs text-gray-500 text-center mt-3">
-                  Quick and easy prescription refills
-                </p>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setIsModalOpen(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-[#0A438C] text-white px-6 py-4 rounded-xl text-base font-semibold hover:bg-[#0A438C]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    Request A Refill
+                  </motion.button>
+                  <p className="text-xs text-gray-500 text-center mt-3">
+                    Quick and easy prescription refills
+                  </p>
+                </motion.div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <RefillModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>

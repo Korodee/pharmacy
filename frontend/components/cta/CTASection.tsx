@@ -2,29 +2,38 @@
 import Image from "next/image";
 import { useState } from "react";
 import RefillModal from "../modal/RefillModal";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 export default function CTASection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <section className="w-full bg-white py-12">
       <div className="px-4">
-        <div className="relative rounded-2xl bg-[#F1FAFD] border border-[#E6EEF7] overflow-hidden">
+        <motion.div
+          className="relative rounded-2xl bg-[#F1FAFD] border border-[#E6EEF7] overflow-hidden"
+          variants={containerStagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+        >
           {/* Text Section */}
           <div className="relative z-10 px-6 md:px-10 pt-[88px] pb-[18rem] text-center">
-            <h3 className="text-[#0A438C] text-3xl md:text-5xl font-semibold leading-tight mb-6">
+            <motion.h3 variants={fadeUp} className="text-[#0A438C] text-3xl md:text-5xl font-semibold leading-tight mb-6">
               Your Health, Our Priority. Refill,
               <br className="hidden md:block" /> Shop, Or Consult Today.
-            </h3>
-            <p className="text-[#6B7280] text-[16px] max-w-md mx-auto mb-8">
+            </motion.h3>
+            <motion.p variants={fadeUp} className="text-[#6B7280] text-[16px] max-w-md mx-auto mb-8">
               Access trusted medications, refills, and expert guidance from
               licensed pharmacists — all in one place.
-            </p>
-            <button
+            </motion.p>
+            <motion.button
+              variants={fadeUp}
               onClick={() => setIsModalOpen(true)}
               className="inline-block bg-[#0A438C] text-white px-14 py-4 rounded-xl font-semibold hover:bg-[#0A438C]/90 transition-colors"
             >
               Request A Refill
-            </button>
+            </motion.button>
           </div>
 
           {/* Background Image */}
@@ -38,7 +47,7 @@ export default function CTASection() {
               priority
             />
           </div>
-        </div>
+        </motion.div>
       </div>
       
       <RefillModal 

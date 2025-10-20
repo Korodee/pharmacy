@@ -1,24 +1,35 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 export default function Footer() {
   return (
     <footer className="w-full bg-white">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-12">
+      <motion.div
+        className="max-w-7xl mx-auto px-6 md:px-10 py-12"
+        variants={containerStagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+      >
         <div className="flex flex-col gap-6 md:gap-10">
           {/* Top row: logo + helper text */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <motion.div variants={fadeUp}>
             <Image
               src="/logo.svg"
               alt="Kateri Pharmacy"
               width={200}
               height={48}
             />
-            <p className="text-[14px] text-gray-600 md:w-[50%] md:text-right">
+            </motion.div>
+            <motion.p variants={fadeUp} className="text-[14px] text-gray-600 md:w-[50%] md:text-right">
               Do you need answers to your queries while ordering medicines
               online? Want to refill your prescription by phone? Our customer
               service specialists will be happy to assist you.
-            </p>
+            </motion.p>
           </div>
           {/* Contacts */}
           <div className="block text-[14px] text-gray-600 md:hidden space-y-1">
@@ -39,7 +50,7 @@ export default function Footer() {
 
           <div className="grid mt-6 md:grid-cols-3 gap-8 text-[14px] text-gray-600">
             {/* Address 1 */}
-            <div className="flex items-start gap-3">
+            <motion.div variants={fadeUp} className="flex items-start gap-3">
               <svg
                 className="h-6 w-6 text-[#0A438C] flex-shrink-0"
                 viewBox="0 0 24 24"
@@ -92,10 +103,10 @@ export default function Footer() {
                   </Link>
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Address 2 */}
-            <div className="flex items-start gap-3">
+            <motion.div variants={fadeUp} className="flex items-start gap-3">
               <svg
                 className="h-6 w-6 text-[#0A438C] flex-shrink-0"
                 viewBox="0 0 24 24"
@@ -148,10 +159,10 @@ export default function Footer() {
                   </Link>
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Contacts */}
-            <div className="hidden md:block md:text-right space-y-1">
+            <motion.div variants={fadeUp} className="hidden md:block md:text-right space-y-1">
               <p>
                 Call{" "}
                 <Link
@@ -171,17 +182,17 @@ export default function Footer() {
                   450‑635‑8249
                 </Link>
               </p>
-            </div>
+            </motion.div>
           </div>
 
           <hr className="border-[#E6EEF7]" />
 
           {/* Bottom row: copyright */}
-          <div className="text-[#6B7280] text-center text-sm">
+          <motion.div variants={fadeUp} className="text-[#6B7280] text-center text-sm">
             © 2025 Kateri Pharmacy. All Rights Reserved.
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </footer>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 type Service = {
   title: string;
@@ -70,10 +72,16 @@ export default function ServicesSection() {
   }, []);
   return (
     <section id="services" className="w-full bg-white">
-      <div className="max-w-6xl mx-auto px-6 md:px-10 py-20">
-        <h3 className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
+      <motion.div
+        className="max-w-6xl mx-auto px-6 md:px-10 py-20"
+        variants={containerStagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+      >
+        <motion.h3 variants={fadeUp} className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
           Comprehensive Care For Every Need
-        </h3>
+        </motion.h3>
 
         {/* Horizontal scroll with snap; card layout: image left, text right */}
         <div className="relative">
@@ -83,9 +91,10 @@ export default function ServicesSection() {
           >
             <div className="flex gap-6 w-max">
               {services.map((s, i) => (
-                <article
+                <motion.article
                   key={i}
                   className="snap-start bg-[#F7FAFE] p-4 rounded-[18px] border border-[#E6EEF7] shadow-sm flex flex-col md:flex-row min-w-[280px] h-auto md:h-[280px] max-w-[120px] md:max-w-[450px] overflow-hidden"
+                  variants={fadeUp}
                 >
                   {/* Image - Top on mobile, left on desktop */}
                   <div className="w-full md:w-[160px] rounded-xl h-[200px] md:h-full shrink-0">
@@ -107,7 +116,7 @@ export default function ServicesSection() {
                       {s.description}
                     </p>
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
           </div>
@@ -117,7 +126,7 @@ export default function ServicesSection() {
             <div ref={progressRef} className="absolute left-0 top-0 h-[3px] rounded-full bg-gradient-to-r from-[#0A438C] to-[#0A7BB2]" style={{ width: '0%' }} />
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

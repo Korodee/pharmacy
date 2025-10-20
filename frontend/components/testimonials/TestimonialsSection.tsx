@@ -1,5 +1,7 @@
 "use client";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { containerStagger, fadeUp } from "@/lib/anim";
 
 type Testimonial = {
   quote: string;
@@ -44,17 +46,24 @@ export default function TestimonialsSection() {
   const loop = [...testimonials, ...testimonials];
   return (
     <section id="reviews" className="w-full bg-[#F1FAFD]">
-      <div className="max-w-7xl mx-auto px-6 md:px-10 py-20">
-        <h3 className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
+      <motion.div
+        className="max-w-7xl mx-auto px-6 md:px-10 py-20"
+        variants={containerStagger}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+      >
+        <motion.h3 variants={fadeUp} className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
           What Client Says About Us
-        </h3>
+        </motion.h3>
 
         <div className="relative overflow-hidden">
           <div className="flex gap-6 w-max will-change-transform animate-[marquee_30s_linear_infinite]">
             {loop.map((t, i) => (
-              <article
+              <motion.article
                 key={i}
                 className="bg-transparent rounded-[14px] border border-[#E6EEF7] p-6 md:p-8 flex flex-col justify-between max-w-[280px] md:max-w-[380px]"
+                variants={fadeUp}
               >
                 <p className="text-[#11122C] text-[17px] leading-6 mb-6">
                   {t.quote}
@@ -69,7 +78,7 @@ export default function TestimonialsSection() {
                     className="rounded-full"
                   />
                 </div>
-              </article>
+              </motion.article>
             ))}
           </div>
         </div>
@@ -83,7 +92,7 @@ export default function TestimonialsSection() {
             }
           }
         `}</style>
-      </div>
+      </motion.div>
     </section>
   );
 }
