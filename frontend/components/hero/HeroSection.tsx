@@ -24,14 +24,22 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="relative h-[100svh] md:h-screen bg-cover bg-center bg-no-repeat overflow-visible"
+      className="relative h-[100svh] md:h-screen bg-[#0A438C] bg-cover bg-center bg-no-repeat overflow-visible"
       style={{ backgroundImage: "url(/hero-bg.png)" }}
     >
-      {/* Background Blur */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-sm"
-        style={{ backgroundImage: "url(/hero-bg.png)" }}
-      ></div>
+      {/* Background Image with proper loading */}
+      <div className="absolute inset-0">
+        <img
+          src="/hero-bg.png"
+          alt=""
+          className="w-full h-full object-cover"
+          style={{ 
+            filter: 'blur(1px)',
+            transform: 'scale(1.02)'
+          }}
+          loading="eager"
+        />
+      </div>
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-white/10"></div>
 

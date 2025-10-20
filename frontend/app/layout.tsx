@@ -16,6 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preload" as="image" href="/hero-bg.png" />
+      </head>
       <body className={`${GeistSans.className} ${GeistMono.variable}`}>
         {children}
       </body>
