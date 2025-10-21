@@ -17,19 +17,38 @@ export default function Footer() {
         <div className="flex flex-col gap-6 md:gap-10">
           {/* Top row: logo + helper text */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <motion.div variants={fadeUp}>
-            <Image
-              src="/logo.svg"
-              alt="Kateri Pharmacy"
-              width={200}
-              height={48}
-            />
-            </motion.div>
-            <motion.p variants={fadeUp} className="text-[14px] text-gray-600 md:w-[50%] md:text-right">
+            <motion.p
+              variants={fadeUp}
+              className="text-[14px] text-gray-600 md:w-[50%] md:text-left"
+            >
               Do you need answers to your queries while ordering medicines
               online? Want to refill your prescription by phone? Our customer
               service specialists will be happy to assist you.
             </motion.p>
+            <motion.div
+              variants={fadeUp}
+              className="hidden md:block text-[14px] md:text-right text-gray-600 space-y-1"
+            >
+              <p>
+                Call{" "}
+                <Link
+                  href="tel:4506385760"
+                  className="text-[#0A438C] underline"
+                >
+                  450 638 5760
+                </Link>{" "}
+                now and we will get in touch with you.
+              </p>
+              <p>
+                Our Fax number is{" "}
+                <Link
+                  href="tel:4506358249"
+                  className="text-[#0A438C] underline"
+                >
+                  450‑635‑8249
+                </Link>
+              </p>
+            </motion.div>
           </div>
           {/* Contacts */}
           <div className="block text-[14px] text-gray-600 md:hidden space-y-1">
@@ -47,10 +66,12 @@ export default function Footer() {
               </Link>
             </p>
           </div>
-
-          <div className="grid mt-6 md:grid-cols-3 gap-8 text-[14px] text-gray-600">
-            {/* Address 1 */}
-            <motion.div variants={fadeUp} className="flex items-start gap-3">
+          <div className="w-full flex flex-col md:flex-row justify-between items-start text-[14px] text-gray-600 mt-6">
+            {/* Address 1 - Left */}
+            <motion.div
+              variants={fadeUp}
+              className="flex items-start gap-3 md:w-1/3"
+            >
               <svg
                 className="h-6 w-6 text-[#0A438C] flex-shrink-0"
                 viewBox="0 0 24 24"
@@ -72,12 +93,73 @@ export default function Footer() {
                 />
               </svg>
               <div>
-                <p>
-                  9316 Airlie (corner 90th ave), LaSalle, T514‑365‑4155
+                <p>10 River road Kahnawake</p>
+                <span>
+                  T450 638 5760
+                  <span className="text-[#0A438C] underline ml-2">
+                    (Open 6 days a week)
+                  </span>
+                </span>
+                <p className="mt-2 flex items-center gap-2">
+                  <svg
+                    className="h-4 w-4 text-[#0A438C]"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path
+                      d="M9 7c1.2-1.2 2.6-2 4.1-2h.4c-.6.5-1.1 1.1-1.3 1.7-.2.5-.6.8-1.1.9-.7.2-1.3.6-1.7 1.2L9 9.5V7z"
+                      fill="white"
+                    />
+                    <path
+                      d="M12 12c-1 .2-1.8.6-2 .9-.4.5-.4 1.3.1 1.9l1.4 1.6c.6.7 1 1.6 1 2.5v.3c1.7-.4 3.3-1.3 4.5-2.6l-.7-1c-.4-.5-1-.8-1.6-.9-.8-.1-1.4-.6-1.7-1.3l-.2-.4-.8-1z"
+                      fill="white"
+                    />
+                  </svg>
+                  <Link
+                    href="https://pharmacy-frontend-jade.vercel.app/"
+                    className="text-[#0A438C] underline"
+                  >
+                    Kateri pharmacy
+                  </Link>
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Address 2 - Center */}
+            <motion.div
+              variants={fadeUp}
+              className="flex mt-4 md:mt-0 items-start gap-3 justify-center md:w-1/3"
+            >
+              <svg
+                className="h-6 w-6 text-[#0A438C] flex-shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 22s7-6.1 7-12a7 7 0 10-14 0c0 5.9 7 12 7 12z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  fill="none"
+                />
+                <circle
+                  cx="12"
+                  cy="10"
+                  r="2.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+              </svg>
+              <div>
+                <p>9316 Airlie (corner 90th Ave), LaSalle</p>
+                <span>
+                  T514‑365‑4155
                   <span className="text-[#0A438C] underline ml-2">
                     (Open 7 days a week)
                   </span>
-                </p>
+                </span>
                 <p className="mt-2 flex items-center gap-2">
                   <svg
                     className="h-4 w-4 text-[#0A438C]"
@@ -105,8 +187,11 @@ export default function Footer() {
               </div>
             </motion.div>
 
-            {/* Address 2 */}
-            <motion.div variants={fadeUp} className="flex items-start gap-3">
+            {/* Address 3 - Right */}
+            <motion.div
+              variants={fadeUp}
+              className="flex mt-4 md:mt-0 items-start gap-3 justify-end md:w-1/3"
+            >
               <svg
                 className="h-6 w-6 text-[#0A438C] flex-shrink-0"
                 viewBox="0 0 24 24"
@@ -128,12 +213,13 @@ export default function Footer() {
                 />
               </svg>
               <div>
-                <p>
-                  640 Rue St‑Regis, St‑Isidore, T450‑454‑5507
+                <p>640 Rue St‑Regis, St‑Isidore</p>
+                <span>
+                  T450‑454‑5507
                   <span className="text-[#0A438C] underline ml-2">
                     (Open 7 days a week)
                   </span>
-                </p>
+                </span>
                 <p className="mt-2 flex items-center gap-2">
                   <svg
                     className="h-4 w-4 text-[#0A438C]"
@@ -160,35 +246,15 @@ export default function Footer() {
                 </p>
               </div>
             </motion.div>
-
-            {/* Contacts */}
-            <motion.div variants={fadeUp} className="hidden md:block md:text-right space-y-1">
-              <p>
-                Call{" "}
-                <Link
-                  href="tel:4506385760"
-                  className="text-[#0A438C] underline"
-                >
-                  450 638 5760
-                </Link>{" "}
-                now and we will get in touch with you.
-              </p>
-              <p>
-                Our Fax number is{" "}
-                <Link
-                  href="tel:4506358249"
-                  className="text-[#0A438C] underline"
-                >
-                  450‑635‑8249
-                </Link>
-              </p>
-            </motion.div>
           </div>
 
           <hr className="border-[#E6EEF7]" />
 
           {/* Bottom row: copyright */}
-          <motion.div variants={fadeUp} className="text-[#6B7280] text-center text-sm">
+          <motion.div
+            variants={fadeUp}
+            className="text-[#6B7280] text-center text-sm"
+          >
             © 2025 Kateri Pharmacy. All Rights Reserved.
           </motion.div>
         </div>

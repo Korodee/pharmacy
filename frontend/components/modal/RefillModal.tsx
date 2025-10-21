@@ -8,7 +8,6 @@ interface RefillModalProps {
 
 export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
   const [formData, setFormData] = useState({
-    name: "",
     phone: "",
     prescriptions: [""],
     deliveryType: "pickup",
@@ -23,25 +22,25 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       // Save current scroll position
       const scrollY = window.scrollY;
       // Lock body scroll
-      document.body.style.position = 'fixed';
+      document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      document.body.style.width = "100%";
     } else {
       // Restore scroll position
       const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
       if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
       }
     }
 
     // Cleanup on unmount
     return () => {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
     };
   }, [isOpen]);
 
@@ -87,25 +86,16 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
         </div>
 
         {/* Form */}
-        <form className="p-6 space-y-6">
-          {/* Personal Information */}
+        <form className="p-6 space-y-8">
+          {/* Phone Number */}
           <div>
             <h3 className="text-lg font-[300] text-[#0A438C] mb-4">
-              Personal Information
+              Contact Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                placeholder="Enter Your Name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-              />
+            <div className="grid grid-cols-1 gap-4">
               <input
                 type="tel"
-                placeholder="Enter Phone"
+                placeholder="Enter Phone Number"
                 value={formData.phone}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, phone: e.target.value }))
@@ -117,18 +107,10 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
 
           {/* Prescription */}
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <h3 className="text-lg font-[400] text-[#0A438C]">
                 Prescription
               </h3>
-                  <button
-                    type="button"
-                    onClick={addPrescription}
-                    className="bg-[#0A438C] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0A438C]/90 flex items-center gap-2"
-                  >
-                    <span className="md:hidden">+ Add</span>
-                    <span className="hidden md:inline">+ Add Other Prescriptions</span>
-                  </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-3">
@@ -199,6 +181,20 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                 ))}
               </div>
             </div>
+
+            {/* Add Other Prescriptions Button */}
+            <div className="mt-4 flex justify-start">
+              <button
+                type="button"
+                onClick={addPrescription}
+                className="bg-[#0A438C] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0A438C]/90 flex items-center gap-2"
+              >
+                <span className="md:hidden">+ Add</span>
+                <span className="hidden md:inline">
+                  + Add Other Prescriptions
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Delivery Type */}
@@ -235,12 +231,17 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
               <div className="flex-1 relative min-w-[200px]">
                 <input
                   type="text"
-                  placeholder="Estimate Delivery Time"
+                  placeholder="Estimate Pick-up Time"
                   value={formData.estimatedTime}
-                  onChange={(e) => setFormData(prev => ({ ...prev, estimatedTime: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      estimatedTime: e.target.value,
+                    }))
+                  }
                   onFocus={() => setShowDatePicker(true)}
                   className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent cursor-pointer ${
-                    formData.estimatedTime ? 'text-black' : 'text-gray-500'
+                    formData.estimatedTime ? "text-black" : "text-gray-500"
                   }`}
                   readOnly
                 />
@@ -264,13 +265,15 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                     />
                   </svg>
                 </button>
-                
+
                 {/* Date Picker Popup */}
                 {showDatePicker && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-full max-w-full">
                     <div className="p-4 w-full max-w-full">
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-sm font-medium text-gray-700">Select Date & Time</h4>
+                        <h4 className="text-sm font-medium text-gray-700">
+                          Select Date & Time
+                        </h4>
                         <button
                           type="button"
                           onClick={() => setShowDatePicker(false)}
@@ -279,55 +282,65 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                           ×
                         </button>
                       </div>
-                      
+
                       {/* Date Input */}
                       <div className="mb-4 w-full">
-                        <label className="block text-xs text-gray-600 mb-2">Date</label>
+                        <label className="block text-xs text-gray-600 mb-2">
+                          Date
+                        </label>
                         <input
                           type="date"
-                          min={new Date().toISOString().split('T')[0]}
+                          min={new Date().toISOString().split("T")[0]}
                           className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
                           onChange={(e) => {
                             const date = e.target.value;
-                            const time = formData.estimatedTime.split(' ')[1] || '';
-                            setFormData(prev => ({ 
-                              ...prev, 
-                              estimatedTime: `${date} ${time}`.trim() 
+                            const time =
+                              formData.estimatedTime.split(" ")[1] || "";
+                            setFormData((prev) => ({
+                              ...prev,
+                              estimatedTime: `${date} ${time}`.trim(),
                             }));
                           }}
                         />
                       </div>
-                      
+
                       {/* Time Input */}
                       <div className="mb-4 w-full">
-                        <label className="block text-xs text-gray-600 mb-2">Time</label>
+                        <label className="block text-xs text-gray-600 mb-2">
+                          Time
+                        </label>
                         <input
                           type="time"
                           className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
                           onChange={(e) => {
                             const time = e.target.value;
-                            const date = formData.estimatedTime.split(' ')[0] || '';
-                            setFormData(prev => ({ 
-                              ...prev, 
-                              estimatedTime: `${date} ${time}`.trim() 
+                            const date =
+                              formData.estimatedTime.split(" ")[0] || "";
+                            setFormData((prev) => ({
+                              ...prev,
+                              estimatedTime: `${date} ${time}`.trim(),
                             }));
                           }}
                         />
                       </div>
-                      
+
                       {/* Quick Time Options */}
                       <div className="mb-4 w-full">
-                        <label className="block text-xs text-gray-600 mb-2">Quick Select</label>
+                        <label className="block text-xs text-gray-600 mb-2">
+                          Quick Select
+                        </label>
                         <div className="grid grid-cols-2 gap-2 w-full">
-                          {['09:00', '12:00', '15:00', '18:00'].map((time) => (
+                          {["09:00", "12:00", "15:00", "18:00"].map((time) => (
                             <button
                               key={time}
                               type="button"
                               onClick={() => {
-                                const date = formData.estimatedTime.split(' ')[0] || new Date().toISOString().split('T')[0];
-                                setFormData(prev => ({ 
-                                  ...prev, 
-                                  estimatedTime: `${date} ${time}`.trim() 
+                                const date =
+                                  formData.estimatedTime.split(" ")[0] ||
+                                  new Date().toISOString().split("T")[0];
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  estimatedTime: `${date} ${time}`.trim(),
                                 }));
                               }}
                               className="px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -337,7 +350,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                           ))}
                         </div>
                       </div>
-                      
+
                       <div className="flex gap-2 w-full">
                         <button
                           type="button"
@@ -379,11 +392,11 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full bg-[#0A438C] text-white py-4 rounded-lg text-lg font-semibold hover:bg-[#0A438C]/90 transition-colors"
+              className="w-full bg-[#0A438C] text-white py-2 rounded-lg text-md font-medium hover:bg-[#0A438C]/90 transition-colors"
             >
               Send Request
             </button>
-            <p className="text-center mt-4">
+            <p className="text-center mt-4 text-sm">
               <a href="#" className="text-[#0A438C] text-sm hover:underline">
                 Click here to know how to find the prescription number.
               </a>

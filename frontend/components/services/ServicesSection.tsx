@@ -80,7 +80,7 @@ export default function ServicesSection() {
         viewport={{ once: true, margin: "-80px" }}
       >
         <motion.h3 variants={fadeUp} className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
-          Comprehensive Care For Every Need
+        Discover our healthcare services
         </motion.h3>
 
         {/* Horizontal scroll with snap; card layout: image left, text right */}
@@ -126,6 +126,34 @@ export default function ServicesSection() {
             <div ref={progressRef} className="absolute left-0 top-0 h-[3px] rounded-full bg-gradient-to-r from-[#0A438C] to-[#0A7BB2]" style={{ width: '0%' }} />
           </div>
         </div>
+
+        {/* View All Services Button */}
+        <motion.div 
+          variants={fadeUp}
+          className="flex justify-center mt-8"
+        >
+          <motion.a
+            href="/services"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-2 bg-[#0A438C] text-white px-8 py-4 rounded-xl font-semibold text-base hover:bg-[#0A438C]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            View All Services
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </motion.a>
+        </motion.div>
       </motion.div>
     </section>
   );
