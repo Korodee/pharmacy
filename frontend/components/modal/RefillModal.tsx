@@ -189,7 +189,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                 onClick={addPrescription}
                 className="bg-[#0A438C] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0A438C]/90 flex items-center gap-2"
               >
-                <span className="md:hidden">+ Add</span>
+                <span className="md:hidden">+ Add Other Prescriptions</span>
                 <span className="hidden md:inline">
                   + Add Other Prescriptions
                 </span>
