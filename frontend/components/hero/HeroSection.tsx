@@ -24,7 +24,7 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="relative h-[100svh] md:h-screen bg-[#0A438C] bg-cover bg-center bg-no-repeat overflow-visible"
+      className="relative h-[100svh] md:h-screen bg-cover bg-center bg-no-repeat overflow-visible"
       style={{ backgroundImage: "url(/hero-bg.png)" }}
     >
       {/* Background Image with proper loading */}
@@ -41,7 +41,7 @@ export default function HeroSection() {
         />
       </div>
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-white/10"></div>
+      <div className="absolute inset-0"></div>
 
       {/* Navigation Header */}
       <header className="relative z-20 px-4 pt-8 lg:px-8">
@@ -101,7 +101,7 @@ export default function HeroSection() {
       {/* Main Hero Content */}
       <div className="relative z-10 px-4 py-2 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 items-center min-h-[80vh]">
+          <div className="min-h-[80vh] flex items-center justify-center">
             {/* Content - Centered on mobile, half on desktop */}
             <div className="flex items-center justify-center w-full lg:w-auto">
               <HeroContent
@@ -112,9 +112,9 @@ export default function HeroSection() {
             </div>
 
             {/* Right Image - Hidden on mobile */}
-            <div className="hidden lg:flex items-center justify-center">
+            {/* <div className="hidden lg:flex items-center justify-center">
               <HeroImage />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

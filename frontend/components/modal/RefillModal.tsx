@@ -392,7 +392,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full bg-[#0A438C] text-white py-2 rounded-lg text-md font-medium hover:bg-[#0A438C]/90 transition-colors"
+              className="w-full bg-[#0A438C] text-white py-3 rounded-lg text-md font-medium hover:bg-[#0A438C]/90 transition-colors"
             >
               Send Request
             </button>

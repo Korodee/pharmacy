@@ -19,22 +19,22 @@ export default function HeroContent({ content, isModalOpen, setIsModalOpen }: He
       animate="visible"
     >
       {/* Primary Heading */}
-      <motion.h1 variants={fadeUp} className="text-center md:text-left text-4xl md:text-6xl lg:text-6xl font-medium text-white leading-tight mb-5">
+      <motion.h1 variants={fadeUp} className="text-center text-4xl md:text-6xl lg:text-6xl font-medium text-white leading-tight mb-5">
         {content.primaryHeading}
       </motion.h1>
 
       {/* Secondary Heading */}
-      <motion.h2 variants={fadeUp} className="text-center md:text-left text-4xl md:text-[49px] font-medium text-primary-200 mb-6">
+      <motion.h2 variants={fadeUp} className="text-center text-4xl md:text-[49px] font-medium text-primary-200 mb-6">
         {content.secondaryHeading}
       </motion.h2>
 
       {/* Description */}
-      <motion.p variants={fadeUp} className="text-xl text-center md:text-left font-light md:text-2xl text-[#D4F4FF] mb-16 leading-relaxed">
+      <motion.p variants={fadeUp} className="text-xl text-center font-light md:text-2xl text-[#D4F4FF] mb-16 leading-relaxed">
         {content.description}
       </motion.p>
 
       {/* Buttons */}
-      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4">
+      <motion.div variants={fadeUp} className="flex justify-center flex-col sm:flex-row gap-4">
         {content.buttons.map((button, index) => (
           <Button key={index} button={button} className="text-center" isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
         ))}
