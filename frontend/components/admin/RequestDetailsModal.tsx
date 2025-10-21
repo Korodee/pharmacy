@@ -155,21 +155,11 @@ export default function RequestDetailsModal({
           </div>
           <hr className="my-4" />
           {/* Contact Info */}
-          <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <p className="text-sm text-gray-900">{formatPhoneNumber(request.phone)}</p>
-              </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country
-              </label>
-              <p className="text-sm text-gray-900">
-                {(request as any).country || "N/A"}
-              </p>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone
+            </label>
+            <p className="text-sm text-gray-900">{formatPhoneNumber(request.phone)}</p>
           </div>
           <hr className="my-4" />
           {/* Request-specific details */}
