@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 interface AdminHeaderProps {
   isLoggingOut: boolean;
