@@ -1,20 +1,16 @@
 {
   "name": "kateri-pharmacy",
   "version": "1.0.0",
-  "description": "Full-stack pharmacy website with Next.js frontend and Express backend",
+  "description": "Kateri Pharmacy website with Next.js",
   "private": true,
   "workspaces": [
-    "frontend",
-    "backend"
+    "frontend"
   ],
   "scripts": {
-    "dev": "concurrently \"pnpm --filter backend dev\" \"pnpm --filter frontend dev\"",
-    "build": "pnpm --filter backend build && pnpm --filter frontend build",
-    "start": "concurrently \"pnpm --filter backend start\" \"pnpm --filter frontend start\"",
-    "install:all": "pnpm install && pnpm --filter backend install && pnpm --filter frontend install"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "dev": "pnpm --filter frontend dev",
+    "build": "pnpm --filter frontend build",
+    "start": "pnpm --filter frontend start",
+    "install:all": "pnpm install"
   },
   "engines": {
     "node": ">=18.0.0",

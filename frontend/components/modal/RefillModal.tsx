@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useToast } from "../ui/ToastProvider";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 interface RefillModalProps {
   isOpen: boolean;
@@ -7,14 +9,17 @@ interface RefillModalProps {
 }
 
 export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
+  const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({
     phone: "",
-    prescriptions: [""],
+    prescriptions: ["", "", "", ""], // Start with 4 empty prescription fields
     deliveryType: "pickup",
     comments: "",
     estimatedTime: "",
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [prescriptionError, setPrescriptionError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -47,7 +52,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
   const addPrescription = () => {
     setFormData((prev) => ({
       ...prev,
-      prescriptions: [...prev.prescriptions, ""],
+      prescriptions: [...prev.prescriptions, "", "", "", ""], // Add 4 more prescription fields
     }));
   };
 
@@ -58,6 +63,97 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
         i === index ? value : prescription
       ),
     }));
+
+    // Clear prescription error when user starts typing
+    if (prescriptionError && value.trim() !== "") {
+      setPrescriptionError(false);
+    }
+  };
+
+  // Format phone number for North American format
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, "");
+
+    // North American format: (XXX) XXX-XXXX
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(
+      6,
+      10
+    )}`;
+  };
+
+  // Extract only digits from formatted phone number
+  const getPhoneDigits = (formattedPhone: string) => {
+    return formattedPhone.replace(/\D/g, "");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    const phoneDigits = getPhoneDigits(formData.phone);
+    if (!phoneDigits || phoneDigits.length < 10) {
+      return;
+    }
+
+    if (!formData.deliveryType) {
+      return;
+    }
+
+    const validPrescriptions = formData.prescriptions.filter(
+      (prescription) => prescription.trim() !== ""
+    );
+    if (validPrescriptions.length === 0) {
+      setPrescriptionError(true);
+      return;
+    }
+
+    // Clear prescription error if validation passes
+    setPrescriptionError(false);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "refill",
+          phone: phoneDigits,
+          prescriptions: validPrescriptions,
+          deliveryType: formData.deliveryType,
+          estimatedTime: formData.estimatedTime,
+          comments: formData.comments,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess(
+          "Refill request submitted successfully! We'll contact you soon."
+        );
+        // Reset form
+        setFormData({
+          phone: "",
+          prescriptions: ["", "", "", ""],
+          deliveryType: "pickup",
+          comments: "",
+          estimatedTime: "",
+        });
+        onClose();
+      } else {
+        showError("Failed to submit request. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      showError("Network error. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -86,21 +182,24 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
         </div>
 
         {/* Form */}
-        <form className="p-6 space-y-8">
+        <form onSubmit={handleSubmit} className="p-6 space-y-8">
           {/* Phone Number */}
           <div>
             <h3 className="text-lg font-[300] text-[#0A438C] mb-4">
-              Contact Information
+              Contact Information <span className="text-red-500">*</span>
             </h3>
             <div className="grid grid-cols-1 gap-4">
+              {/* Phone Number Input */}
               <input
                 type="tel"
-                placeholder="Enter Phone Number"
+                placeholder="Enter Phone Number *"
                 value={formData.phone}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, phone: e.target.value }))
-                }
+                onChange={(e) => {
+                  const formatted = formatPhoneNumber(e.target.value);
+                  setFormData((prev) => ({ ...prev, phone: formatted }));
+                }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
+                required
               />
             </div>
           </div>
@@ -109,77 +208,31 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           <div>
             <div className="mb-4">
               <h3 className="text-lg font-[400] text-[#0A438C]">
-                Prescription
+                Prescription <span className="text-red-500">*</span>
+                {prescriptionError && (
+                  <span className="text-red-500 text-sm font-normal ml-2">
+                    (at least one required)
+                  </span>
+                )}
               </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                {formData.prescriptions.map((prescription, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    placeholder={
-                      index === 0
-                        ? "Rx Number, medication name or all Rx"
-                        : "Rx Number or medication name"
-                    }
-                    value={prescription}
-                    onChange={(e) => updatePrescription(index, e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                  />
-                ))}
-              </div>
-              <div className="space-y-3">
-                {formData.prescriptions.map((prescription, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    placeholder={
-                      index === 0
-                        ? "Rx Number, medication name or all Rx"
-                        : "Rx Number or medication name"
-                    }
-                    value={prescription}
-                    onChange={(e) => updatePrescription(index, e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {" "}
-              <div className="space-y-3">
-                {formData.prescriptions.map((prescription, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    placeholder={
-                      index === 0
-                        ? "Rx Number, medication name or all Rx"
-                        : "Rx Number or medication name"
-                    }
-                    value={prescription}
-                    onChange={(e) => updatePrescription(index, e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                  />
-                ))}
-              </div>
-              <div className="space-y-3">
-                {formData.prescriptions.map((prescription, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    placeholder={
-                      index === 0
-                        ? "Rx Number, medication name or all Rx"
-                        : "Rx Number or medication name"
-                    }
-                    value={prescription}
-                    onChange={(e) => updatePrescription(index, e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                  />
-                ))}
-              </div>
+              {formData.prescriptions.map((prescription, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  placeholder={
+                    index === 0
+                      ? "Rx Number, medication name or all Rx"
+                      : index < 4
+                      ? "Rx Number or medication name"
+                      : "Additional Rx Number or medication name"
+                  }
+                  value={prescription}
+                  onChange={(e) => updatePrescription(index, e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
+                />
+              ))}
             </div>
 
             {/* Add Other Prescriptions Button */}
@@ -189,9 +242,9 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                 onClick={addPrescription}
                 className="bg-[#0A438C] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#0A438C]/90 flex items-center gap-2"
               >
-                <span className="md:hidden">+ Add Other Prescriptions</span>
+                <span className="md:hidden">+ Add More Prescriptions</span>
                 <span className="hidden md:inline">
-                  + Add Other Prescriptions
+                  + Add More Prescriptions
                 </span>
               </button>
             </div>
@@ -200,7 +253,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           {/* Delivery Type */}
           <div>
             <h3 className="text-lg font-[400] text-[#0A438C] mb-4">
-              Delivery Type
+              Delivery Type <span className="text-red-500">*</span>
             </h3>
             <div className="flex gap-3 items-center overflow-x-auto pb-2 md:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               <div className="flex gap-3 min-w-max">
@@ -216,6 +269,8 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                       setFormData((prev) => ({
                         ...prev,
                         deliveryType: option.value,
+                        estimatedTime:
+                          option.value === "pickup" ? prev.estimatedTime : "",
                       }))
                     }
                     className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
@@ -231,7 +286,11 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
               <div className="flex-1 relative min-w-[200px]">
                 <input
                   type="text"
-                  placeholder="Estimate Pick-up Time"
+                  placeholder={
+                    formData.deliveryType === "pickup"
+                      ? "Estimate Pick-up Time"
+                      : "Select Pick-up to set time"
+                  }
                   value={formData.estimatedTime}
                   onChange={(e) =>
                     setFormData((prev) => ({
@@ -239,19 +298,37 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                       estimatedTime: e.target.value,
                     }))
                   }
-                  onFocus={() => setShowDatePicker(true)}
-                  className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent cursor-pointer ${
-                    formData.estimatedTime ? "text-black" : "text-gray-500"
-                  }`}
+                  onFocus={() =>
+                    formData.deliveryType === "pickup" &&
+                    setShowDatePicker(true)
+                  }
+                  disabled={formData.deliveryType !== "pickup"}
+                  className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent ${
+                    formData.deliveryType === "pickup"
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed bg-gray-100 text-gray-400"
+                  } ${formData.estimatedTime ? "text-black" : "text-gray-500"}`}
                   readOnly
                 />
                 <button
                   type="button"
-                  onClick={() => setShowDatePicker(!showDatePicker)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  onClick={() =>
+                    formData.deliveryType === "pickup" &&
+                    setShowDatePicker(!showDatePicker)
+                  }
+                  disabled={formData.deliveryType !== "pickup"}
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                    formData.deliveryType === "pickup"
+                      ? "text-gray-400 hover:text-gray-600"
+                      : "text-gray-300 cursor-not-allowed"
+                  }`}
                 >
                   <svg
-                    className="w-4 h-4 text-gray-400"
+                    className={`w-4 h-4 ${
+                      formData.deliveryType === "pickup"
+                        ? "text-gray-400"
+                        : "text-gray-300"
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -268,104 +345,85 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
 
                 {/* Date Picker Popup */}
                 {showDatePicker && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-full max-w-full">
-                    <div className="p-4 w-full max-w-full">
-                      <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-sm font-medium text-gray-700">
-                          Select Date & Time
-                        </h4>
-                        <button
-                          type="button"
-                          onClick={() => setShowDatePicker(false)}
-                          className="text-gray-400 hover:text-gray-600 text-xl"
-                        >
-                          ×
-                        </button>
-                      </div>
-
-                      {/* Date Input */}
-                      <div className="mb-4 w-full">
-                        <label className="block text-xs text-gray-600 mb-2">
-                          Date
-                        </label>
-                        <input
-                          type="date"
-                          min={new Date().toISOString().split("T")[0]}
-                          className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                          onChange={(e) => {
-                            const date = e.target.value;
-                            const time =
-                              formData.estimatedTime.split(" ")[1] || "";
-                            setFormData((prev) => ({
-                              ...prev,
-                              estimatedTime: `${date} ${time}`.trim(),
-                            }));
-                          }}
-                        />
-                      </div>
-
-                      {/* Time Input */}
-                      <div className="mb-4 w-full">
-                        <label className="block text-xs text-gray-600 mb-2">
-                          Time
-                        </label>
-                        <input
-                          type="time"
-                          className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                          onChange={(e) => {
-                            const time = e.target.value;
-                            const date =
-                              formData.estimatedTime.split(" ")[0] || "";
-                            setFormData((prev) => ({
-                              ...prev,
-                              estimatedTime: `${date} ${time}`.trim(),
-                            }));
-                          }}
-                        />
-                      </div>
-
-                      {/* Quick Time Options */}
-                      <div className="mb-4 w-full">
-                        <label className="block text-xs text-gray-600 mb-2">
-                          Quick Select
-                        </label>
-                        <div className="grid grid-cols-2 gap-2 w-full">
-                          {["09:00", "12:00", "15:00", "18:00"].map((time) => (
-                            <button
-                              key={time}
-                              type="button"
-                              onClick={() => {
-                                const date =
-                                  formData.estimatedTime.split(" ")[0] ||
-                                  new Date().toISOString().split("T")[0];
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  estimatedTime: `${date} ${time}`.trim(),
-                                }));
-                              }}
-                              className="px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                            >
-                              {time}
-                            </button>
-                          ))}
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+                    onClick={() => setShowDatePicker(false)}
+                  >
+                    <div
+                      className="bg-white border border-gray-300 rounded-xl shadow-lg w-full max-w-md mx-4"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="p-4 w-full max-w-full">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-sm font-medium text-gray-700">
+                            Select Date & Time
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => setShowDatePicker(false)}
+                            className="text-gray-400 hover:text-gray-600 text-xl"
+                          >
+                            ×
+                          </button>
                         </div>
-                      </div>
 
-                      <div className="flex gap-2 w-full">
-                        <button
-                          type="button"
-                          onClick={() => setShowDatePicker(false)}
-                          className="flex-1 px-4 py-3 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowDatePicker(false)}
-                          className="flex-1 px-4 py-3 text-sm bg-[#0A438C] text-white rounded-lg hover:bg-[#0A438C]/90 transition-colors font-medium"
-                        >
-                          Done
-                        </button>
+                        {/* Date Input */}
+                        <div className="mb-4 w-full">
+                          <label className="block text-xs text-gray-600 mb-2">
+                            Date
+                          </label>
+                          <input
+                            type="date"
+                            min={new Date().toISOString().split("T")[0]}
+                            className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
+                            onChange={(e) => {
+                              const date = e.target.value;
+                              const time =
+                                formData.estimatedTime.split(" ")[1] || "";
+                              setFormData((prev) => ({
+                                ...prev,
+                                estimatedTime: `${date} ${time}`.trim(),
+                              }));
+                            }}
+                          />
+                        </div>
+
+                        {/* Time Input */}
+                        <div className="mb-4 w-full">
+                          <label className="block text-xs text-gray-600 mb-2">
+                            Time
+                          </label>
+                          <input
+                            type="time"
+                            className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
+                            onChange={(e) => {
+                              const time = e.target.value;
+                              const date =
+                                formData.estimatedTime.split(" ")[0] || "";
+                              setFormData((prev) => ({
+                                ...prev,
+                                estimatedTime: `${date} ${time}`.trim(),
+                              }));
+                            }}
+                          />
+                        </div>
+
+                        <div className="flex gap-2 w-full">
+                          <button
+                            type="button"
+                            onClick={() => setShowDatePicker(false)}
+                            className="flex-1 px-4 py-3 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowDatePicker(false)}
+                            className="flex-1 px-4 py-3 text-sm bg-[#0A438C] text-white rounded-lg hover:bg-[#0A438C]/90 transition-colors font-medium"
+                          >
+                            Done
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -392,9 +450,17 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full bg-[#0A438C] text-white py-3 rounded-lg text-md font-medium hover:bg-[#0A438C]/90 transition-colors"
+              disabled={isSubmitting}
+              className={`w-full py-3 rounded-lg text-md font-medium transition-colors flex items-center justify-center gap-2 ${
+                isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-[#0A438C] text-white hover:bg-[#0A438C]/90"
+              }`}
             >
-              Send Request
+              {isSubmitting && (
+                <LoadingSpinner size="sm" className="text-white" />
+              )}
+              {isSubmitting ? "Sending Request..." : "Send Request"}
             </button>
             <p className="text-center mt-4 text-sm">
               <a href="#" className="text-[#0A438C] text-sm hover:underline">

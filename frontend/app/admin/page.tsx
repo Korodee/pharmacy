@@ -1,44 +1,274 @@
-export default function AdminPage() {
+"use client";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { RequestData } from "../api/requests/route";
+import { useToast } from "../../components/ui/ToastProvider";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
+import AdminHeader from "../../components/admin/AdminHeader";
+import StatisticsCards from "../../components/admin/StatisticsCards";
+import SearchAndFilter from "../../components/admin/SearchAndFilter";
+import RequestCard from "../../components/admin/RequestCard";
+import RequestDetailsModal from "../../components/admin/RequestDetailsModal";
+
+export default function AdminDashboard() {
+  const { showSuccess, showError } = useToast();
+  const [requests, setRequests] = useState<RequestData[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<RequestData | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const fetchRequests = async () => {
+    try {
+      const response = await fetch("/api/requests");
+      const data = await response.json();
+
+      if (data.success) {
+        setRequests(data.requests);
+      } else {
+        setError(data.error || "Failed to fetch requests");
+        showError("Failed to fetch requests");
+      }
+    } catch (err) {
+      setError("Failed to fetch requests");
+      showError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateRequestStatus = async (requestId: string, status: string) => {
+    try {
+      // In a real app, you'd make an API call to update the status
+      setRequests((prev) =>
+        prev.map((req) =>
+          req.id === requestId ? { ...req, status: status as any } : req
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    }
+  };
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      showSuccess("Logged out successfully");
+      window.location.href = "/admin/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
+      showError("Logout failed. Please try again.");
+      setIsLoggingOut(false);
+    }
+  };
+
+  // Statistics calculations
+  const stats = {
+    total: requests.length,
+    pending: requests.filter((r) => r.status === "pending").length,
+    inProgress: requests.filter((r) => r.status === "in-progress").length,
+    completed: requests.filter((r) => r.status === "completed").length,
+    refills: requests.filter((r) => r.type === "refill").length,
+    consultations: requests.filter((r) => r.type === "consultation").length,
+  };
+
+  // Filter requests based on search and filters
+  const filteredRequests = requests.filter((request) => {
+    const matchesSearch =
+      request.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || request.status === statusFilter;
+    const matchesType = typeFilter === "all" || request.type === typeFilter;
+
+    return matchesSearch && matchesStatus && matchesType;
+  });
+
+  const getTypeIcon = (type: string) => {
+    return type === "refill" ? "💊" : "🩺";
+  };
+
+  const getTypeColor = (type: string) => {
+    return type === "refill"
+      ? "bg-blue-50 border-blue-200"
+      : "bg-purple-50 border-purple-200";
+  };
+
+  const formatDate = (date: Date | string) => {
+    return new Date(date).toLocaleString();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <LoadingSpinner size="lg" className="text-[#0A438C] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Loading Dashboard
+            </h3>
+            <p className="text-gray-600">Fetching your requests...</p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
+            <div className="text-red-500 text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Connection Error
+            </h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button
+              onClick={fetchRequests}
+              className="bg-[#0A438C] text-white px-6 py-3 rounded-xl hover:bg-[#0A438C]/90 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+            >
+              Try Again
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-2xl font-medium text-gray-800 mb-4">
-          Admin Dashboard
-        </h2>
-        <p className="text-gray-600 mb-6">
-          Manage orders and pharmacy operations from this dashboard.
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="font-medium text-blue-900 mb-2">Orders</h3>
-            <p className="text-blue-700 text-sm">
-              View and manage customer orders
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <AdminHeader
+          isLoggingOut={isLoggingOut}
+          onLogout={handleLogout}
+          onRefresh={fetchRequests}
+        />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Statistics Cards */}
+        <StatisticsCards
+          totalRequests={stats.total}
+          pendingRequests={stats.pending}
+          inProgressRequests={stats.inProgress}
+          completedRequests={stats.completed}
+        />
+
+        {/* Requests Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20"
+        >
+          {/* Section Header */}
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="bg-[#0A438C] p-2 rounded-lg">
+                  <span className="text-white text-xl">📋</span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Requests</h2>
+                  <p className="text-sm text-gray-600">
+                    {filteredRequests.length} of {requests.length} requests
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div className="bg-green-50 rounded-lg p-4">
-            <h3 className="font-medium text-green-900 mb-2">Inventory</h3>
-            <p className="text-green-700 text-sm">
-              Track medication stock levels
-            </p>
+          {/* Search & Filter */}
+          <SearchAndFilter
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            typeFilter={typeFilter}
+            setTypeFilter={setTypeFilter}
+          />
+          {/* Requests List */}
+          <div className="px-6 py-3">
+            {filteredRequests.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">📋</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  No requests found
+                </h3>
+                <p className="text-gray-500">
+                  {requests.length === 0
+                    ? "Requests will appear here when users submit them."
+                    : "Try adjusting your search or filter criteria."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <AnimatePresence>
+                  {filteredRequests.map((request, index) => (
+                    <motion.div
+                      key={request.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <RequestCard
+                        request={request}
+                        onClick={() => setSelectedRequest(request)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
-          
-          <div className="bg-purple-50 rounded-lg p-4">
-            <h3 className="font-medium text-purple-900 mb-2">Customers</h3>
-            <p className="text-purple-700 text-sm">
-              Manage customer information
-            </p>
-          </div>
-        </div>
-        
-        <div className="mt-8 p-4 bg-yellow-50 rounded-lg">
-          <p className="text-yellow-800 text-sm">
-            <strong>Note:</strong> This is a placeholder admin interface. 
-            The full admin functionality will be implemented in the next phase.
-          </p>
-        </div>
+        </motion.div>
+      </div>
+
+        {/* Request Details Modal */}
+        <AnimatePresence>
+          {selectedRequest && (
+            <RequestDetailsModal
+              request={selectedRequest}
+              onClose={() => setSelectedRequest(null)}
+              onUpdateStatus={updateRequestStatus}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </div>
-  )
+  );
 }
+
+// Helper function for status colors (used in main component)
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    case "in-progress":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "completed":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
+

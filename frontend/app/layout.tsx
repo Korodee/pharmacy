@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GeistSans, GeistMono } from "geist/font";
 import "./globals.css";
+import { ToastProvider } from "../components/ui/ToastProvider";
 
 // Using Geist font package classes directly (no function calls)
 
@@ -20,7 +21,9 @@ export default function RootLayout({
         <link rel="preload" as="image" href="/hero-bg.png" />
       </head>
       <body className={`${GeistSans.className} ${GeistMono.variable}`}>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

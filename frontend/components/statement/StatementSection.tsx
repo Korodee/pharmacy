@@ -5,7 +5,7 @@ import { containerStagger, fadeUp } from "@/lib/anim";
 
 export default function StatementSection() {
   return (
-    <section id="about" className="relative z-10 w-full bg-white -mt-6 md:-mt-8 lg:-mt-8 rounded-t-[20px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+    <section id="about" className="relative z-10 w-full bg-white -mt-6 md:-mt-6 lg:-mt-6 rounded-t-[20px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
       <motion.div
         className="max-w-6xl mx-auto px-8 py-28 text-center"
         variants={containerStagger}

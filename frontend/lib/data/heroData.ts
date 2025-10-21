@@ -27,7 +27,7 @@ export const heroData: HeroData = {
     { label: 'Home', href: '#home' },
     { label: 'How it works', href: '#how-it-works' },
     { label: 'Services', href: '#services' },
-    { label: 'Reviews', href: '#reviews' },
+    // { label: 'Reviews', href: '#reviews' },
     { label: 'FAQ', href: '#faq' }
   ],
   content: {
@@ -41,9 +41,9 @@ export const heroData: HeroData = {
         href: "modal"
       },
       {
-        text: "Learn More",
+        text: "Request A Consultation",
         variant: "secondary",
-        href: "#how-it-works"
+        href: "modal"
       }
     ]
   },

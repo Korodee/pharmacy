@@ -2,26 +2,25 @@
 import { HeroButton } from "@/lib/data/heroData";
 import { useState } from "react";
 import RefillModal from "../modal/RefillModal";
+import ConsultationModal from "../modal/ConsultationModal";
 
 interface ButtonProps {
   button: HeroButton;
   className?: string;
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
+  isConsultationModalOpen: boolean;
+  setIsConsultationModalOpen: (open: boolean) => void;
 }
 
-export default function Button({ button, className = "", isModalOpen, setIsModalOpen }: ButtonProps) {
+export default function Button({ button, className = "", isModalOpen, setIsModalOpen, isConsultationModalOpen, setIsConsultationModalOpen }: ButtonProps) {
   const rounded = "rounded-[20px]";
 
   const handleClick = () => {
     if (button.text === "Request A Refill") {
       setIsModalOpen(true);
-    } else if (button.text === "Learn More") {
-      // Scroll to section
-      const element = document.querySelector("#how-it-works");
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+    } else if (button.text === "Request A Consultation") {
+      setIsConsultationModalOpen(true);
     }
   };
 
@@ -48,6 +47,10 @@ export default function Button({ button, className = "", isModalOpen, setIsModal
       <RefillModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+      />
+      <ConsultationModal 
+        isOpen={isConsultationModalOpen} 
+        onClose={() => setIsConsultationModalOpen(false)} 
       />
     </>
   );

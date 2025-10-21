@@ -6,10 +6,12 @@ import HeroContent from "./HeroContent";
 import HeroImage from "./HeroImage";
 import { useState, useEffect } from "react";
 import RefillModal from "../modal/RefillModal";
+import ConsultationModal from "../modal/ConsultationModal";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function HeroSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -44,27 +46,13 @@ export default function HeroSection() {
       <div className="absolute inset-0"></div>
 
       {/* Navigation Header */}
-      <header className="relative z-20 px-4 pt-8 lg:px-8">
-        {/* Fixed centered nav */}
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
-          <Navigation items={heroData.navigation} isModalOpen={isModalOpen} />
+      <header className="relative z-20">
+        {/* Fixed full-width nav */}
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <Navigation items={heroData.navigation} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
         </div>
 
         <div className="max-w-7xl mx-auto flex items-center justify-between relative">
-          {/* Left: Logo */}
-          <Logo />
-
-          {/* Right: CTA (white bg, gradient border, text #0A438C) - Hidden on mobile */}
-          <div className="justify-self-end hidden md:block">
-            <div className="p-[1.6px] rounded-[15px] bg-[linear-gradient(90deg,#0A438C,#0A7BB2)]">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="block bg-white text-[#0A438C] px-6 py-3 text-base font-medium hover:bg-gray-50 transition-colors duration-200 rounded-[12px]"
-              >
-                {heroData.ctaButton.text}
-              </button>
-            </div>
-          </div>
 
           {/* Mobile Burger Menu - Fixed position */}
           <div className="md:hidden fixed top-6 right-6 z-50">
@@ -99,7 +87,7 @@ export default function HeroSection() {
       </header>
 
       {/* Main Hero Content */}
-      <div className="relative z-10 px-4 py-2 lg:px-8">
+      <div className="relative z-10 px-4 py-2 lg:px-8 pt-20">
         <div className="max-w-7xl mx-auto">
           <div className="min-h-[80vh] flex items-center justify-center">
             {/* Content - Centered on mobile, half on desktop */}
@@ -108,6 +96,8 @@ export default function HeroSection() {
                 content={heroData.content}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
+                isConsultationModalOpen={isConsultationModalOpen}
+                setIsConsultationModalOpen={setIsConsultationModalOpen}
               />
             </div>
 
@@ -242,6 +232,7 @@ export default function HeroSection() {
       </AnimatePresence>
 
       <RefillModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ConsultationModal isOpen={isConsultationModalOpen} onClose={() => setIsConsultationModalOpen(false)} />
     </section>
   );
 }

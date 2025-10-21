@@ -8,9 +8,11 @@ interface HeroContentProps {
   content: HeroContentType;
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
+  isConsultationModalOpen: boolean;
+  setIsConsultationModalOpen: (open: boolean) => void;
 }
 
-export default function HeroContent({ content, isModalOpen, setIsModalOpen }: HeroContentProps) {
+export default function HeroContent({ content, isModalOpen, setIsModalOpen, isConsultationModalOpen, setIsConsultationModalOpen }: HeroContentProps) {
   return (
     <motion.div
       className="max-w-2xl mt-[40px] md:my-0"
@@ -36,7 +38,15 @@ export default function HeroContent({ content, isModalOpen, setIsModalOpen }: He
       {/* Buttons */}
       <motion.div variants={fadeUp} className="flex justify-center flex-col sm:flex-row gap-4">
         {content.buttons.map((button, index) => (
-          <Button key={index} button={button} className="text-center" isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+          <Button 
+            key={index} 
+            button={button} 
+            className="text-center" 
+            isModalOpen={isModalOpen} 
+            setIsModalOpen={setIsModalOpen}
+            isConsultationModalOpen={isConsultationModalOpen}
+            setIsConsultationModalOpen={setIsConsultationModalOpen}
+          />
         ))}
       </motion.div>
     </motion.div>
