@@ -46,11 +46,11 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     
-    // Business hours: Monday-Friday 9 AM to 8 PM, Saturday 9 AM to 2 PM
+    // Business hours: Monday-Friday 9 AM to 8 PM, Saturday 9:30 AM to 2 PM
     const isWeekend = now.getDay() === 0 || now.getDay() === 6; // Sunday = 0, Saturday = 6
     const isSaturday = now.getDay() === 6;
     
-    let businessStart = 9;
+    let businessStart = isSaturday ? 9.5 : 9; // 9:30 AM on Saturday, 9 AM on weekdays
     let businessEnd = isSaturday ? 14 : 20; // 2 PM on Saturday, 8 PM on weekdays
     
     // If it's Sunday, start from next Monday at 9 AM
@@ -62,18 +62,25 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
       return generateTimeSlots(nextMonday);
     }
     
-    // If it's after business hours or before 9 AM, start from next business day at 9 AM
-    if (currentHour >= businessEnd || currentHour < businessStart) {
+    // If it's after business hours or before business start, start from next business day
+    if (currentHour >= businessEnd || (currentHour < businessStart || (isSaturday && currentHour === 9 && currentMinute < 30))) {
       const nextBusinessDay = new Date(now);
       if (isSaturday && currentHour >= 14) {
         // If it's Saturday after 2 PM, go to Monday
         const daysUntilMonday = (1 - now.getDay() + 7) % 7;
         nextBusinessDay.setDate(now.getDate() + daysUntilMonday);
+        nextBusinessDay.setHours(9, 0, 0, 0);
       } else {
         // Otherwise, go to next day
         nextBusinessDay.setDate(now.getDate() + 1);
+        if (nextBusinessDay.getDay() === 6) {
+          // If next day is Saturday, start at 9:30 AM
+          nextBusinessDay.setHours(9, 30, 0, 0);
+        } else {
+          // Otherwise start at 9 AM
+          nextBusinessDay.setHours(9, 0, 0, 0);
+        }
       }
-      nextBusinessDay.setHours(9, 0, 0, 0);
       return generateTimeSlots(nextBusinessDay);
     }
     
@@ -81,18 +88,25 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
     const fourHoursLater = new Date(now);
     fourHoursLater.setHours(fourHoursLater.getHours() + 4);
     
-    // If 4 hours later is after business hours, start next business day at 9 AM
+    // If 4 hours later is after business hours, start next business day
     if (fourHoursLater.getHours() >= businessEnd) {
       const nextBusinessDay = new Date(now);
       if (isSaturday) {
         // If it's Saturday, go to Monday
         const daysUntilMonday = (1 - now.getDay() + 7) % 7;
         nextBusinessDay.setDate(now.getDate() + daysUntilMonday);
+        nextBusinessDay.setHours(9, 0, 0, 0);
       } else {
         // Otherwise, go to next day
         nextBusinessDay.setDate(now.getDate() + 1);
+        if (nextBusinessDay.getDay() === 6) {
+          // If next day is Saturday, start at 9:30 AM
+          nextBusinessDay.setHours(9, 30, 0, 0);
+        } else {
+          // Otherwise start at 9 AM
+          nextBusinessDay.setHours(9, 0, 0, 0);
+        }
       }
-      nextBusinessDay.setHours(9, 0, 0, 0);
       return generateTimeSlots(nextBusinessDay);
     }
     
@@ -108,8 +122,11 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
     
     let currentTime = new Date(startTime);
     
-    // Round up to the next hour if not on the hour
-    if (currentTime.getMinutes() > 0) {
+    // For Saturday, if it's exactly 9:30 AM, start there; otherwise round up to next hour
+    if (isSaturday && currentTime.getHours() === 9 && currentTime.getMinutes() === 30) {
+      // Start at 9:30 AM on Saturday
+    } else if (currentTime.getMinutes() > 0) {
+      // Round up to the next hour for other times
       currentTime.setHours(currentTime.getHours() + 1);
       currentTime.setMinutes(0);
     }
@@ -448,7 +465,7 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
               </div>
             </div>
             <p className="text-sm text-gray-500 mt-2">
-              Available times start 4 hours from now. Business hours: Mon-Fri 9 AM-8 PM, Sat 9 AM-2 PM, Closed Sundays.
+              Available times start 4 hours from now. Business hours: Mon-Fri 9 AM-8 PM, Sat 9:30 AM-2 PM, Closed Sundays.
             </p>
           </div>
 
@@ -580,7 +597,7 @@ export default function ConsultationModal({ isOpen, onClose }: ConsultationModal
                 <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
                   <p className="font-medium mb-1">Business Hours:</p>
                   <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
-                  <p>Saturday: 9:00 AM - 2:00 PM</p>
+                  <p>Saturday: 9:30 AM - 2:00 PM</p>
                   <p>Sunday: Closed</p>
                 </div>
               </div>

@@ -16,10 +16,14 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     deliveryType: "pickup",
     comments: "",
     estimatedTime: "",
+    preferredDate: "",
+    preferredTime: "",
   });
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [prescriptionError, setPrescriptionError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -30,12 +34,14 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
     } else {
       // Restore scroll position
       const scrollY = document.body.style.top;
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
+      document.body.style.overflow = "";
       if (scrollY) {
         window.scrollTo(0, parseInt(scrollY || "0") * -1);
       }
@@ -46,6 +52,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -89,6 +96,203 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     return formattedPhone.replace(/\D/g, "");
   };
 
+  // Business hours logic (same as ConsultationModal)
+  const getAvailableTimes = (selectedDate?: string) => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Business hours: Monday-Friday 9 AM to 8 PM, Saturday 9:30 AM to 2 PM
+    const isWeekend = now.getDay() === 0 || now.getDay() === 6; // Sunday = 0, Saturday = 6
+    const isSaturday = now.getDay() === 6;
+
+    let businessStart = isSaturday ? 9.5 : 9; // 9:30 AM on Saturday, 9 AM on weekdays
+    let businessEnd = isSaturday ? 14 : 20; // 2 PM on Saturday, 8 PM on weekdays
+
+    // If it's Sunday, start from next Monday at 9 AM
+    if (now.getDay() === 0) {
+      const nextMonday = new Date(now);
+      const daysUntilMonday = (1 - now.getDay() + 7) % 7;
+      nextMonday.setDate(now.getDate() + daysUntilMonday);
+      nextMonday.setHours(9, 0, 0, 0);
+      return generateTimeSlots(nextMonday);
+    }
+
+    // If it's after business hours or before business start, start from next business day
+    if (
+      currentHour >= businessEnd ||
+      currentHour < businessStart ||
+      (isSaturday && currentHour === 9 && currentMinute < 30)
+    ) {
+      const nextBusinessDay = new Date(now);
+      if (isSaturday && currentHour >= 14) {
+        // If it's Saturday after 2 PM, go to Monday
+        const daysUntilMonday = (1 - now.getDay() + 7) % 7;
+        nextBusinessDay.setDate(now.getDate() + daysUntilMonday);
+        nextBusinessDay.setHours(9, 0, 0, 0);
+      } else {
+        // Otherwise, go to next day
+        nextBusinessDay.setDate(now.getDate() + 1);
+        if (nextBusinessDay.getDay() === 6) {
+          // If next day is Saturday, start at 9:30 AM
+          nextBusinessDay.setHours(9, 30, 0, 0);
+        } else {
+          // Otherwise start at 9 AM
+          nextBusinessDay.setHours(9, 0, 0, 0);
+        }
+      }
+      return generateTimeSlots(nextBusinessDay);
+    }
+
+    // If it's during business hours, start 4 hours from now
+    const fourHoursLater = new Date(now);
+    fourHoursLater.setHours(fourHoursLater.getHours() + 4);
+
+    // If 4 hours later is after business hours, start next business day
+    if (fourHoursLater.getHours() >= businessEnd) {
+      const nextBusinessDay = new Date(now);
+      if (isSaturday) {
+        // If it's Saturday, go to Monday
+        const daysUntilMonday = (1 - now.getDay() + 7) % 7;
+        nextBusinessDay.setDate(now.getDate() + daysUntilMonday);
+        nextBusinessDay.setHours(9, 0, 0, 0);
+      } else {
+        // Otherwise, go to next day
+        nextBusinessDay.setDate(now.getDate() + 1);
+        if (nextBusinessDay.getDay() === 6) {
+          // If next day is Saturday, start at 9:30 AM
+          nextBusinessDay.setHours(9, 30, 0, 0);
+        } else {
+          // Otherwise start at 9 AM
+          nextBusinessDay.setHours(9, 0, 0, 0);
+        }
+      }
+      return generateTimeSlots(nextBusinessDay);
+    }
+
+    return generateTimeSlots(fourHoursLater);
+  };
+
+  // Generate time slots starting from a given time
+  const generateTimeSlots = (startTime: Date) => {
+    const slots = [];
+    const dayOfWeek = startTime.getDay();
+    const isSaturday = dayOfWeek === 6;
+    const businessEnd = isSaturday ? 14 : 20; // 2 PM on Saturday, 8 PM on weekdays
+
+    let currentTime = new Date(startTime);
+
+    // For Saturday, if it's exactly 9:30 AM, start there; otherwise round up to next hour
+    if (
+      isSaturday &&
+      currentTime.getHours() === 9 &&
+      currentTime.getMinutes() === 30
+    ) {
+      // Start at 9:30 AM on Saturday
+    } else if (currentTime.getMinutes() > 0) {
+      // Round up to the next hour for other times
+      currentTime.setHours(currentTime.getHours() + 1);
+      currentTime.setMinutes(0);
+    }
+
+    // Generate slots until business end
+    while (currentTime.getHours() < businessEnd) {
+      const timeString = currentTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      slots.push({
+        value: timeString,
+        label: timeString,
+        date: currentTime.toISOString().split("T")[0],
+      });
+
+      currentTime.setHours(currentTime.getHours() + 1);
+    }
+
+    return slots;
+  };
+
+  // Get available dates (next 30 days)
+  const getAvailableDates = () => {
+    const dates = [];
+    const today = new Date();
+
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+
+      // Include weekdays and Saturday, skip Sunday
+      if (date.getDay() !== 0) {
+        dates.push({
+          value: date.toISOString().split("T")[0],
+          label: date.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          isSaturday: date.getDay() === 6,
+        });
+      }
+    }
+
+    return dates;
+  };
+
+  // Generate calendar days for the current month
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const today = new Date();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    const days = [];
+    const currentDate = new Date(startDate);
+
+    // Generate 42 days (6 weeks)
+    for (let i = 0; i < 42; i++) {
+      const isCurrentMonth = currentDate.getMonth() === month;
+      const isToday = currentDate.toDateString() === today.toDateString();
+      const isPast = currentDate < today;
+      const isSunday = currentDate.getDay() === 0;
+      const isAvailable = !isPast && !isSunday && isCurrentMonth;
+
+      days.push({
+        date: new Date(currentDate),
+        isCurrentMonth,
+        isToday,
+        isPast,
+        isSunday,
+        isAvailable,
+        dayNumber: currentDate.getDate(),
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return days;
+  };
+
+  // Navigate calendar months
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentMonth((prev) => {
+      const newMonth = new Date(prev);
+      if (direction === "prev") {
+        newMonth.setMonth(prev.getMonth() - 1);
+      } else {
+        newMonth.setMonth(prev.getMonth() + 1);
+      }
+      return newMonth;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -126,6 +330,8 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           prescriptions: validPrescriptions,
           deliveryType: formData.deliveryType,
           estimatedTime: formData.estimatedTime,
+          preferredDate: formData.preferredDate,
+          preferredTime: formData.preferredTime,
           comments: formData.comments,
         }),
       });
@@ -143,6 +349,8 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           deliveryType: "pickup",
           comments: "",
           estimatedTime: "",
+          preferredDate: "",
+          preferredTime: "",
         });
         onClose();
       } else {
@@ -167,7 +375,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[80svh] md:max-h-[90vh] overflow-y-auto scrollbar-hide">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80svh] md:max-h-[90vh] overflow-y-auto scrollbar-hide">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-2xl font-medium text-[#0A438C]">
@@ -259,8 +467,8 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
               <div className="flex gap-3 min-w-max">
                 {[
                   { value: "pickup", label: "Pickup" },
-                  { value: "delivery-am", label: "Delivery (AM)" },
-                  { value: "delivery-pm", label: "Delivery (PM)" },
+                  { value: "delivery-am", label: "Delivery (Noon)" },
+                  { value: "delivery-pm", label: "Delivery (Evening)" },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -271,6 +479,10 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                         deliveryType: option.value,
                         estimatedTime:
                           option.value === "pickup" ? prev.estimatedTime : "",
+                        preferredDate:
+                          option.value === "pickup" ? prev.preferredDate : "",
+                        preferredTime:
+                          option.value === "pickup" ? prev.preferredTime : "",
                       }))
                     }
                     className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
@@ -343,86 +555,194 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                   </svg>
                 </button>
 
-                {/* Date Picker Popup */}
+                {/* Calendar Modal */}
                 {showDatePicker && (
                   <div
                     className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
                     onClick={() => setShowDatePicker(false)}
                   >
                     <div
-                      className="bg-white border border-gray-300 rounded-xl shadow-lg w-full max-w-md mx-4"
+                      className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <div className="p-4 w-full max-w-full">
-                        <div className="flex justify-between items-center mb-4">
-                          <h4 className="text-sm font-medium text-gray-700">
-                            Select Date & Time
-                          </h4>
+                      {/* Header */}
+                      <div className="p-4 text-black">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">Select Date</h3>
+
                           <button
-                            type="button"
                             onClick={() => setShowDatePicker(false)}
-                            className="text-gray-400 hover:text-gray-600 text-xl"
+                            className="text-white/80 hover:text-white text-xl"
                           >
                             ×
                           </button>
                         </div>
-
-                        {/* Date Input */}
-                        <div className="mb-4 w-full">
-                          <label className="block text-xs text-gray-600 mb-2">
-                            Date
-                          </label>
-                          <input
-                            type="date"
-                            min={new Date().toISOString().split("T")[0]}
-                            className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                            onChange={(e) => {
-                              const date = e.target.value;
-                              const time =
-                                formData.estimatedTime.split(" ")[1] || "";
-                              setFormData((prev) => ({
-                                ...prev,
-                                estimatedTime: `${date} ${time}`.trim(),
-                              }));
-                            }}
-                          />
+                      </div>
+                      <hr className="border-gray-200" />
+                      {/* Calendar */}
+                      <div className="p-4">
+                        {/* Month Navigation */}
+                        <div className="flex items-center justify-between mb-4">
+                          <button
+                            onClick={() => navigateMonth("prev")}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 19l-7-7 7-7"
+                              />
+                            </svg>
+                          </button>
+                          <h4 className="text-lg font-semibold text-gray-900">
+                            {currentMonth.toLocaleDateString("en-US", {
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </h4>
+                          <button
+                            onClick={() => navigateMonth("next")}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </button>
                         </div>
 
-                        {/* Time Input */}
-                        <div className="mb-4 w-full">
-                          <label className="block text-xs text-gray-600 mb-2">
-                            Time
-                          </label>
-                          <input
-                            type="time"
-                            className="w-full px-3 py-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent text-black"
-                            onChange={(e) => {
-                              const time = e.target.value;
-                              const date =
-                                formData.estimatedTime.split(" ")[0] || "";
-                              setFormData((prev) => ({
-                                ...prev,
-                                estimatedTime: `${date} ${time}`.trim(),
-                              }));
-                            }}
-                          />
+                        {/* Calendar Grid */}
+                        <div className="grid grid-cols-7 gap-1 mb-4">
+                          {[
+                            "Sun",
+                            "Mon",
+                            "Tue",
+                            "Wed",
+                            "Thu",
+                            "Fri",
+                            "Sat",
+                          ].map((day) => (
+                            <div
+                              key={day}
+                              className="p-2 text-center text-sm font-medium text-gray-500"
+                            >
+                              {day}
+                            </div>
+                          ))}
+                          {generateCalendarDays().map((day, index) => (
+                            <button
+                              key={index}
+                              onClick={() => {
+                                if (day.isAvailable) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    preferredDate: day.date
+                                      .toISOString()
+                                      .split("T")[0],
+                                  }));
+                                  setShowDatePicker(false);
+                                  setShowTimePicker(true);
+                                }
+                              }}
+                              disabled={!day.isAvailable}
+                              className={`p-2 text-sm rounded-lg transition-colors ${
+                                day.isAvailable
+                                  ? "hover:bg-blue-100 text-gray-900"
+                                  : "text-gray-300 cursor-not-allowed"
+                              } ${
+                                day.isToday
+                                  ? "bg-blue-100 text-blue-600 font-semibold"
+                                  : ""
+                              } ${!day.isCurrentMonth ? "text-gray-300" : ""}`}
+                            >
+                              {day.dayNumber}
+                            </button>
+                          ))}
                         </div>
 
-                        <div className="flex gap-2 w-full">
+                        {/* Business Hours Info */}
+                        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                          <p className="font-medium mb-1">Business Hours:</p>
+                          <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
+                          <p>Saturday: 9:30 AM - 2:00 PM</p>
+                          <p>Sunday: Closed</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Time Picker Modal */}
+                {showTimePicker && (
+                  <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+                    onClick={() => setShowTimePicker(false)}
+                  >
+                    <div
+                      className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {/* Header */}
+                      <div className="p-4 text-black">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">Select Time</h3>
                           <button
-                            type="button"
-                            onClick={() => setShowDatePicker(false)}
-                            className="flex-1 px-4 py-3 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            onClick={() => setShowTimePicker(false)}
+                            className="text-white/80 hover:text-white text-xl"
                           >
-                            Cancel
+                            ×
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => setShowDatePicker(false)}
-                            className="flex-1 px-4 py-3 text-sm bg-[#0A438C] text-white rounded-lg hover:bg-[#0A438C]/90 transition-colors font-medium"
-                          >
-                            Done
-                          </button>
+                        </div>
+                      </div>
+                      <hr className="border-gray-200" />
+                      {/* Time Slots */}
+                      <div className="p-4 max-h-96 overflow-y-auto">
+                        <div className="space-y-2">
+                          {getAvailableTimes(formData.preferredDate).map(
+                            (slot, index) => (
+                              <button
+                                key={index}
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    preferredTime: slot.value,
+                                    estimatedTime:
+                                      `${prev.preferredDate} ${slot.value}`.trim(),
+                                  }));
+                                  setShowTimePicker(false);
+                                }}
+                                className="w-full p-3 text-left hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                              >
+                                <span className="text-gray-900 font-medium">
+                                  {slot.label}
+                                </span>
+                              </button>
+                            )
+                          )}
+                        </div>
+
+                        {/* Business Hours Info */}
+                        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mt-4">
+                          <p className="font-medium mb-1">Business Hours:</p>
+                          <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
+                          <p>Saturday: 9:30 AM - 2:00 PM</p>
+                          <p>Sunday: Closed</p>
                         </div>
                       </div>
                     </div>
