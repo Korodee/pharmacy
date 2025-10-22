@@ -13,39 +13,46 @@ type Service = {
 
 const services: Service[] = [
   {
-    title: "Testing and Treatment for UTI",
+    title: "Smoking <br /> Cessation",
     description:
-      "Quick, confidential testing and effective treatment options to relieve discomfort and prevent recurrence.",
-    image: "/uti.png",
-    alt: "UTI testing",
-  },
-  {
-    title: "Testing and Treatment for Strep A",
-    description:
-      "Fast diagnosis and targeted care to help you recover and prevent the spread of infection.",
-    image: "/strep.png",
-    alt: "Strep A testing",
-  },
-  {
-    title: "Traveller’s <br /> Health",
-    description:
-      "Get travel‑ready with essential vaccines, preventive medication, and expert health advice.",
-    image: "/traveler.png",
-    alt: "Traveller health",
+      "Free patches, gums, lozenges, and inhalers to help you quit smoking with professional support.",
+    image: "/smoke.jpg",
+    alt: "Smoking cessation",
   },
   {
     title: "Sinus <br /> Infection",
     description:
-      "Relief from sinus pressure and congestion with professional evaluation and treatment.",
-    image: "/sinus.png",
+      "Professional assessment and antibiotic treatment for sinus infections lasting more than 7 days.",
+    image: "/sinus.jpg",
     alt: "Sinus infection",
   },
   {
-    title: "Allergies <br /> Treatment",
+    title: "Heartburn & <br /> Indigestion",
     description:
-      "Personalized allergy relief plans to help you breathe easier and enjoy your day‑to‑day life.",
-    image: "/allergies.png",
-    alt: "Allergies treatment",
+      "Expert assessment and treatment for heartburn, acid reflux, and digestive discomfort.",
+    image: "/heart-burn.jpg",
+    alt: "Heartburn and indigestion",
+  },
+  {
+    title: "Seasonal <br /> Allergies",
+    description:
+      "Professional relief from seasonal allergy symptoms with personalized treatment plans.",
+    image: "/seasonal-allergy.jpg",
+    alt: "Seasonal allergy treatment",
+  },
+  {
+    title: "Mild <br /> Acne",
+    description:
+      "Professional treatment options for mild acne conditions with personalized care.",
+    image: "/acne.jpg",
+    alt: "Mild acne treatment",
+  },
+  {
+    title: "Tick <br /> Bite",
+    description:
+      "Quick assessment and antibiotic treatment to prevent Lyme disease after tick bites.",
+    image: "/tick-bite.jpg",
+    alt: "Tick bite treatment",
   },
 ];
 

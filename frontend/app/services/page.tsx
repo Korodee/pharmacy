@@ -21,44 +21,164 @@ type Service = {
 
 const allServices: Service[] = [
   {
-    id: "uti",
-    title: "Testing & Treatment for UTI",
+    id: "smoking-cessation",
+    title: "SMOKING CESSATION",
     description:
-      "Quick, confidential testing and effective treatment options to relieve discomfort and prevent recurrence.",
-    image: "/uti.png",
-    alt: "UTI testing",
+      "Are you thinking about quitting smoking? Your pharmacist can prescribe you patches/gums/lozenges/inhalers for that matter, and it is 100% free.",
+    image: "/smoke.jpg",
+    alt: "Smoking cessation",
   },
   {
-    id: "strep",
-    title: "Testing & Treatment for Strep A",
+    id: "lice",
+    title: "LICE",
     description:
-      "Fast diagnosis and targeted care to help you recover and prevent the spread of infection.",
-    image: "/strep.png",
-    alt: "Strep A testing",
+      "Did you know that your pharmacist can help you getting rid of lice by prescribing an effective treatment? The consultation is confidential and products are covered by Health Canada with a pharmacist prescription.",
+    image: "/lice.jpg",
+    alt: "Lice treatment",
   },
   {
-    id: "travel",
-    title: "Traveller's Health",
+    id: "travellers-diarrhea",
+    title: "TRAVELLER'S DIARRHEA",
     description:
-      "Get travel-ready with essential vaccines, preventive medication, and expert health advice for your destination.",
+      "If you are going away to the Caribbean or other destinations at risk, we can prescribe antibiotics in case you have traveler's diarrhea so that you keep enjoying your vacation to the fullest! Some fees may apply.",
     image: "/traveler.png",
-    alt: "Traveller health",
+    alt: "Traveller's diarrhea",
   },
   {
-    id: "sinus",
-    title: "Sinus Infection",
+    id: "malaria-mountain-sickness",
+    title: "MALARIA AND MOUNTAIN SICKNESS",
     description:
-      "Find relief from sinus pressure and congestion with professional evaluation and treatment tailored to your symptoms.",
-    image: "/sinus.png",
+      "If you are planning to go to the South or climbing up a mountain, your pharmacist can prescribe you a medication to prevent malaria (disease transmitted by mosquitoes) and also to prevent mountain sickness.",
+    image: "/malaria.jpg",
+    alt: "Malaria and mountain sickness",
+  },
+  {
+    id: "pregnancy-nausea-vitamins",
+    title: "NAUSEAS AND VITAMINS DURING PREGNANCY",
+    description:
+      "You are expecting but your first trimester is a bit rough on the digestive system? Your pharmacist can prescribe you medication to help relieve nausea and vomiting due to pregnancy. We can also prescribe you some vitamin supplements to ensure a nice and healthy pregnancy, both for the mother and the baby.",
+    image: "/pregnancy-vomit.jpg",
+    alt: "Pregnancy nausea and vitamins",
+  },
+  {
+    id: "emergency-contraceptive",
+    title: "EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR CONTRACEPTION",
+    description:
+      "You need the morning-after pill and you can't get an appointment with your doctor in a short delay? Your pharmacist can prescribe you the pill as well as a regular contraceptive method afterwards. It is 100% confidential and the consultation will be personalized to your needs.",
+    image: "/uti.png",
+    alt: "Emergency contraceptive",
+  },
+  {
+    id: "shingles",
+    title: "Shingles (under certain conditions)",
+    description:
+      "Are you experiencing a burning, tingling, or itchy sensation with small yellowish blisters on your skin, often on the chest area? It could be shingles. Your pharmacist can assess your condition and prescribe antiviral treatment — ideally within 72 hours of the onset of symptoms. Act quickly to relieve your symptoms and reduce the risk of complications.",
+    image: "/herpes.jpg",
+    alt: "Shingles treatment",
+  },
+  {
+    id: "sinus-infection",
+    title: "Sinus infection (under certain conditions)",
+    description:
+      "Are you experiencing facial pain or pressure in the forehead area, along with nasal congestion or discharge lasting more than 7 days? You may have a sinus infection. Your pharmacist can assess your symptoms and, if appropriate, prescribe an antibiotic treatment to help you recover faster and feel better.",
+    image: "/sinus.jpg",
     alt: "Sinus infection",
   },
   {
-    id: "allergies",
-    title: "Allergies Treatment",
+    id: "chronic-health-conditions",
+    title: "CONSULTATION AND FOLLOW-UP OF CHRONIC HEALTH CONDITIONS",
     description:
-      "Personalized allergy relief plans to help you breathe easier and enjoy your day-to-day life.",
-    image: "/allergies.png",
-    alt: "Allergies treatment",
+      "Are you worried about your sugar levels or is your blood pressure is too high? Do you think you have a side effect to a medication? You can meet with the pharmacist to discuss about your symptoms and treatments. We will give you professional advice and we will help you optimize your actual treatments. You can make an appointment at the pharmacy counter.",
+    image: "/diabetes.jpg",
+    alt: "Chronic health conditions",
+  },
+  {
+    id: "medication-adjustment",
+    title: "ADJUSTING YOUR MEDICATION TO YOUR NEEDS",
+    description:
+      "At the pharmacy, we offer medication adjustment according to efficacy, tolerance, and compliance. You do not need to take an appointment with your doctor while we are taking care of it at the pharmacy for you. For that matter, we will speak to your physician to get his/her approval beforehand.",
+    image: "/side-effect.jpg",
+    alt: "Medication adjustment",
+  },
+  {
+    id: "tick-bite",
+    title: "Tick Bite",
+    description:
+      "If you've been bitten by a tick, your pharmacist can assess your situation and, when appropriate, prescribe an antibiotic treatment to help prevent Lyme disease. The assessment is quick and based on where and when the bite occurred. Early action is key!",
+    image: "/tick-bite.jpg",
+    alt: "Tick bite treatment",
+  },
+  {
+    id: "heartburn-indigestion",
+    title: "Heartburn and Indigestion",
+    description:
+      "Your pharmacist can assess your symptoms and, when appropriate, recommend or prescribe medication to relieve heartburn (acid reflux) and dyspepsia (indigestion). They can help you find the right treatment, offer lifestyle advice, and ensure your medication is safe with your other prescriptions.",
+    image: "/heart-burn.jpg",
+    alt: "Heartburn and indigestion",
+  },
+  {
+    id: "strep-a-test",
+    title: "Throat infection: STREP A TEST",
+    description:
+      "If you have symptoms of a sudden and severe sore throat, pain when swallowing, fever, and white or yellow spots on the tonsils or back of the throat you can come get tested at the pharmacy. This service has a charge, and if the test is positive, the pharmacist will be able to prescribe an antibiotic and pain killers.",
+    image: "/throat-infection.jpg",
+    alt: "Strep A test",
+  },
+  {
+    id: "mild-acne",
+    title: "MILD ACNE",
+    description: "Professional treatment options for mild acne conditions.",
+    image: "/acne.jpg",
+    alt: "Mild acne treatment",
+  },
+  {
+    id: "seasonal-allergy",
+    title: "SEASONAL ALLERGY",
+    description: "Relief from seasonal allergy symptoms with professional guidance.",
+    image: "/seasonal-allergy.jpg",
+    alt: "Seasonal allergy treatment",
+  },
+  {
+    id: "eyes-allergy",
+    title: "EYES ALLERGY",
+    description: "Specialized treatment for eye allergy symptoms.",
+    image: "/eyes-allergy.jpg",
+    alt: "Eyes allergy treatment",
+  },
+  {
+    id: "pink-eye-infection",
+    title: "PINK EYE (INFECTION)",
+    description: "Professional assessment and treatment for pink eye infections.",
+    image: "/pink-eye.jpg",
+    alt: "Pink eye infection treatment",
+  },
+  {
+    id: "yeast-infection",
+    title: "YEAST INFECTION",
+    description: "Confidential and effective treatment for yeast infections.",
+    image: "/yeast.jpg",
+    alt: "Yeast infection treatment",
+  },
+  {
+    id: "athletes-foot",
+    title: "ATHLETE'S FOOT (SKIN FUNGUS)",
+    description: "Professional treatment for athlete's foot and skin fungal conditions.",
+    image: "/athletes-foot.jpg",
+    alt: "Athlete's foot treatment",
+  },
+  {
+    id: "multivitamins-kids",
+    title: "MULTIVITAMINS/VITAMIN D FOR YOUR KIDS (6 YEARS OLD AND UNDER)",
+    description: "Essential vitamins and supplements for children 6 years and under.",
+    image: "/kids-multivitamins.jpg",
+    alt: "Multivitamins for kids",
+  },
+  {
+    id: "constipation",
+    title: "CONSTIPATION",
+    description: "Professional guidance and treatment for constipation relief.",
+    image: "/constipation.jpg",
+    alt: "Constipation treatment",
   },
 ];
 
@@ -191,12 +311,12 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Service Content */}
-                <div className={`w-full md:w-1/2 space-y-6 ${index % 2 === 1 ? 'md:pl-14' : 'md:pr-14 md:text-right'}`}>
+                <div className={`w-full md:w-1/2 space-y-6 ${index % 2 === 1 ? 'md:pl-6' : 'md:pr-6 md:text-right'}`}>
                   <div>
                     <h4 className="text-xl md:text-2xl font-medium text-[#0A438C] mb-4">
                       {service.title}
                     </h4>
-                    <p className={`text-gray-600 text-lg leading-relaxed mb-6 ${index % 2 === 0 ? 'md:w-[80%] md:ml-auto' : 'md:w-[80%]'}`}>
+                    <p className={`text-gray-600 text-md leading-relaxed ${index % 2 === 0 ? 'md:w-[90%] md:ml-auto' : 'md:w-[80%]'}`}>
                       {service.description}
                     </p>
                   </div>
