@@ -241,19 +241,34 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
                   transition={{ delay: 0.5, duration: 0.3 }}
                   className="p-6 border-t border-gray-100 bg-gray-50/50"
                 >
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setIsModalOpen(true);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="w-full bg-[#0A438C] text-white px-6 py-4 rounded-xl text-base font-semibold hover:bg-[#0A438C]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  >
-                    Request A Refill
-                  </motion.button>
+                  <div className="space-y-3">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setIsModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full bg-[#0A438C] text-white px-6 py-4 rounded-xl text-base font-semibold hover:bg-[#0A438C]/90 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Request A Refill
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setIsConsultationModalOpen(true);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full bg-white text-[#0A438C] border-2 border-[#0A438C] px-6 py-4 rounded-xl text-base font-semibold hover:bg-[#0A438C]/5 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Book a Consultation
+                    </motion.button>
+                  </div>
+                  
                   <p className="text-xs text-gray-500 text-center mt-3">
-                    Quick and easy prescription refills
+                    Quick and easy prescription refills & professional consultations
                   </p>
                 </motion.div>
               </div>
