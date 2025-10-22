@@ -86,8 +86,11 @@ export default function ServicesSection() {
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
       >
-        <motion.h3 variants={fadeUp} className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10">
-        Discover our healthcare services
+        <motion.h3
+          variants={fadeUp}
+          className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-10"
+        >
+          Discover our healthcare services
         </motion.h3>
 
         {/* Horizontal scroll with snap; card layout: image left, text right */}
@@ -117,17 +120,7 @@ export default function ServicesSection() {
                   {/* Text - Below image on mobile, right on desktop */}
                   <div className="flex flex-col h-full mt-4 md:mt-0">
                     <h4 className="text-[#0A438C] py-2 px-2 md:px-6 font-semibold text-[19px] leading-snug">
-                      {s.title.split(' ').map((word, index, array) => (
-                        <span key={index}>
-                          {word}
-                          {index < array.length - 1 && (
-                            <span className="md:hidden"> </span>
-                          )}
-                          {index < array.length - 1 && (
-                            <br className="hidden md:inline" />
-                          )}
-                        </span>
-                      ))}
+                      {s.title}
                     </h4>
                     <p className="text-[#11122C] px-2 md:pl-6 font-[300] text-[13px] leading-relaxed max-w-[360px] mt-auto pb-2 md:pb-2">
                       {s.description}
@@ -140,15 +133,16 @@ export default function ServicesSection() {
 
           {/* Custom scroll progress bar */}
           <div className="relative mt-6 h-[3px] bg-[#EEF3FA] rounded-full">
-            <div ref={progressRef} className="absolute left-0 top-0 h-[3px] rounded-full bg-gradient-to-r from-[#0A438C] to-[#0A7BB2]" style={{ width: '0%' }} />
+            <div
+              ref={progressRef}
+              className="absolute left-0 top-0 h-[3px] rounded-full bg-gradient-to-r from-[#0A438C] to-[#0A7BB2]"
+              style={{ width: "0%" }}
+            />
           </div>
         </div>
 
         {/* View All Services Button */}
-        <motion.div 
-          variants={fadeUp}
-          className="flex justify-center mt-8"
-        >
+        <motion.div variants={fadeUp} className="flex justify-center mt-8">
           <motion.a
             href="/services"
             whileHover={{ scale: 1.05 }}
@@ -171,7 +165,6 @@ export default function ServicesSection() {
             </svg>
           </motion.a>
         </motion.div>
-
       </motion.div>
     </section>
   );

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "../ui/ToastProvider";
 import LoadingSpinner from "../ui/LoadingSpinner";
+import PrescriptionNumberModal from "./PrescriptionNumberModal";
 
 interface RefillModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
   const [prescriptionError, setPrescriptionError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isPrescriptionNumberModalOpen, setIsPrescriptionNumberModalOpen] = useState(false);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -768,13 +770,23 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
               {isSubmitting ? "Sending Request..." : "Send Request"}
             </button>
             <p className="text-center mt-4 text-sm">
-              <a href="#" className="text-[#0A438C] text-sm hover:underline">
+              <button 
+                type="button"
+                onClick={() => setIsPrescriptionNumberModalOpen(true)}
+                className="text-[#0A438C] text-sm hover:underline"
+              >
                 Click here to know how to find the prescription number.
-              </a>
+              </button>
             </p>
           </div>
         </form>
       </div>
+      
+      {/* Prescription Number Modal */}
+      <PrescriptionNumberModal
+        isOpen={isPrescriptionNumberModalOpen}
+        onClose={() => setIsPrescriptionNumberModalOpen(false)}
+      />
     </div>
   );
 }
