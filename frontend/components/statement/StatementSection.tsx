@@ -4,7 +4,11 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { containerStagger, fadeUp } from "@/lib/anim";
 import { useRef } from "react";
 
-export default function StatementSection() {
+interface StatementSectionProps {
+  customText?: string;
+}
+
+export default function StatementSection({ customText }: StatementSectionProps = {}) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -33,50 +37,78 @@ export default function StatementSection() {
         </motion.div>
 
         <motion.h2 className="text-2xl md:text-3xl lg:text-4xl font-medium leading-snug mb-6">
-          <motion.span
-            style={{
-              color: useTransform(
-                text1Progress,
-                [0, 1],
-                ["#6B7280", "#0A438C"]
-              )
-            }}
-          >
-            We believe healthcare should feel personal, not complicated. That's
-          </motion.span>
-          <motion.span
-            style={{
-              color: useTransform(
-                text2Progress,
-                [0, 1],
-                ["#6B7280", "#0A438C"]
-              )
-            }}
-          >
-            {" "}why our team is here to guide, support, and care for you — every
-          </motion.span>
-          <motion.span
-            style={{
-              color: useTransform(
-                text3Progress,
-                [0, 1],
-                ["#6B7280", "#0A438C"]
-              )
-            }}
-          >
-            {" "}step of the way. From prescriptions to everyday wellness, we make
-          </motion.span>
-          <motion.span
-            style={{
-              color: useTransform(
-                text4Progress,
-                [0, 1],
-                ["#6B7280", "#0A438C"]
-              )
-            }}
-          >
-            {" "}sure you always have what you need to stay healthy.
-          </motion.span>
+          {customText ? (
+            <>
+              {customText.split(' ').map((word, index) => {
+                const progress = index === 0 ? text1Progress : 
+                               index < 8 ? text2Progress : 
+                               index < 16 ? text3Progress : 
+                               index < 24 ? text4Progress : text5Progress;
+                
+                return (
+                  <motion.span
+                    key={index}
+                    style={{
+                      color: useTransform(
+                        progress,
+                        [0, 1],
+                        ["#6B7280", "#0A438C"]
+                      )
+                    }}
+                  >
+                    {word}{index < customText.split(' ').length - 1 ? ' ' : ''}
+                  </motion.span>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              <motion.span
+                style={{
+                  color: useTransform(
+                    text1Progress,
+                    [0, 1],
+                    ["#6B7280", "#0A438C"]
+                  )
+                }}
+              >
+                We believe healthcare should feel personal, not complicated. That's
+              </motion.span>
+              <motion.span
+                style={{
+                  color: useTransform(
+                    text2Progress,
+                    [0, 1],
+                    ["#6B7280", "#0A438C"]
+                  )
+                }}
+              >
+                {" "}why our team is here to guide, support, and care for you — every
+              </motion.span>
+              <motion.span
+                style={{
+                  color: useTransform(
+                    text3Progress,
+                    [0, 1],
+                    ["#6B7280", "#0A438C"]
+                  )
+                }}
+              >
+                {" "}step of the way. From prescriptions to everyday wellness, we make
+              </motion.span>
+              <motion.span
+                style={{
+                  color: useTransform(
+                    text4Progress,
+                    [0, 1],
+                    ["#6B7280", "#0A438C"]
+                  )
+                }}
+              >
+                {" "}sure you always have what you need to stay healthy.
+              </motion.span>
+            </>
+          )}
         </motion.h2>
       </motion.div>
     </section>

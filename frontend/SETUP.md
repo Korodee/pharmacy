@@ -25,7 +25,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 ### User Dashboard
 - **Request A Refill**: Modal form for prescription refills
-- **Request A Consultation**: Modal form for consultation requests
+- **Book a Consultation**: Modal form for consultation requests
 - Both forms send data to the backend API
 
 ### Admin Dashboard
@@ -42,7 +42,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ## Usage
 
 1. **User Flow**:
-   - User clicks "Request A Refill" or "Request A Consultation"
+   - User clicks "Request A Refill" or "Book a Consultation"
    - Fills out the modal form
    - Submits the request
    - Admin receives email notification

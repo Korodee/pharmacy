@@ -11,8 +11,12 @@ interface NavigationProps {
 
 export default function Navigation({ items, isModalOpen = false, setIsModalOpen }: NavigationProps) {
   const [activeSection, setActiveSection] = useState('#home');
+  const [currentPath, setCurrentPath] = useState('');
 
   useEffect(() => {
+    // Set current path
+    setCurrentPath(window.location.pathname);
+    
     const handleScroll = () => {
       // Check which section is currently in view
       const sections = items.map(item => item.href);
@@ -48,11 +52,32 @@ export default function Navigation({ items, isModalOpen = false, setIsModalOpen 
         {/* Navigation Links - Center */}
         <div className="flex-1 flex items-center justify-center gap-4">
           {items.map((item, index) => {
-            const isActive = activeSection === item.href;
+            // Determine if this link should be active
+            let isActive = false;
+            if (currentPath === '/services' && item.href === '#services') {
+              isActive = true; // Services link is active on services page
+            } else if (currentPath === '/' && activeSection === item.href) {
+              isActive = true; // Normal scroll-based active state on main page
+            }
+            
             const base = 'transition-colors duration-200 px-3 py-2 text-white font-medium hover:text-white/80';
             const activeClass = isActive ? 'text-white font-semibold' : 'text-white/40';
+            
+            // Handle navigation - if on services page and not services link, go to main page
+            const handleClick = (e: React.MouseEvent) => {
+              if (currentPath === '/services' && item.href !== '#services') {
+                e.preventDefault();
+                window.location.href = `/${item.href}`;
+              }
+            };
+            
             return (
-              <a key={index} href={item.href} className={`${base} ${activeClass}`}>
+              <a 
+                key={index} 
+                href={item.href} 
+                onClick={handleClick}
+                className={`${base} ${activeClass}`}
+              >
                 {item.label}
               </a>
             );

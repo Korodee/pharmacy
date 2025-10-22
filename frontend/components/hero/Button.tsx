@@ -19,7 +19,7 @@ export default function Button({ button, className = "", isModalOpen, setIsModal
   const handleClick = () => {
     if (button.text === "Request A Refill") {
       setIsModalOpen(true);
-    } else if (button.text === "Request A Consultation") {
+    } else if (button.text === "Book a Consultation" || button.text === "Book a Consultation") {
       setIsConsultationModalOpen(true);
     }
   };

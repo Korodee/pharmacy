@@ -9,7 +9,21 @@ import RefillModal from "../modal/RefillModal";
 import ConsultationModal from "../modal/ConsultationModal";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  customContent?: {
+    primaryHeading: string;
+    secondaryHeading: string;
+    description: string;
+    buttons: Array<{
+      text: string;
+      variant: 'primary' | 'secondary';
+      href: string;
+    }>;
+  };
+  customBackgroundImage?: string;
+}
+
+export default function HeroSection({ customContent, customBackgroundImage }: HeroSectionProps = {}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -27,12 +41,12 @@ export default function HeroSection() {
     <section
       id="home"
       className="relative h-[100svh] md:h-screen bg-cover bg-center bg-no-repeat overflow-visible"
-      style={{ backgroundImage: "url(/hero-bg.png)" }}
+      style={{ backgroundImage: `url(${customBackgroundImage || "/hero-bg.png"})` }}
     >
       {/* Background Image with proper loading */}
       <div className="absolute inset-0">
         <img
-          src="/hero-bg.png"
+          src={customBackgroundImage || "/hero-bg.png"}
           alt=""
           className="w-full h-full object-cover"
           style={{ 
@@ -61,7 +75,7 @@ export default function HeroSection() {
               className={`p-3 rounded-full transition-all duration-300 ${
                 isScrolled
                   ? "bg-[#0A438C] border border-[#0A438C] shadow-lg"
-                  : "bg-transparent"
+                  : "bg-[#0A438C]/80 backdrop-blur-sm border border-white/20 shadow-lg"
               }`}
             >
               <div className="w-4 h-4 flex flex-col justify-center items-center">
@@ -93,7 +107,7 @@ export default function HeroSection() {
             {/* Content - Centered on mobile, half on desktop */}
             <div className="flex items-center justify-center w-full lg:w-auto">
               <HeroContent
-                content={heroData.content}
+                content={customContent || heroData.content}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
                 isConsultationModalOpen={isConsultationModalOpen}

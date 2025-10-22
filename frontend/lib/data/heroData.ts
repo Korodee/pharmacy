@@ -36,12 +36,12 @@ export const heroData: HeroData = {
     description: "Serving our community with care, convenience, and trusted pharmacy support every day.",
     buttons: [
       {
-        text: "Request A Refill",
+        text: "Book a Consultation",
         variant: "primary",
         href: "modal"
       },
       {
-        text: "Request A Consultation",
+        text: "Request A Refill",
         variant: "secondary",
         href: "modal"
       }
