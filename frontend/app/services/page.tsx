@@ -275,7 +275,7 @@ export default function ServicesPage() {
       {/* Services Section */}
       <section id="services" className="w-full bg-white">
         <motion.div
-          className="max-w-6xl mx-auto px-16 md:px-10 py-20"
+          className="max-w-6xl mx-auto px-4 md:px-10 py-20"
           variants={containerStagger}
           initial="hidden"
           whileInView="visible"

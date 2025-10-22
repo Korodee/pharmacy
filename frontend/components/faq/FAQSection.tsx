@@ -7,29 +7,39 @@ type FAQ = { question: string; answer: string };
 
 const faqs: FAQ[] = [
   {
-    question: "How do I refill my prescription online?",
+    question: "Can I send a prescription to be prepared without having to wait in the pharmacy?",
     answer:
-      "Use the Request A Refill button at the top of the page. Upload a photo or enter your RX number and contact details.",
+      "Yes! You can contact our team to send it by text message through our secured platform or you can send it through the Familiprix App.",
   },
   {
-    question: "How long does delivery take?",
+    question: "How can I access my file on the Familiprix App?",
     answer:
-      "Local deliveries are typically completed the same day if placed before 2:00 PM. Otherwise, next business day.",
+      "You download the App on Google Play or the App store, create an account with your information, select our pharmacy and request your personal key from our team to link to your medication's file. You can place an order, see your file, put reminders, send a picture of your prescription and much more!",
   },
   {
-    question: "What are your available hours?",
+    question: "When is the pharmacy open?",
     answer:
-      "We’re open Monday–Friday, 9:00 AM–8:00 PM, and Saturday, 9:00 AM–2:00 PM. Closed on Sundays. Online orders and uploads are available anytime.",
+      "We are open Monday to Thursday 9:00AM to 8:00PM, Friday 9:00 to 6:00PM and Saturday 9:30AM to 2:00PM. We are closed on Sunday",
   },
   {
-    question: "Can I order medicines without a prescription?",
+    question: "What do I do to get my medication when you are closed?",
     answer:
-      "Over‑the‑counter items can be ordered without a prescription. Prescription medications require a valid RX or doctor transfer.",
+      "You can get your prescription in our pharmacy in Lasalle, 9316 Airlie. Phone number: <a href='tel:+15143654155' class='text-blue-500 hover:underline'> (514) 365-4155</a>. They can have access to your file there as we are linked. If you don't want to cross the bridge, you can go to our pharmacy in St-Isidore, 640 Rang Saint-Régis. Phone number: <a href='tel:+14504545507' class='text-blue-500 hover:underline'> (450) 454-5507</a>",
   },
   {
-    question: "Where are your pharmacies located?",
+    question: "How can I transfer my file to your pharmacy?",
     answer:
-      "Our pharmacies in LaSalle and St‑Isidore are open 7 days per week:\n- 9316 Airlie (corner 90th Ave), LaSalle, T514‑365‑4155\n- 640 Rue St‑Regis, St‑Isidore, T450‑454‑5507",
+      "Come open your file at our pharmacy, give us the information of the pharmacy from where you want us to transfer and let us do the rest!",
+  },
+  {
+    question: "Do we offer delivery?",
+    answer:
+      "Yes, during the week, we have 2 deliveries: one around noon and one in the evening around supper time. Saturday we have one delivery around noon.",
+  },
+  {
+    question: "Can a pharmacist prescribe medication?",
+    answer:
+      "Yes! The pharmacist can prescribe medication either over the counter which can be covered by Health Canada or certain medication for certain conditions. Consult our list of <a href='/services' class='text-blue-500 hover:underline'>services</a> to learn more?",
   },
 ];
 
@@ -75,8 +85,7 @@ export default function FAQSection() {
                   } bg-white`}
                 >
                   <div className="overflow-hidden">
-                    <div className="px-5 py-5 text-gray-500 text-md leading-6">
-                      {f.answer}
+                    <div className="px-5 py-5 text-gray-500 text-md leading-6" dangerouslySetInnerHTML={{ __html: f.answer }}>
                     </div>
                   </div>
                 </div>

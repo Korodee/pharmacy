@@ -9,7 +9,8 @@ export default function Logo() {
           alt="Kateri Pharmacy Logo"
           width={160}
           height={60}
-          className="h-10 w-auto"
+          className="h-8 md:h-10 w-auto"
+          priority
         />
       </div>
     </div>

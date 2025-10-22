@@ -68,6 +68,11 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
 
         <div className="max-w-7xl mx-auto flex items-center justify-between relative">
 
+          {/* Mobile Logo - Absolute position */}
+          <div className="md:hidden absolute top-8 left-6 z-50">
+            <Logo />
+          </div>
+
           {/* Mobile Burger Menu - Fixed position */}
           <div className="md:hidden fixed top-6 right-6 z-50">
             <button
@@ -183,37 +188,49 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
                     transition={{ delay: 0.2, duration: 0.3 }}
                     className="space-y-2"
                   >
-                    {heroData.navigation.map((item, index) => (
-                      <motion.a
-                        key={index}
-                        initial={{ x: 20, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ 
-                          delay: 0.3 + (index * 0.1), 
-                          duration: 0.3 
-                        }}
-                        href={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="block px-4 py-4 rounded-xl text-base font-medium text-gray-700 hover:bg-[#0A438C]/5 hover:text-[#0A438C] transition-all duration-200 group"
-                      >
-                        <span className="flex items-center justify-between">
-                          {item.label}
-                          <svg
-                            className="w-4 h-4 text-gray-400 group-hover:text-[#0A438C] transition-colors"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                        </span>
-                      </motion.a>
-                    ))}
+                    {heroData.navigation.map((item, index) => {
+                      // Handle navigation - if on services page and not services link, go to main page
+                      const handleClick = (e: React.MouseEvent) => {
+                        const currentPath = window.location.pathname;
+                        if (currentPath === '/services' && item.href !== '#services') {
+                          e.preventDefault();
+                          window.location.href = `/${item.href}`;
+                        }
+                        setIsMobileMenuOpen(false);
+                      };
+
+                      return (
+                        <motion.a
+                          key={index}
+                          initial={{ x: 20, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ 
+                            delay: 0.3 + (index * 0.1), 
+                            duration: 0.3 
+                          }}
+                          href={item.href}
+                          onClick={handleClick}
+                          className="block px-4 py-4 rounded-xl text-base font-medium text-gray-700 hover:bg-[#0A438C]/5 hover:text-[#0A438C] transition-all duration-200 group"
+                        >
+                          <span className="flex items-center justify-between">
+                            {item.label}
+                            <svg
+                              className="w-4 h-4 text-gray-400 group-hover:text-[#0A438C] transition-colors"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </span>
+                        </motion.a>
+                      );
+                    })}
                   </motion.div>
                 </nav>
 

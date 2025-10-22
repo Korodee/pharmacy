@@ -13,42 +13,42 @@ type Service = {
 
 const services: Service[] = [
   {
-    title: "Smoking <br /> Cessation",
+    title: "Smoking Cessation",
     description:
       "Free patches, gums, lozenges, and inhalers to help you quit smoking with professional support.",
     image: "/smoke.jpg",
     alt: "Smoking cessation",
   },
   {
-    title: "Sinus <br /> Infection",
+    title: "Sinus Infection",
     description:
       "Professional assessment and antibiotic treatment for sinus infections lasting more than 7 days.",
     image: "/sinus.jpg",
     alt: "Sinus infection",
   },
   {
-    title: "Heartburn & <br /> Indigestion",
+    title: "Heartburn & Indigestion",
     description:
       "Expert assessment and treatment for heartburn, acid reflux, and digestive discomfort.",
     image: "/heart-burn.jpg",
     alt: "Heartburn and indigestion",
   },
   {
-    title: "Seasonal <br /> Allergies",
+    title: "Seasonal Allergies",
     description:
       "Professional relief from seasonal allergy symptoms with personalized treatment plans.",
     image: "/seasonal-allergy.jpg",
     alt: "Seasonal allergy treatment",
   },
   {
-    title: "Mild <br /> Acne",
+    title: "Mild Acne",
     description:
       "Professional treatment options for mild acne conditions with personalized care.",
     image: "/acne.jpg",
     alt: "Mild acne treatment",
   },
   {
-    title: "Tick <br /> Bite",
+    title: "Tick Bite",
     description:
       "Quick assessment and antibiotic treatment to prevent Lyme disease after tick bites.",
     image: "/tick-bite.jpg",
@@ -117,7 +117,17 @@ export default function ServicesSection() {
                   {/* Text - Below image on mobile, right on desktop */}
                   <div className="flex flex-col h-full mt-4 md:mt-0">
                     <h4 className="text-[#0A438C] py-2 px-2 md:px-6 font-semibold text-[19px] leading-snug">
-                      <span dangerouslySetInnerHTML={{ __html: s.title }} />
+                      {s.title.split(' ').map((word, index, array) => (
+                        <span key={index}>
+                          {word}
+                          {index < array.length - 1 && (
+                            <span className="md:hidden"> </span>
+                          )}
+                          {index < array.length - 1 && (
+                            <br className="hidden md:inline" />
+                          )}
+                        </span>
+                      ))}
                     </h4>
                     <p className="text-[#11122C] px-2 md:pl-6 font-[300] text-[13px] leading-relaxed max-w-[360px] mt-auto pb-2 md:pb-2">
                       {s.description}
