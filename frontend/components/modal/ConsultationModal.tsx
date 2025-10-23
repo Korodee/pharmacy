@@ -402,24 +402,49 @@ export default function ConsultationModal({
                 </option>
                 <option value="smoking-cessation">SMOKING CESSATION</option>
                 <option value="lice">LICE</option>
-                <option value="travellers-diarrhea">TRAVELLER'S DIARRHEA</option>
-                <option value="malaria-mountain-sickness">MALARIA AND MOUNTAIN SICKNESS</option>
-                <option value="pregnancy-nausea-vitamins">NAUSEAS AND VITAMINS DURING PREGNANCY</option>
-                <option value="emergency-contraceptive">EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR CONTRACEPTION</option>
-                <option value="shingles">Shingles (under certain conditions)</option>
-                <option value="sinus-infection">Sinus infection (under certain conditions)</option>
-                <option value="chronic-health-conditions">CONSULTATION AND FOLLOW-UP OF CHRONIC HEALTH CONDITIONS</option>
-                <option value="medication-adjustment">ADJUSTING YOUR MEDICATION TO YOUR NEEDS</option>
+                <option value="travellers-diarrhea">
+                  TRAVELLER'S DIARRHEA
+                </option>
+                <option value="malaria-mountain-sickness">
+                  MALARIA AND MOUNTAIN SICKNESS
+                </option>
+                <option value="pregnancy-nausea-vitamins">
+                  NAUSEAS AND VITAMINS DURING PREGNANCY
+                </option>
+                <option value="emergency-contraceptive">
+                  EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR
+                  CONTRACEPTION
+                </option>
+                <option value="shingles">
+                  Shingles (under certain conditions)
+                </option>
+                <option value="sinus-infection">
+                  Sinus infection (under certain conditions)
+                </option>
+                <option value="chronic-health-conditions">
+                  CONSULTATION AND FOLLOW-UP OF CHRONIC HEALTH CONDITIONS
+                </option>
+                <option value="medication-adjustment">
+                  ADJUSTING YOUR MEDICATION TO YOUR NEEDS
+                </option>
                 <option value="tick-bite">Tick Bite</option>
-                <option value="heartburn-indigestion">Heartburn and Indigestion</option>
-                <option value="strep-a-test">Throat infection: STREP A TEST</option>
+                <option value="heartburn-indigestion">
+                  Heartburn and Indigestion
+                </option>
+                <option value="strep-a-test">
+                  Throat infection: STREP A TEST
+                </option>
                 <option value="mild-acne">MILD ACNE</option>
                 <option value="seasonal-allergy">SEASONAL ALLERGY</option>
                 <option value="eyes-allergy">EYES ALLERGY</option>
                 <option value="pink-eye-infection">PINK EYE (INFECTION)</option>
                 <option value="yeast-infection">YEAST INFECTION</option>
-                <option value="athletes-foot">ATHLETE'S FOOT (SKIN FUNGUS)</option>
-                <option value="multivitamins-kids">MULTIVITAMINS/VITAMIN D FOR YOUR KIDS (6 YEARS OLD AND UNDER)</option>
+                <option value="athletes-foot">
+                  ATHLETE'S FOOT (SKIN FUNGUS)
+                </option>
+                <option value="multivitamins-kids">
+                  MULTIVITAMINS/VITAMIN D FOR YOUR KIDS (6 YEARS OLD AND UNDER)
+                </option>
                 <option value="constipation">CONSTIPATION</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -509,8 +534,7 @@ export default function ConsultationModal({
               </div>
             </div>
             <p className="text-sm text-gray-500 mt-2">
-              We request a minimum of 4 hours to fill an order, we are doing our
-              best to serve you!
+              We will do our best to consult with you at the selected time!
             </p>
           </div>
 

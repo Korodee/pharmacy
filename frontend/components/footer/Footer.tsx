@@ -6,7 +6,7 @@ import { containerStagger, fadeUp } from "@/lib/anim";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-white">
+    <footer className="w-full border-t border-[#E6EEF7] bg-white">
       <motion.div
         className="max-w-7xl mx-auto px-6 md:px-10 py-12"
         variants={containerStagger}
@@ -19,7 +19,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <motion.p
               variants={fadeUp}
-              className="text-[14px] text-gray-600 md:w-[50%] md:text-left"
+              className="text-[16px] text-gray-600 md:w-[50%] md:text-left"
             >
               Do you need answers to your queries while ordering medicines
               online? Want to refill your prescription by phone? Our customer
@@ -27,7 +27,7 @@ export default function Footer() {
             </motion.p>
             <motion.div
               variants={fadeUp}
-              className="hidden md:block text-[14px] md:text-right text-gray-600 space-y-1"
+              className="hidden md:block text-[16px] md:text-right text-gray-600 space-y-1"
             >
               <p>
                 Call{" "}
@@ -51,7 +51,7 @@ export default function Footer() {
             </motion.div>
           </div>
           {/* Contacts */}
-          <div className="block text-[14px] text-gray-600 md:hidden space-y-1">
+          <div className="block text-[16px] text-gray-600 md:hidden space-y-1">
             <p>
               Call{" "}
               <Link href="tel:4506385760" className="text-[#0A438C] underline">
@@ -66,7 +66,7 @@ export default function Footer() {
               </Link>
             </p>
           </div>
-          <div className="w-full flex flex-col md:flex-row justify-between items-start text-[14px] text-gray-600 mt-6">
+          <div className="w-full flex flex-col md:flex-row justify-between items-start text-[16px] text-gray-600 mt-6">
             {/* Address 1 - Left */}
             <motion.div
               variants={fadeUp}
@@ -253,7 +253,7 @@ export default function Footer() {
           {/* Bottom row: copyright */}
           <motion.div
             variants={fadeUp}
-            className="text-[#6B7280] text-center text-sm"
+            className="text-[#6B7280] text-center text-base"
           >
             © 2025 Kateri Pharmacy. All Rights Reserved.
           </motion.div>

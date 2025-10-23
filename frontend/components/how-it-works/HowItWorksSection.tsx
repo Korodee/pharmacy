@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { containerStagger, fadeUp } from "@/lib/anim";
+import { useState } from "react";
 
 type Step = {
   title: string;
@@ -12,31 +13,43 @@ type Step = {
 
 const steps: Step[] = [
   {
-    title: "Request a Refill",
-    description:
-      "Choose the prescription number, add phone number, and select the medicines you want to refill.",
+    title: "Refill now on our website",
+    description: "Request A Refill",
     image: "/request.png",
-    alt: "Request a refill",
+    alt: "Website refill",
   },
   {
-    title: "Get Notified When Ready",
-    description:
-      "You will receive a notification when your medications are ready with the pharmacist.",
+    title: "To access your file, request a key from our team",
+    description: "Download the App",
     image: "/notify.png",
-    alt: "Get notified",
+    alt: "App download",
   },
   {
-    title: "Pickup/Doorstep Delivery",
-    description:
-      "We offer pickup and delivery options for your medications for greater convenience.",
+    title: "For pick up or Delivery?",
+    description: "Call to order now",
     image: "/deliver.png",
-    alt: "Pickup or delivery",
+    alt: "Phone order",
   },
 ];
 
-export default function HowItWorksSection() {
+interface HowItWorksSectionProps {
+  onRefillClick?: () => void;
+}
+
+export default function HowItWorksSection({ onRefillClick }: HowItWorksSectionProps) {
+  const handleButtonClick = (description: string) => {
+    if (description === "Request A Refill") {
+      onRefillClick?.();
+    } else if (description === "Download the App") {
+      window.open("https://apps.apple.com/ca/app/familiprix/id932510029", "_blank");
+    } else if (description === "Call to order now") {
+      window.location.href = "tel:4506385760";
+    }
+    // Add other button handlers here if needed
+  };
+
   return (
-    <section id="how-it-works" className="w-full bg-[#F1FAFD]">
+    <section id="how-it-works" className="relative z-10 w-full bg-[#F1FAFD] -mt-6 md:-mt-6 lg:-mt-6 rounded-t-[20px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
       <motion.div
         className="max-w-7xl mx-auto px-6 md:px-10 py-20"
         variants={containerStagger}
@@ -52,10 +65,10 @@ export default function HowItWorksSection() {
           {steps.map((step, idx) => (
             <motion.div
               key={idx}
-              className="bg-white rounded-[18px] border border-[#E6EEF7] shadow-sm py-4 px-8 flex flex-col"
+              className="bg-white rounded-[18px] border border-[#E6EEF7] shadow-sm py-8 px-6 flex flex-col items-center text-center h-full"
               variants={fadeUp}
             >
-              <div className="flex justify-center mb-8">
+              <div className="flex justify-center mb-6">
                 <Image
                   src={step.image}
                   alt={step.alt}
@@ -64,12 +77,19 @@ export default function HowItWorksSection() {
                   className="w-56 h-40 object-contain"
                 />
               </div>
-              <h4 className="text-[#11122C] font-[400] text-xl mb-4">
+              <h4 className={`text-[#0A438C] font-medium text-lg mb-6 flex-grow text-center ${
+                step.title === "Refill now on our website" || step.title === "For pick up or Delivery?" 
+                  ? "mt-2" 
+                  : ""
+              }`}>
                 {step.title}
               </h4>
-              <p className="text-[#11122C] font-[300] leading-relaxed">
+              <button 
+                onClick={() => handleButtonClick(step.description)}
+                className="bg-white border-2 border-[#0A438C] text-[#0A438C] px-6 py-3 rounded-lg font-medium hover:bg-[#0A438C] hover:text-white transition-all duration-200 mt-auto"
+              >
                 {step.description}
-              </p>
+              </button>
             </motion.div>
           ))}
         </div>

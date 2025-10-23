@@ -25,7 +25,8 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
   const [prescriptionError, setPrescriptionError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [isPrescriptionNumberModalOpen, setIsPrescriptionNumberModalOpen] = useState(false);
+  const [isPrescriptionNumberModalOpen, setIsPrescriptionNumberModalOpen] =
+    useState(false);
 
   // Prevent background scroll when modal is open
   useEffect(() => {
@@ -354,7 +355,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
@@ -447,296 +448,310 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
 
           {/* Delivery Type */}
           <div>
-            <h3 className="text-lg font-[400] text-[#0A438C] mb-4">
-              Delivery Type <span className="text-red-500">*</span>
-            </h3>
-            <div className="flex gap-3 items-center overflow-x-auto pb-2 md:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex gap-3 min-w-max">
-                {[
-                  { value: "pickup", label: "Pickup" },
-                  { value: "delivery-am", label: "Delivery (Noon)" },
-                  { value: "delivery-pm", label: "Delivery (Evening)" },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
+            <div>
+              <h3 className="text-lg font-[400] text-[#0A438C] mb-4">
+                Delivery Type <span className="text-red-500">*</span>
+              </h3>
+              <div className="flex gap-3 items-center overflow-x-auto pb-2 md:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex gap-3 min-w-max">
+                  {[
+                    { value: "pickup", label: "Pickup" },
+                    { value: "delivery-am", label: "Delivery (Noon)" },
+                    { value: "delivery-pm", label: "Delivery (Evening)" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          deliveryType: option.value,
+                          estimatedTime:
+                            option.value === "pickup" ? prev.estimatedTime : "",
+                          preferredDate:
+                            option.value === "pickup" ? prev.preferredDate : "",
+                          preferredTime:
+                            option.value === "pickup" ? prev.preferredTime : "",
+                        }))
+                      }
+                      className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+                        formData.deliveryType === option.value
+                          ? "bg-gray-100 text-[#0A438C] border-2 border-[#0A438C] font-semibold"
+                          : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex-1 relative min-w-[200px]">
+                  <input
+                    type="text"
+                    placeholder={
+                      formData.deliveryType === "pickup"
+                        ? "Estimate Pick-up Time"
+                        : "Select Pick-up to set time"
+                    }
+                    value={formData.estimatedTime}
+                    onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
-                        deliveryType: option.value,
-                        estimatedTime:
-                          option.value === "pickup" ? prev.estimatedTime : "",
-                        preferredDate:
-                          option.value === "pickup" ? prev.preferredDate : "",
-                        preferredTime:
-                          option.value === "pickup" ? prev.preferredTime : "",
+                        estimatedTime: e.target.value,
                       }))
                     }
-                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
-                      formData.deliveryType === option.value
-                        ? "bg-gray-100 text-[#0A438C] border-2 border-[#0A438C] font-semibold"
-                        : "bg-white text-gray-500 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex-1 relative min-w-[200px]">
-                <input
-                  type="text"
-                  placeholder={
-                    formData.deliveryType === "pickup"
-                      ? "Estimate Pick-up Time"
-                      : "Select Pick-up to set time"
-                  }
-                  value={formData.estimatedTime}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      estimatedTime: e.target.value,
-                    }))
-                  }
-                  onFocus={() =>
-                    formData.deliveryType === "pickup" &&
-                    setShowDatePicker(true)
-                  }
-                  disabled={formData.deliveryType !== "pickup"}
-                  className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent ${
-                    formData.deliveryType === "pickup"
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed bg-gray-100 text-gray-400"
-                  } ${formData.estimatedTime ? "text-black" : "text-gray-500"}`}
-                  readOnly
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    formData.deliveryType === "pickup" &&
-                    setShowDatePicker(!showDatePicker)
-                  }
-                  disabled={formData.deliveryType !== "pickup"}
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${
-                    formData.deliveryType === "pickup"
-                      ? "text-gray-400 hover:text-gray-600"
-                      : "text-gray-300 cursor-not-allowed"
-                  }`}
-                >
-                  <svg
-                    className={`w-4 h-4 ${
+                    onFocus={() =>
+                      formData.deliveryType === "pickup" &&
+                      setShowDatePicker(true)
+                    }
+                    disabled={formData.deliveryType !== "pickup"}
+                    className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0A438C] focus:border-transparent ${
                       formData.deliveryType === "pickup"
-                        ? "text-gray-400"
-                        : "text-gray-300"
+                        ? "cursor-pointer"
+                        : "cursor-not-allowed bg-gray-100 text-gray-400"
+                    } ${
+                      formData.estimatedTime ? "text-black" : "text-gray-500"
                     }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      formData.deliveryType === "pickup" &&
+                      setShowDatePicker(!showDatePicker)
+                    }
+                    disabled={formData.deliveryType !== "pickup"}
+                    className={`absolute right-3 top-1/2 -translate-y-1/2 ${
+                      formData.deliveryType === "pickup"
+                        ? "text-gray-400 hover:text-gray-600"
+                        : "text-gray-300 cursor-not-allowed"
+                    }`}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </button>
-
-                {/* Calendar Modal */}
-                {showDatePicker && (
-                  <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
-                    onClick={() => setShowDatePicker(false)}
-                  >
-                    <div
-                      className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden"
-                      onClick={(e) => e.stopPropagation()}
+                    <svg
+                      className={`w-4 h-4 ${
+                        formData.deliveryType === "pickup"
+                          ? "text-gray-400"
+                          : "text-gray-300"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                      {/* Header */}
-                      <div className="p-4 text-black">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-semibold">Select Date</h3>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
 
-                          <button
-                            onClick={() => setShowDatePicker(false)}
-                            className="text-white/80 hover:text-white text-xl"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </div>
-                      <hr className="border-gray-200" />
-                      {/* Calendar */}
-                      <div className="p-4">
-                        {/* Month Navigation */}
-                        <div className="flex items-center justify-between mb-4">
-                          <button
-                            onClick={() => navigateMonth("prev")}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 19l-7-7 7-7"
-                              />
-                            </svg>
-                          </button>
-                          <h4 className="text-lg font-semibold text-gray-900">
-                            {currentMonth.toLocaleDateString("en-US", {
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </h4>
-                          <button
-                            onClick={() => navigateMonth("next")}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
-                          </button>
-                        </div>
+                  {/* Calendar Modal */}
+                  {showDatePicker && (
+                    <div
+                      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+                      onClick={() => setShowDatePicker(false)}
+                    >
+                      <div
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* Header */}
+                        <div className="p-4 text-black">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">
+                              Select Date
+                            </h3>
 
-                        {/* Calendar Grid */}
-                        <div className="grid grid-cols-7 gap-1 mb-4">
-                          {[
-                            "Sun",
-                            "Mon",
-                            "Tue",
-                            "Wed",
-                            "Thu",
-                            "Fri",
-                            "Sat",
-                          ].map((day) => (
-                            <div
-                              key={day}
-                              className="p-2 text-center text-sm font-medium text-gray-500"
-                            >
-                              {day}
-                            </div>
-                          ))}
-                          {generateCalendarDays().map((day, index) => (
                             <button
-                              key={index}
-                              onClick={() => {
-                                if (day.isAvailable) {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    preferredDate: day.date
-                                      .toISOString()
-                                      .split("T")[0],
-                                  }));
-                                  setShowDatePicker(false);
-                                  setShowTimePicker(true);
-                                }
-                              }}
-                              disabled={!day.isAvailable}
-                              className={`p-2 text-sm rounded-lg transition-colors ${
-                                day.isAvailable
-                                  ? "hover:bg-blue-100 text-gray-900"
-                                  : "text-gray-300 cursor-not-allowed"
-                              } ${
-                                day.isToday
-                                  ? "bg-blue-100 text-blue-600 font-semibold"
-                                  : ""
-                              } ${!day.isCurrentMonth ? "text-gray-300" : ""}`}
+                              onClick={() => setShowDatePicker(false)}
+                              className="text-white/80 hover:text-white text-xl"
                             >
-                              {day.dayNumber}
+                              ×
                             </button>
-                          ))}
+                          </div>
                         </div>
+                        <hr className="border-gray-200" />
+                        {/* Calendar */}
+                        <div className="p-4">
+                          {/* Month Navigation */}
+                          <div className="flex items-center justify-between mb-4">
+                            <button
+                              onClick={() => navigateMonth("prev")}
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 19l-7-7 7-7"
+                                />
+                              </svg>
+                            </button>
+                            <h4 className="text-lg font-semibold text-gray-900">
+                              {currentMonth.toLocaleDateString("en-US", {
+                                month: "long",
+                                year: "numeric",
+                              })}
+                            </h4>
+                            <button
+                              onClick={() => navigateMonth("next")}
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
 
-                        {/* Business Hours Info */}
-                        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                          <p className="font-medium mb-1">Business Hours:</p>
-                          <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
-                          <p>Saturday: 9:30 AM - 2:00 PM</p>
-                          <p>Sunday: Closed</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Time Picker Modal */}
-                {showTimePicker && (
-                  <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
-                    onClick={() => setShowTimePicker(false)}
-                  >
-                    <div
-                      className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {/* Header */}
-                      <div className="p-4 text-black">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-semibold">Select Time</h3>
-                          <button
-                            onClick={() => setShowTimePicker(false)}
-                            className="text-white/80 hover:text-white text-xl"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </div>
-                      <hr className="border-gray-200" />
-                      {/* Time Slots */}
-                      <div className="p-4 max-h-96 overflow-y-auto">
-                        <div className="space-y-2">
-                          {getAvailableTimes(formData.preferredDate).map(
-                            (slot, index) => (
+                          {/* Calendar Grid */}
+                          <div className="grid grid-cols-7 gap-1 mb-4">
+                            {[
+                              "Sun",
+                              "Mon",
+                              "Tue",
+                              "Wed",
+                              "Thu",
+                              "Fri",
+                              "Sat",
+                            ].map((day) => (
+                              <div
+                                key={day}
+                                className="p-2 text-center text-sm font-medium text-gray-500"
+                              >
+                                {day}
+                              </div>
+                            ))}
+                            {generateCalendarDays().map((day, index) => (
                               <button
                                 key={index}
                                 onClick={() => {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    preferredTime: slot.value,
-                                    estimatedTime:
-                                      `${prev.preferredDate} ${slot.value}`.trim(),
-                                  }));
-                                  setShowTimePicker(false);
+                                  if (day.isAvailable) {
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      preferredDate: day.date
+                                        .toISOString()
+                                        .split("T")[0],
+                                    }));
+                                    setShowDatePicker(false);
+                                    setShowTimePicker(true);
+                                  }
                                 }}
-                                className="w-full p-3 text-left hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                                disabled={!day.isAvailable}
+                                className={`p-2 text-sm rounded-lg transition-colors ${
+                                  day.isAvailable
+                                    ? "hover:bg-blue-100 text-gray-900"
+                                    : "text-gray-300 cursor-not-allowed"
+                                } ${
+                                  day.isToday
+                                    ? "bg-blue-100 text-blue-600 font-semibold"
+                                    : ""
+                                } ${
+                                  !day.isCurrentMonth ? "text-gray-300" : ""
+                                }`}
                               >
-                                <span className="text-gray-900 font-medium">
-                                  {slot.label}
-                                </span>
+                                {day.dayNumber}
                               </button>
-                            )
-                          )}
-                        </div>
+                            ))}
+                          </div>
 
-                        {/* Business Hours Info */}
-                        <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mt-4">
-                          <p className="font-medium mb-1">Business Hours:</p>
-                          <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
-                          <p>Saturday: 9:30 AM - 2:00 PM</p>
-                          <p>Sunday: Closed</p>
+                          {/* Business Hours Info */}
+                          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                            <p className="font-medium mb-1">Business Hours:</p>
+                            <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
+                            <p>Saturday: 9:30 AM - 2:00 PM</p>
+                            <p>Sunday: Closed</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* Time Picker Modal */}
+                  {showTimePicker && (
+                    <div
+                      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+                      onClick={() => setShowTimePicker(false)}
+                    >
+                      <div
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* Header */}
+                        <div className="p-4 text-black">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">
+                              Select Time
+                            </h3>
+                            <button
+                              onClick={() => setShowTimePicker(false)}
+                              className="text-white/80 hover:text-white text-xl"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                        <hr className="border-gray-200" />
+                        {/* Time Slots */}
+                        <div className="p-4 max-h-96 overflow-y-auto">
+                          <div className="space-y-2">
+                            {getAvailableTimes(formData.preferredDate).map(
+                              (slot, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => {
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      preferredTime: slot.value,
+                                      estimatedTime:
+                                        `${prev.preferredDate} ${slot.value}`.trim(),
+                                    }));
+                                    setShowTimePicker(false);
+                                  }}
+                                  className="w-full p-3 text-left hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                                >
+                                  <span className="text-gray-900 font-medium">
+                                    {slot.label}
+                                  </span>
+                                </button>
+                              )
+                            )}
+                          </div>
+
+                          {/* Business Hours Info */}
+                          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mt-4">
+                            <p className="font-medium mb-1">Business Hours:</p>
+                            <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
+                            <p>Saturday: 9:30 AM - 2:00 PM</p>
+                            <p>Sunday: Closed</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+            <p className="text-sm mt-3 text-gray-500">
+              We request a minimum of 4 hours to fill an order, we are doing our
+              best to serve you!
+            </p>
           </div>
 
           {/* Other */}
@@ -770,7 +785,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
               {isSubmitting ? "Sending Request..." : "Send Request"}
             </button>
             <p className="text-center mt-4 text-sm">
-              <button 
+              <button
                 type="button"
                 onClick={() => setIsPrescriptionNumberModalOpen(true)}
                 className="text-[#0A438C] text-sm hover:underline"
@@ -781,7 +796,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           </div>
         </form>
       </div>
-      
+
       {/* Prescription Number Modal */}
       <PrescriptionNumberModal
         isOpen={isPrescriptionNumberModalOpen}

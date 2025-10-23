@@ -8,11 +8,13 @@ interface StatementSectionProps {
   customText?: string;
 }
 
-export default function StatementSection({ customText }: StatementSectionProps = {}) {
+export default function StatementSection({
+  customText,
+}: StatementSectionProps = {}) {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"]
+    offset: ["start end", "end start"],
   });
 
   // Create progressive text highlighting
@@ -23,7 +25,7 @@ export default function StatementSection({ customText }: StatementSectionProps =
   const text5Progress = useTransform(scrollYProgress, [0.8, 1], [0, 1]);
 
   return (
-    <section id="about" className="relative z-10 w-full bg-white -mt-6 md:-mt-6 lg:-mt-6 rounded-t-[20px] shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+    <section id="about" className="bg-white ">
       <motion.div
         ref={ref}
         className="max-w-6xl mx-auto px-8 py-28 text-center"
@@ -39,12 +41,18 @@ export default function StatementSection({ customText }: StatementSectionProps =
         <motion.h2 className="text-2xl md:text-3xl lg:text-4xl font-medium leading-snug mb-6">
           {customText ? (
             <>
-              {customText.split(' ').map((word, index) => {
-                const progress = index === 0 ? text1Progress : 
-                               index < 8 ? text2Progress : 
-                               index < 16 ? text3Progress : 
-                               index < 24 ? text4Progress : text5Progress;
-                
+              {customText.split(" ").map((word, index) => {
+                const progress =
+                  index === 0
+                    ? text1Progress
+                    : index < 8
+                    ? text2Progress
+                    : index < 16
+                    ? text3Progress
+                    : index < 24
+                    ? text4Progress
+                    : text5Progress;
+
                 return (
                   <motion.span
                     key={index}
@@ -53,10 +61,11 @@ export default function StatementSection({ customText }: StatementSectionProps =
                         progress,
                         [0, 1],
                         ["#6B7280", "#0A438C"]
-                      )
+                      ),
                     }}
                   >
-                    {word}{index < customText.split(' ').length - 1 ? ' ' : ''}
+                    {word}
+                    {index < customText.split(" ").length - 1 ? " " : ""}
                   </motion.span>
                 );
               })}
@@ -69,10 +78,11 @@ export default function StatementSection({ customText }: StatementSectionProps =
                     text1Progress,
                     [0, 1],
                     ["#6B7280", "#0A438C"]
-                  )
+                  ),
                 }}
               >
-                We believe healthcare should feel personal, not complicated. That's
+                We believe healthcare should feel personal, not complicated.
+                That's
               </motion.span>
               <motion.span
                 style={{
@@ -80,10 +90,11 @@ export default function StatementSection({ customText }: StatementSectionProps =
                     text2Progress,
                     [0, 1],
                     ["#6B7280", "#0A438C"]
-                  )
+                  ),
                 }}
               >
-                {" "}why our team is here to guide, support, and care for you — every
+                {" "}
+                why our team is here to guide, support, and care for you — every
               </motion.span>
               <motion.span
                 style={{
@@ -91,10 +102,12 @@ export default function StatementSection({ customText }: StatementSectionProps =
                     text3Progress,
                     [0, 1],
                     ["#6B7280", "#0A438C"]
-                  )
+                  ),
                 }}
               >
-                {" "}step of the way. From prescriptions to everyday wellness, we make
+                {" "}
+                step of the way. From prescriptions to everyday wellness, we
+                make
               </motion.span>
               <motion.span
                 style={{
@@ -102,10 +115,11 @@ export default function StatementSection({ customText }: StatementSectionProps =
                     text4Progress,
                     [0, 1],
                     ["#6B7280", "#0A438C"]
-                  )
+                  ),
                 }}
               >
-                {" "}sure you always have what you need to stay healthy.
+                {" "}
+                sure you always have what you need to stay healthy.
               </motion.span>
             </>
           )}

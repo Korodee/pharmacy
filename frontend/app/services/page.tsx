@@ -19,7 +19,8 @@ type Service = {
   alt: string;
 };
 
-const allServices: Service[] = [
+// Main services with detailed descriptions and images
+const mainServices: Service[] = [
   {
     id: "smoking-cessation",
     title: "SMOKING CESSATION",
@@ -62,7 +63,8 @@ const allServices: Service[] = [
   },
   {
     id: "emergency-contraceptive",
-    title: "EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR CONTRACEPTION",
+    title:
+      "EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR CONTRACEPTION",
     description:
       "You need the morning-after pill and you can't get an appointment with your doctor in a short delay? Your pharmacist can prescribe you the pill as well as a regular contraceptive method afterwards. It is 100% confidential and the consultation will be personalized to your needs.",
     image: "/uti.png",
@@ -124,69 +126,29 @@ const allServices: Service[] = [
     image: "/throat-infection.jpg",
     alt: "Strep A test",
   },
-  {
-    id: "mild-acne",
-    title: "MILD ACNE",
-    description: "Professional treatment options for mild acne conditions.",
-    image: "/acne.jpg",
-    alt: "Mild acne treatment",
-  },
-  {
-    id: "seasonal-allergy",
-    title: "SEASONAL ALLERGY",
-    description: "Relief from seasonal allergy symptoms with professional guidance.",
-    image: "/seasonal-allergy.jpg",
-    alt: "Seasonal allergy treatment",
-  },
-  {
-    id: "eyes-allergy",
-    title: "EYES ALLERGY",
-    description: "Specialized treatment for eye allergy symptoms.",
-    image: "/eyes-allergy.jpg",
-    alt: "Eyes allergy treatment",
-  },
-  {
-    id: "pink-eye-infection",
-    title: "PINK EYE (INFECTION)",
-    description: "Professional assessment and treatment for pink eye infections.",
-    image: "/pink-eye.jpg",
-    alt: "Pink eye infection treatment",
-  },
-  {
-    id: "yeast-infection",
-    title: "YEAST INFECTION",
-    description: "Confidential and effective treatment for yeast infections.",
-    image: "/yeast.jpg",
-    alt: "Yeast infection treatment",
-  },
-  {
-    id: "athletes-foot",
-    title: "ATHLETE'S FOOT (SKIN FUNGUS)",
-    description: "Professional treatment for athlete's foot and skin fungal conditions.",
-    image: "/athletes-foot.jpg",
-    alt: "Athlete's foot treatment",
-  },
+];
+
+// Minor conditions grouped together
+const minorConditions = [
+  { id: "mild-acne", title: "Mild Acne" },
+  { id: "seasonal-allergy", title: "Seasonal Allergy" },
+  { id: "eyes-allergy", title: "Eyes Allergy" },
+  { id: "pink-eye-infection", title: "Pink Eye (Infection)" },
+  { id: "yeast-infection", title: "Yeast Infection" },
+  { id: "athletes-foot", title: "Athlete's Foot (Skin Fungus)" },
   {
     id: "multivitamins-kids",
-    title: "MULTIVITAMINS/VITAMIN D FOR YOUR KIDS (6 YEARS OLD AND UNDER)",
-    description: "Essential vitamins and supplements for children 6 years and under.",
-    image: "/kids-multivitamins.jpg",
-    alt: "Multivitamins for kids",
+    title: "Multivitamins/Vitamin D for Your Kids (6 Years Old and Under)",
   },
-  {
-    id: "constipation",
-    title: "CONSTIPATION",
-    description: "Professional guidance and treatment for constipation relief.",
-    image: "/constipation.jpg",
-    alt: "Constipation treatment",
-  },
+  { id: "constipation", title: "Constipation" },
 ];
 
 export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [isConsultationModalOpen, setIsConsultationModalOpen] = useState<boolean>(false);
+  const [isConsultationModalOpen, setIsConsultationModalOpen] =
+    useState<boolean>(false);
   const [preSelectedService, setPreSelectedService] = useState<string>("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -269,9 +231,6 @@ export default function ServicesPage() {
         }}
       />
 
-      {/* Statement Section - Same component, custom text */}
-      <StatementSection customText="We believe good health starts with the right support. Our pharmacists provide personalized guidance, answer your questions, and help you make the most of every treatment." />
-
       {/* Services Section */}
       <section id="services" className="w-full bg-white">
         <motion.div
@@ -285,12 +244,12 @@ export default function ServicesPage() {
             variants={fadeUp}
             className="text-center text-3xl md:text-4xl font-semibold text-[#0A438C] mb-14"
           >
-            Comprehensive Care For Your Health
+            Discover our healthcare services
           </motion.h3>
 
-          {/* Services with Alternating Layout */}
+          {/* Main Services with Alternating Layout */}
           <div className="space-y-16">
-            {allServices.map((service, index) => (
+            {mainServices.map((service, index) => (
               <motion.div
                 key={service.id}
                 variants={fadeUp}
@@ -311,12 +270,20 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Service Content */}
-                <div className={`w-full md:w-1/2 space-y-6 ${index % 2 === 1 ? 'md:pl-6' : 'md:pr-6 md:text-right'}`}>
+                <div
+                  className={`w-full md:w-1/2 space-y-6 ${
+                    index % 2 === 1 ? "md:pl-6" : "md:pr-6 md:text-right"
+                  }`}
+                >
                   <div>
                     <h4 className="text-xl md:text-2xl font-medium text-[#0A438C] mb-4">
                       {service.title}
                     </h4>
-                    <p className={`text-gray-600 text-md leading-relaxed ${index % 2 === 0 ? 'md:w-[90%] md:ml-auto' : 'md:w-[80%]'}`}>
+                    <p
+                      className={`text-gray-600 text-md leading-relaxed ${
+                        index % 2 === 0 ? "md:w-[90%] md:ml-auto" : "md:w-[80%]"
+                      }`}
+                    >
                       {service.description}
                     </p>
                   </div>
@@ -335,18 +302,71 @@ export default function ServicesPage() {
         </motion.div>
       </section>
 
+      {/* Minor Conditions Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-6 md:px-10">
+          <motion.div
+            variants={containerStagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center"
+          >
+            <motion.h3
+              variants={fadeUp}
+              className="text-3xl md:text-4xl font-semibold text-[#0A438C] mb-4"
+            >
+              Minor Conditions
+            </motion.h3>
+            <motion.p
+              variants={fadeUp}
+              className="text-gray-600 text-lg mb-1 max-w-3xl mx-auto"
+            >
+              We also provide professional treatment and guidance for these
+              common minor conditions:
+            </motion.p>
+            <motion.p
+              variants={fadeUp}
+              className="text-[#0A438C] text-md mb-12 max-w-3xl mx-auto font-medium"
+            >
+              Click on any condition below to request a consultation
+            </motion.p>
+
+            {/* Minor Conditions Grid */}
+            <motion.div
+              variants={containerStagger}
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto"
+            >
+              {minorConditions.map((condition, index) => (
+                <motion.button
+                  key={index}
+                  variants={fadeUp}
+                  onClick={() => handleRequestService(condition.id)}
+                  className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:bg-gray-50 text-center w-full flex items-center justify-center"
+                >
+                  <h4 className="text-[#0A438C] font-semibold text-lg">
+                    {condition.title}
+                  </h4>
+                </motion.button>
+              ))}
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <FAQSection />
 
       {/* CTA Section */}
-      <CTASection />
-
+      {/* <CTASection /> */}
+      {/* Statement Section - Same component, custom text */}
+      <StatementSection customText="We believe good health starts with the right support. Our pharmacists provide personalized guidance, answer your questions, and help you make the most of every treatment." />
       {/* Footer */}
       <Footer />
 
       {/* Consultation Modal */}
-      <ConsultationModal 
-        isOpen={isConsultationModalOpen} 
+      <ConsultationModal
+        isOpen={isConsultationModalOpen}
         onClose={() => setIsConsultationModalOpen(false)}
         preSelectedService={preSelectedService}
       />
