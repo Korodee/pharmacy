@@ -21,13 +21,13 @@ const steps: Step[] = [
   {
     title: "To access your file, request a key from our team",
     description: "Download the App",
-    image: "/notify.png",
+    image: "/download-app.png",
     alt: "App download",
   },
   {
     title: "For pick up or Delivery?",
     description: "Call to order now",
-    image: "/deliver.png",
+    image: "/call-to-order.png",
     alt: "Phone order",
   },
 ];
