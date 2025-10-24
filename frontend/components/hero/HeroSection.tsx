@@ -16,14 +16,17 @@ interface HeroSectionProps {
     description: string;
     buttons: Array<{
       text: string;
-      variant: 'primary' | 'secondary';
+      variant: "primary" | "secondary";
       href: string;
     }>;
   };
   customBackgroundImage?: string;
 }
 
-export default function HeroSection({ customContent, customBackgroundImage }: HeroSectionProps = {}) {
+export default function HeroSection({
+  customContent,
+  customBackgroundImage,
+}: HeroSectionProps = {}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isConsultationModalOpen, setIsConsultationModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -41,7 +44,9 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
     <section
       id="home"
       className="relative h-[100svh] md:h-screen bg-cover bg-center bg-no-repeat overflow-visible"
-      style={{ backgroundImage: `url(${customBackgroundImage || "/hero-bg.png"})` }}
+      style={{
+        backgroundImage: `url(${customBackgroundImage || "/hero-bg.png"})`,
+      }}
     >
       {/* Background Image with proper loading */}
       <div className="absolute inset-0">
@@ -49,10 +54,6 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
           src={customBackgroundImage || "/hero-bg.png"}
           alt=""
           className="w-full h-full object-cover"
-          style={{ 
-            filter: 'blur(1px)',
-            transform: 'scale(1.02)'
-          }}
           loading="eager"
         />
       </div>
@@ -63,11 +64,14 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
       <header className="relative z-20">
         {/* Fixed full-width nav */}
         <div className="fixed top-0 left-0 right-0 z-50">
-          <Navigation items={heroData.navigation} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+          <Navigation
+            items={heroData.navigation}
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+          />
         </div>
 
         <div className="max-w-7xl mx-auto flex items-center justify-between relative">
-
           {/* Mobile Logo - Absolute position */}
           <div className="md:hidden absolute top-8 left-6 z-50">
             <Logo />
@@ -143,11 +147,11 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
               initial={{ x: "100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
-              transition={{ 
-                type: "spring", 
-                damping: 25, 
+              transition={{
+                type: "spring",
+                damping: 25,
                 stiffness: 200,
-                duration: 0.4 
+                duration: 0.4,
               }}
               className="absolute top-0 right-0 w-72 h-full bg-white shadow-2xl"
             >
@@ -192,7 +196,10 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
                       // Handle navigation - if on services page and not services link, go to main page
                       const handleClick = (e: React.MouseEvent) => {
                         const currentPath = window.location.pathname;
-                        if (currentPath === '/services' && item.href !== '#services') {
+                        if (
+                          currentPath === "/services" &&
+                          item.href !== "#services"
+                        ) {
                           e.preventDefault();
                           window.location.href = `/${item.href}`;
                         }
@@ -204,9 +211,9 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
                           key={index}
                           initial={{ x: 20, opacity: 0 }}
                           animate={{ x: 0, opacity: 1 }}
-                          transition={{ 
-                            delay: 0.3 + (index * 0.1), 
-                            duration: 0.3 
+                          transition={{
+                            delay: 0.3 + index * 0.1,
+                            duration: 0.3,
                           }}
                           href={item.href}
                           onClick={handleClick}
@@ -253,7 +260,7 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
                     >
                       Request A Refill
                     </motion.button>
-                    
+
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -266,9 +273,10 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
                       Book a Consultation
                     </motion.button>
                   </div>
-                  
+
                   <p className="text-xs text-gray-500 text-center mt-3">
-                    Quick and easy prescription refills & professional consultations
+                    Quick and easy prescription refills & professional
+                    consultations
                   </p>
                 </motion.div>
               </div>
@@ -278,7 +286,10 @@ export default function HeroSection({ customContent, customBackgroundImage }: He
       </AnimatePresence>
 
       <RefillModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <ConsultationModal isOpen={isConsultationModalOpen} onClose={() => setIsConsultationModalOpen(false)} />
+      <ConsultationModal
+        isOpen={isConsultationModalOpen}
+        onClose={() => setIsConsultationModalOpen(false)}
+      />
     </section>
   );
 }
