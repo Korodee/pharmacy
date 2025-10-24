@@ -30,7 +30,7 @@ const services: Service[] = [
     title: "Traveller's Diarrhea",
     description:
       "Prevention and treatment for traveller's diarrhea with professional guidance and medication.",
-    image: "/Traveller's-Diarrhea-new.png",
+    image: "/Traveller’s-Diarrhea-new.png",
     alt: "Traveller's diarrhea treatment",
   },
   {

@@ -408,52 +408,52 @@ export default function ConsultationModal({
                 <option value="" className="text-gray-500">
                   Choose a service
                 </option>
-                <option value="smoking-cessation">SMOKING CESSATION</option>
-                <option value="lice">LICE</option>
+                <option value="smoking-cessation">Smoking Cessation</option>
+                <option value="lice">Lice</option>
                 <option value="travellers-diarrhea">
-                  TRAVELLER'S DIARRHEA
+                  Traveller's Diarrhea
                 </option>
                 <option value="malaria-mountain-sickness">
-                  MALARIA AND MOUNTAIN SICKNESS
+                  Malaria and Mountain Sickness
                 </option>
                 <option value="pregnancy-nausea-vitamins">
-                  NAUSEAS AND VITAMINS DURING PREGNANCY
+                  Nauseas and Vitamins During Pregnancy
                 </option>
                 <option value="emergency-contraceptive">
-                  EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR
-                  CONTRACEPTION
+                  Emergency Contraceptive Pill and Prescription of a Regular
+                  Contraception
                 </option>
                 <option value="shingles">
-                  Shingles (under certain conditions)
+                  Shingles (Under Certain Conditions)
                 </option>
                 <option value="sinus-infection">
-                  Sinus infection (under certain conditions)
+                  Sinus Infection (Under Certain Conditions)
                 </option>
                 <option value="chronic-health-conditions">
-                  CONSULTATION AND FOLLOW-UP OF CHRONIC HEALTH CONDITIONS
+                  Consultation and Follow-up of Chronic Health Conditions
                 </option>
                 <option value="medication-adjustment">
-                  ADJUSTING YOUR MEDICATION TO YOUR NEEDS
+                  Adjusting Your Medication to Your Needs
                 </option>
                 <option value="tick-bite">Tick Bite</option>
                 <option value="heartburn-indigestion">
                   Heartburn and Indigestion
                 </option>
                 <option value="strep-a-test">
-                  Throat infection: STREP A TEST
+                  Throat Infection: Strep A Test
                 </option>
-                <option value="mild-acne">MILD ACNE</option>
-                <option value="seasonal-allergy">SEASONAL ALLERGY</option>
-                <option value="eyes-allergy">EYES ALLERGY</option>
-                <option value="pink-eye-infection">PINK EYE (INFECTION)</option>
-                <option value="yeast-infection">YEAST INFECTION</option>
+                <option value="mild-acne">Mild Acne</option>
+                <option value="seasonal-allergy">Seasonal Allergy</option>
+                <option value="eyes-allergy">Eyes Allergy</option>
+                <option value="pink-eye-infection">Pink Eye (Infection)</option>
+                <option value="yeast-infection">Yeast Infection</option>
                 <option value="athletes-foot">
-                  ATHLETE'S FOOT (SKIN FUNGUS)
+                  Athlete's Foot (Skin Fungus)
                 </option>
                 <option value="multivitamins-kids">
-                  MULTIVITAMINS/VITAMIN D FOR YOUR KIDS (6 YEARS OLD AND UNDER)
+                  Multivitamins/Vitamin D for Your Kids (6 Years Old and Under)
                 </option>
-                <option value="constipation">CONSTIPATION</option>
+                <option value="constipation">Constipation</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg
