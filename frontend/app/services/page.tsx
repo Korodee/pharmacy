@@ -23,72 +23,72 @@ type Service = {
 const mainServices: Service[] = [
   {
     id: "smoking-cessation",
-    title: "SMOKING CESSATION",
+    title: "Smoking Cessation",
     description:
       "Are you thinking about quitting smoking? Your pharmacist can prescribe you patches/gums/lozenges/inhalers for that matter, and it is 100% free.",
-    image: "/smoke.jpg",
+    image: "/smoking-cessation-new.png",
     alt: "Smoking cessation",
   },
   {
     id: "lice",
-    title: "LICE",
+    title: "Lice",
     description:
       "Did you know that your pharmacist can help you getting rid of lice by prescribing an effective treatment? The consultation is confidential and products are covered by Health Canada with a pharmacist prescription.",
-    image: "/lice.jpg",
+    image: "/Hair-lice-new.png",
     alt: "Lice treatment",
   },
   {
     id: "travellers-diarrhea",
-    title: "TRAVELLER'S DIARRHEA",
+    title: "Traveller's Diarrhea",
     description:
       "If you are going away to the Caribbean or other destinations at risk, we can prescribe antibiotics in case you have traveler's diarrhea so that you keep enjoying your vacation to the fullest! Some fees may apply.",
-    image: "/traveler.png",
+    image: "/Traveller’s-Diarrhea-new.png",
     alt: "Traveller's diarrhea",
   },
   {
     id: "malaria-mountain-sickness",
-    title: "MALARIA AND MOUNTAIN SICKNESS",
+    title: "Malaria and Mountain Sickness",
     description:
       "If you are planning to go to the South or climbing up a mountain, your pharmacist can prescribe you a medication to prevent malaria (disease transmitted by mosquitoes) and also to prevent mountain sickness.",
-    image: "/malaria.jpg",
+    image: "/Mountain-sickness-and-Malaria-new.png",
     alt: "Malaria and mountain sickness",
   },
   {
     id: "pregnancy-nausea-vitamins",
-    title: "NAUSEAS AND VITAMINS DURING PREGNANCY",
+    title: "Nauseas and Vitamins During Pregnancy",
     description:
       "You are expecting but your first trimester is a bit rough on the digestive system? Your pharmacist can prescribe you medication to help relieve nausea and vomiting due to pregnancy. We can also prescribe you some vitamin supplements to ensure a nice and healthy pregnancy, both for the mother and the baby.",
-    image: "/pregnancy-vomit.jpg",
+    image: "/pregnant-woman-new.png",
     alt: "Pregnancy nausea and vitamins",
   },
   {
     id: "emergency-contraceptive",
     title:
-      "EMERGENCY CONTRACEPTIVE PILL AND PRESCRIPTION OF A REGULAR CONTRACEPTION",
+      "Emergency Contraceptive Pill and Prescription of a Regular Contraception",
     description:
       "You need the morning-after pill and you can't get an appointment with your doctor in a short delay? Your pharmacist can prescribe you the pill as well as a regular contraceptive method afterwards. It is 100% confidential and the consultation will be personalized to your needs.",
-    image: "/uti.png",
+    image: "/Emergency-contraceptive-pill-and-regular contraception-new.png",
     alt: "Emergency contraceptive",
   },
   {
     id: "shingles",
-    title: "Shingles (under certain conditions)",
+    title: "Shingles (Under Certain Conditions)",
     description:
       "Are you experiencing a burning, tingling, or itchy sensation with small yellowish blisters on your skin, often on the chest area? It could be shingles. Your pharmacist can assess your condition and prescribe antiviral treatment — ideally within 72 hours of the onset of symptoms. Act quickly to relieve your symptoms and reduce the risk of complications.",
-    image: "/herpes.jpg",
+    image: "/Shingles-new.png",
     alt: "Shingles treatment",
   },
   {
     id: "sinus-infection",
-    title: "Sinus infection (under certain conditions)",
+    title: "Sinus Infection (Under Certain Conditions)",
     description:
       "Are you experiencing facial pain or pressure in the forehead area, along with nasal congestion or discharge lasting more than 7 days? You may have a sinus infection. Your pharmacist can assess your symptoms and, if appropriate, prescribe an antibiotic treatment to help you recover faster and feel better.",
-    image: "/sinus.jpg",
+    image: "/sinus-infection-new.png",
     alt: "Sinus infection",
   },
   {
     id: "chronic-health-conditions",
-    title: "CONSULTATION AND FOLLOW-UP OF CHRONIC HEALTH CONDITIONS",
+    title: "Consultation and Follow-up of Chronic Health Conditions",
     description:
       "Are you worried about your sugar levels or is your blood pressure is too high? Do you think you have a side effect to a medication? You can meet with the pharmacist to discuss about your symptoms and treatments. We will give you professional advice and we will help you optimize your actual treatments. You can make an appointment at the pharmacy counter.",
     image: "/diabetes.jpg",
@@ -96,10 +96,10 @@ const mainServices: Service[] = [
   },
   {
     id: "medication-adjustment",
-    title: "ADJUSTING YOUR MEDICATION TO YOUR NEEDS",
+    title: "Adjusting Your Medication to Your Needs",
     description:
       "At the pharmacy, we offer medication adjustment according to efficacy, tolerance, and compliance. You do not need to take an appointment with your doctor while we are taking care of it at the pharmacy for you. For that matter, we will speak to your physician to get his/her approval beforehand.",
-    image: "/side-effect.jpg",
+    image: "/ADJUSTING-YOUR-MEDICATION-TO-YOUR-NEEDS-new.png",
     alt: "Medication adjustment",
   },
   {
@@ -107,7 +107,7 @@ const mainServices: Service[] = [
     title: "Tick Bite",
     description:
       "If you've been bitten by a tick, your pharmacist can assess your situation and, when appropriate, prescribe an antibiotic treatment to help prevent Lyme disease. The assessment is quick and based on where and when the bite occurred. Early action is key!",
-    image: "/tick-bite.jpg",
+    image: "/Tick-bite-new.png",
     alt: "Tick bite treatment",
   },
   {
@@ -115,16 +115,32 @@ const mainServices: Service[] = [
     title: "Heartburn and Indigestion",
     description:
       "Your pharmacist can assess your symptoms and, when appropriate, recommend or prescribe medication to relieve heartburn (acid reflux) and dyspepsia (indigestion). They can help you find the right treatment, offer lifestyle advice, and ensure your medication is safe with your other prescriptions.",
-    image: "/heart-burn.jpg",
+    image: "/Heartburn-new.png",
     alt: "Heartburn and indigestion",
   },
   {
     id: "strep-a-test",
-    title: "Throat infection: STREP A TEST",
+    title: "Throat Infection: Strep A Test",
     description:
       "If you have symptoms of a sudden and severe sore throat, pain when swallowing, fever, and white or yellow spots on the tonsils or back of the throat you can come get tested at the pharmacy. This service has a charge, and if the test is positive, the pharmacist will be able to prescribe an antibiotic and pain killers.",
     image: "/throat-infection.jpg",
     alt: "Strep A test",
+  },
+  {
+    id: "uti-treatment",
+    title: "Testing & Treatment for UTI",
+    description:
+      "If you're experiencing symptoms like frequent urination, burning sensation, or lower abdominal pain, you may have a urinary tract infection. Your pharmacist can assess your symptoms and, when appropriate, prescribe antibiotic treatment to help you recover quickly and comfortably.",
+    image: "/testing-&-treatment-for-UTI-new.png",
+    alt: "UTI testing and treatment",
+  },
+  {
+    id: "allergies-treatment",
+    title: "Allergies Treatment",
+    description:
+      "Whether you're dealing with seasonal allergies, food allergies, or environmental allergens, our pharmacists can help assess your symptoms and recommend appropriate treatments. We can prescribe antihistamines, nasal sprays, and other medications to help you manage your allergies effectively and improve your quality of life.",
+    image: "/allergies.png",
+    alt: "Allergies treatment",
   },
 ];
 

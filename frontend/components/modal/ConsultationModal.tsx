@@ -143,7 +143,7 @@ export default function ConsultationModal({
 
     let currentTime = new Date(startTime);
 
-    // For Saturday, if it's exactly 9:30 AM, start there; otherwise round up to next hour
+    // For Saturday, if it's exactly 9:30 AM, start there; otherwise round up to next 15-minute interval
     if (
       isSaturday &&
       currentTime.getHours() === 9 &&
@@ -151,13 +151,20 @@ export default function ConsultationModal({
     ) {
       // Start at 9:30 AM on Saturday
     } else if (currentTime.getMinutes() > 0) {
-      // Round up to the next hour for other times
-      currentTime.setHours(currentTime.getHours() + 1);
-      currentTime.setMinutes(0);
+      // Round up to the next 15-minute interval
+      const minutes = currentTime.getMinutes();
+      const nextInterval = Math.ceil(minutes / 15) * 15;
+      if (nextInterval >= 60) {
+        currentTime.setHours(currentTime.getHours() + 1);
+        currentTime.setMinutes(0);
+      } else {
+        currentTime.setMinutes(nextInterval);
+      }
     }
 
-    // Generate slots until business end
-    while (currentTime.getHours() < businessEnd) {
+    // Generate slots until business end (every 15 minutes)
+    while (currentTime.getHours() < businessEnd || 
+           (currentTime.getHours() === businessEnd && currentTime.getMinutes() === 0)) {
       const timeString = currentTime.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
@@ -170,7 +177,8 @@ export default function ConsultationModal({
         date: currentTime.toISOString().split("T")[0],
       });
 
-      currentTime.setHours(currentTime.getHours() + 1);
+      // Add 15 minutes
+      currentTime.setMinutes(currentTime.getMinutes() + 15);
     }
 
     return slots;

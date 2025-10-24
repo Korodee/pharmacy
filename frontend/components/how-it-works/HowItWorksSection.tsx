@@ -27,7 +27,7 @@ const steps: Step[] = [
   {
     title: "For pick up or Delivery?",
     description: "Call to order now",
-    image: "/call-to-order.png",
+    image: "/phone-icon-new.png",
     alt: "Phone order",
   },
 ];
@@ -41,7 +41,21 @@ export default function HowItWorksSection({ onRefillClick }: HowItWorksSectionPr
     if (description === "Request A Refill") {
       onRefillClick?.();
     } else if (description === "Download the App") {
-      window.open("https://apps.apple.com/ca/app/familiprix/id932510029", "_blank");
+      // Detect device type and redirect accordingly
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(userAgent);
+      const isAndroid = /android/.test(userAgent);
+      
+      if (isIOS) {
+        // iPhone/iPad users go to App Store
+        window.open("https://apps.apple.com/ca/app/familiprix/id932510029", "_blank");
+      } else if (isAndroid) {
+        // Android users go to Google Play Store
+        window.open("https://play.google.com/store/search?q=familiprix&c=apps&hl=en", "_blank");
+      } else {
+        // Default to App Store for other devices
+        window.open("https://apps.apple.com/ca/app/familiprix/id932510029", "_blank");
+      }
     } else if (description === "Call to order now") {
       window.location.href = "tel:4506385760";
     }

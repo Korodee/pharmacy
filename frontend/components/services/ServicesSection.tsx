@@ -13,46 +13,39 @@ type Service = {
 
 const services: Service[] = [
   {
+    title: "UTI Testing & Treatment",
+    description:
+      "Quick, confidential testing and effective treatment options to relieve discomfort and prevent recurrence.",
+    image: "/testing-&-treatment-for-UTI-new.png",
+    alt: "UTI treatment",
+  },
+  {
+    title: "Strep Test",
+    description:
+      "Quick and accurate strep throat testing with immediate results and treatment if needed.",
+    image: "/throat-infection.jpg",
+    alt: "Strep test",
+  },
+  {
+    title: "Traveller's Diarrhea",
+    description:
+      "Prevention and treatment for traveller's diarrhea with professional guidance and medication.",
+    image: "/Traveller's-Diarrhea-new.png",
+    alt: "Traveller's diarrhea treatment",
+  },
+  {
     title: "Smoking Cessation",
     description:
       "Free patches, gums, lozenges, and inhalers to help you quit smoking with professional support.",
-    image: "/smoke.jpg",
+    image: "/smoking-cessation-new.png",
     alt: "Smoking cessation",
   },
   {
     title: "Sinus Infection",
     description:
       "Professional assessment and antibiotic treatment for sinus infections lasting more than 7 days.",
-    image: "/sinus.jpg",
+    image: "/sinus-infection-new.png",
     alt: "Sinus infection",
-  },
-  {
-    title: "Heartburn & Indigestion",
-    description:
-      "Expert assessment and treatment for heartburn, acid reflux, and digestive discomfort.",
-    image: "/heart-burn.jpg",
-    alt: "Heartburn and indigestion",
-  },
-  {
-    title: "Seasonal Allergies",
-    description:
-      "Professional relief from seasonal allergy symptoms with personalized treatment plans.",
-    image: "/seasonal-allergy.jpg",
-    alt: "Seasonal allergy treatment",
-  },
-  {
-    title: "Mild Acne",
-    description:
-      "Professional treatment options for mild acne conditions with personalized care.",
-    image: "/acne.jpg",
-    alt: "Mild acne treatment",
-  },
-  {
-    title: "Tick Bite",
-    description:
-      "Quick assessment and antibiotic treatment to prevent Lyme disease after tick bites.",
-    image: "/tick-bite.jpg",
-    alt: "Tick bite treatment",
   },
 ];
 
