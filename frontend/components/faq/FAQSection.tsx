@@ -65,13 +65,13 @@ export default function FAQSection() {
             return (
               <motion.div key={i} className="rounded-[12px] border border-[#E6EEF7] bg-[#F1FAFD] overflow-hidden" variants={fadeUp}>
                 <button
-                  className="w-full flex items-center justify-between text-left px-5 py-4 text-[17px] text-[#0A438C] font-medium"
+                  className="w-full flex items-center justify-between text-left px-5 py-4 text-[17px] text-[#0A438C] font-medium gap-4"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                   aria-expanded={isOpen}
                 >
-                  <span>{f.question}</span>
+                  <span className="flex-1 pr-1">{f.question}</span>
                   <svg
-                    className={`h-5 w-5 text-[#0A438C] transition-transform duration-200 ${isOpen ? "rotate-180" : "rotate-0"}`}
+                    className={`h-5 w-5 text-[#0A438C] transition-transform duration-200 flex-shrink-0 ${isOpen ? "rotate-180" : "rotate-0"}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
