@@ -27,6 +27,7 @@ export default function ConsultationModal({
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showConfirmationPopup, setShowConfirmationPopup] = useState(false);
 
   // Pre-fill service when preSelectedService is provided
   useEffect(() => {
@@ -328,15 +329,8 @@ export default function ConsultationModal({
         showSuccess(
           "Consultation request submitted successfully! We'll contact you soon."
         );
-        // Reset form
-        setFormData({
-          phone: "",
-          service: "",
-          preferredDate: "",
-          preferredTime: "",
-          additionalNote: "",
-        });
-        onClose();
+        // Show confirmation popup
+        setShowConfirmationPopup(true);
       } else {
         showError("Failed to submit request. Please try again.");
       }
@@ -793,6 +787,113 @@ export default function ConsultationModal({
                       </button>
                     )
                   )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Confirmation Popup */}
+      <AnimatePresence>
+        {showConfirmationPopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+            onClick={() => {
+              setShowConfirmationPopup(false);
+              // Reset form and close modal
+              setFormData({
+                phone: "",
+                service: "",
+                preferredDate: "",
+                preferredTime: "",
+                additionalNote: "",
+              });
+              onClose();
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="bg-white border border-gray-300 rounded-xl shadow-lg w-full max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    Appointment Confirmed
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowConfirmationPopup(false);
+                      // Reset form and close modal
+                      setFormData({
+                        phone: "",
+                        service: "",
+                        preferredDate: "",
+                        preferredTime: "",
+                        additionalNote: "",
+                      });
+                      onClose();
+                    }}
+                    className="text-gray-400 hover:text-gray-600 text-xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="text-center">
+                  <div className="mb-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        className="w-8 h-8 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                    </div>
+                    <h5 className="text-lg font-semibold text-gray-900 mb-2">
+                      Next Steps
+                    </h5>
+                  </div>
+
+                  <p className="text-blue-600 font-medium text-base leading-relaxed">
+                    You will receive a text message with a form to fill. This will be the first step to your consultation.
+                  </p>
+
+                  <div className="mt-6">
+                    <button
+                      onClick={() => {
+                        setShowConfirmationPopup(false);
+                        // Reset form and close modal
+                        setFormData({
+                          phone: "",
+                          service: "",
+                          preferredDate: "",
+                          preferredTime: "",
+                          additionalNote: "",
+                        });
+                        onClose();
+                      }}
+                      className="w-full bg-[#0A438C] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0A438C]/90 transition-colors"
+                    >
+                      Got it!
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
