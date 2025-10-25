@@ -90,19 +90,20 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
 
-    // Business hours: Monday-Friday 9 AM to 8 PM, Saturday 9:30 AM to 2 PM
+    // Business hours: Monday-Thursday 9:30 AM to 7:30 PM, Friday 9:30 AM to 5:30 PM, Saturday 9:30 AM to 1:30 PM
     const isWeekend = now.getDay() === 0 || now.getDay() === 6; // Sunday = 0, Saturday = 6
     const isSaturday = now.getDay() === 6;
+    const isFriday = now.getDay() === 5;
 
-    let businessStart = isSaturday ? 9.5 : 9; // 9:30 AM on Saturday, 9 AM on weekdays
-    let businessEnd = isSaturday ? 14 : 20; // 2 PM on Saturday, 8 PM on weekdays
+    let businessStart = 9.5; // 9:30 AM for all days
+    let businessEnd = isSaturday ? 13.5 : isFriday ? 17.5 : 19.5; // 1:30 PM Saturday, 5:30 PM Friday, 7:30 PM other days
 
-    // If it's Sunday, start from next Monday at 9 AM
+    // If it's Sunday, start from next Monday at 9:30 AM
     if (now.getDay() === 0) {
       const nextMonday = new Date(now);
       const daysUntilMonday = (1 - now.getDay() + 7) % 7;
       nextMonday.setDate(now.getDate() + daysUntilMonday);
-      nextMonday.setHours(9, 0, 0, 0);
+      nextMonday.setHours(9, 30, 0, 0);
       return generateTimeSlots(nextMonday);
     }
 
@@ -110,24 +111,19 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     if (
       currentHour >= businessEnd ||
       currentHour < businessStart ||
-      (isSaturday && currentHour === 9 && currentMinute < 30)
+      (currentHour === 9 && currentMinute < 30)
     ) {
       const nextBusinessDay = new Date(now);
-      if (isSaturday && currentHour >= 14) {
-        // If it's Saturday after 2 PM, go to Monday
+      if (isSaturday && currentHour >= 13.5) {
+        // If it's Saturday after 1:30 PM, go to Monday
         const daysUntilMonday = (1 - now.getDay() + 7) % 7;
         nextBusinessDay.setDate(now.getDate() + daysUntilMonday);
-        nextBusinessDay.setHours(9, 0, 0, 0);
+        nextBusinessDay.setHours(9, 30, 0, 0);
       } else {
         // Otherwise, go to next day
         nextBusinessDay.setDate(now.getDate() + 1);
-        if (nextBusinessDay.getDay() === 6) {
-          // If next day is Saturday, start at 9:30 AM
-          nextBusinessDay.setHours(9, 30, 0, 0);
-        } else {
-          // Otherwise start at 9 AM
-          nextBusinessDay.setHours(9, 0, 0, 0);
-        }
+        // All days start at 9:30 AM
+        nextBusinessDay.setHours(9, 30, 0, 0);
       }
       return generateTimeSlots(nextBusinessDay);
     }
@@ -164,19 +160,21 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
   // Generate time slots starting from a given time
   const generateTimeSlots = (startTime: Date) => {
     const slots = [];
-    const dayOfWeek = startTime.getDay();
+    
+    // Get the selected date from formData to determine business hours
+    const selectedDate = formData.preferredDate ? new Date(formData.preferredDate) : startTime;
+    const dayOfWeek = selectedDate.getDay();
     const isSaturday = dayOfWeek === 6;
-    const businessEnd = isSaturday ? 14 : 20; // 2 PM on Saturday, 8 PM on weekdays
+    const isFriday = dayOfWeek === 5;
+    const businessEnd = isSaturday ? 13.5 : isFriday ? 17.5 : 19.5; // 1:30 PM Saturday, 5:30 PM Friday, 7:30 PM other days
+
+    console.log(`RefillModal: Generating slots for selected date: ${formData.preferredDate}, day ${dayOfWeek}, businessEnd: ${businessEnd}`);
 
     let currentTime = new Date(startTime);
 
-    // For Saturday, if it's exactly 9:30 AM, start there; otherwise round up to next 15-minute interval
-    if (
-      isSaturday &&
-      currentTime.getHours() === 9 &&
-      currentTime.getMinutes() === 30
-    ) {
-      // Start at 9:30 AM on Saturday
+    // If it's exactly 9:30 AM, start there; otherwise round up to next 15-minute interval
+    if (currentTime.getHours() === 9 && currentTime.getMinutes() === 30) {
+      // Start at 9:30 AM
     } else if (currentTime.getMinutes() > 0) {
       // Round up to the next 15-minute interval
       const minutes = currentTime.getMinutes();
@@ -190,13 +188,27 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     }
 
     // Generate slots until business end (every 15 minutes)
-    while (currentTime.getHours() < businessEnd || 
-           (currentTime.getHours() === businessEnd && currentTime.getMinutes() === 0)) {
+    while (true) {
+      // Check if current time exceeds business end before adding the slot
+      const currentHour = currentTime.getHours();
+      const currentMinute = currentTime.getMinutes();
+      
+      // Convert businessEnd to hours and minutes for comparison
+      const businessEndHour = Math.floor(businessEnd);
+      const businessEndMinute = (businessEnd - businessEndHour) * 60;
+      
+      if (currentHour > businessEndHour || 
+          (currentHour === businessEndHour && currentMinute > businessEndMinute)) {
+        break;
+      }
+      
       const timeString = currentTime.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "2-digit",
         hour12: true,
       });
+
+      console.log(`RefillModal: Adding slot: ${timeString} (${currentTime.getHours()}:${currentTime.getMinutes()})`);
 
       slots.push({
         value: timeString,
@@ -258,7 +270,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       const isToday = currentDate.toDateString() === today.toDateString();
       const isPast = currentDate < today;
       const isSunday = currentDate.getDay() === 0;
-      const isAvailable = !isPast && !isSunday && isCurrentMonth;
+      const isAvailable = !isPast && !isSunday;
 
       days.push({
         date: new Date(currentDate),
@@ -585,11 +597,13 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                           {/* Month Navigation */}
                           <div className="flex items-center justify-between mb-4">
                             <button
+                              type="button"
                               onClick={() => navigateMonth("prev")}
-                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                              className="p-3 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
+                              title="Previous month"
                             >
                               <svg
-                                className="w-5 h-5"
+                                className="w-6 h-6 text-gray-600"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -609,11 +623,13 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                               })}
                             </h4>
                             <button
+                              type="button"
                               onClick={() => navigateMonth("next")}
-                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                              className="p-3 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 hover:border-gray-300"
+                              title="Next month"
                             >
                               <svg
-                                className="w-5 h-5"
+                                className="w-6 h-6 text-gray-600"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -651,11 +667,13 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                                 key={index}
                                 onClick={() => {
                                   if (day.isAvailable) {
+                                    const year = day.date.getFullYear();
+                                    const month = String(day.date.getMonth() + 1).padStart(2, '0');
+                                    const dayNum = String(day.date.getDate()).padStart(2, '0');
+                                    const dateString = `${year}-${month}-${dayNum}`;
                                     setFormData((prev) => ({
                                       ...prev,
-                                      preferredDate: day.date
-                                        .toISOString()
-                                        .split("T")[0],
+                                      preferredDate: dateString,
                                     }));
                                     setShowDatePicker(false);
                                     setShowTimePicker(true);
@@ -679,13 +697,14 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                             ))}
                           </div>
 
-                          {/* Business Hours Info */}
-                          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-                            <p className="font-medium mb-1">Business Hours:</p>
-                            <p>Monday-Friday: 9:00 AM - 8:00 PM</p>
-                            <p>Saturday: 9:30 AM - 2:00 PM</p>
-                            <p>Sunday: Closed</p>
-                          </div>
+                {/* Business Hours Info */}
+                <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+                  <p className="font-medium mb-1">Business Hours:</p>
+                  <p>Monday-Thursday: 9:30 AM - 7:30 PM</p>
+                  <p>Friday: 9:30 AM - 5:30 PM</p>
+                  <p>Saturday: 9:30 AM - 1:30 PM</p>
+                  <p>Sunday: Closed</p>
+                </div>
                         </div>
                       </div>
                     </div>
