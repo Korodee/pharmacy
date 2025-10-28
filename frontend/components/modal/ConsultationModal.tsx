@@ -102,33 +102,28 @@ export default function ConsultationModal({
       return generateTimeSlots(nextBusinessDay);
     }
 
-    // If it's during business hours, start 4 hours from now
-    const fourHoursLater = new Date(now);
-    fourHoursLater.setHours(fourHoursLater.getHours() + 4);
+    // If it's during business hours, start 30 minutes from now
+    const thirtyMinutesLater = new Date(now);
+    thirtyMinutesLater.setMinutes(thirtyMinutesLater.getMinutes() + 30);
 
-    // If 4 hours later is after business hours, start next business day
-    if (fourHoursLater.getHours() >= businessEnd) {
+    // If 30 minutes later is after business hours, start next business day
+    if (thirtyMinutesLater.getHours() >= businessEnd) {
       const nextBusinessDay = new Date(now);
       if (isSaturday) {
         // If it's Saturday, go to Monday
         const daysUntilMonday = (1 - now.getDay() + 7) % 7;
         nextBusinessDay.setDate(now.getDate() + daysUntilMonday);
-        nextBusinessDay.setHours(9, 0, 0, 0);
+        nextBusinessDay.setHours(9, 30, 0, 0);
       } else {
         // Otherwise, go to next day
         nextBusinessDay.setDate(now.getDate() + 1);
-        if (nextBusinessDay.getDay() === 6) {
-          // If next day is Saturday, start at 9:30 AM
-          nextBusinessDay.setHours(9, 30, 0, 0);
-        } else {
-          // Otherwise start at 9 AM
-          nextBusinessDay.setHours(9, 0, 0, 0);
-        }
+        // All days start at 9:30 AM
+        nextBusinessDay.setHours(9, 30, 0, 0);
       }
       return generateTimeSlots(nextBusinessDay);
     }
 
-    return generateTimeSlots(fourHoursLater);
+    return generateTimeSlots(thirtyMinutesLater);
   };
 
   // Generate time slots starting from a given time
@@ -229,6 +224,8 @@ export default function ConsultationModal({
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
     const today = new Date();
+    // Set today to start of day for accurate comparison
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
@@ -242,7 +239,8 @@ export default function ConsultationModal({
     for (let i = 0; i < 42; i++) {
       const isCurrentMonth = currentDate.getMonth() === month;
       const isToday = currentDate.toDateString() === today.toDateString();
-      const isPast = currentDate < today;
+      // Only consider dates before today as past (not including today)
+      const isPast = currentDate < todayStart;
       const isSunday = currentDate.getDay() === 0;
       const isAvailable = !isPast && !isSunday;
 
