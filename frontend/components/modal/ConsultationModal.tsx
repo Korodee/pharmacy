@@ -64,6 +64,42 @@ export default function ConsultationModal({
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
 
+    // If a specific date is selected, generate slots for that date
+    if (selectedDate) {
+      const selectedDateObj = new Date(selectedDate);
+      const today = new Date();
+      const isToday = selectedDateObj.toDateString() === today.toDateString();
+      
+      // Determine business hours for the selected date
+      const dayOfWeek = selectedDateObj.getDay();
+      const isSaturday = dayOfWeek === 6;
+      const isFriday = dayOfWeek === 5;
+      const businessEnd = isSaturday ? 13.5 : isFriday ? 17.5 : 19.5; // 1:30 PM Saturday, 5:30 PM Friday, 7:30 PM other days
+      
+      // Start time for the selected date
+      let startTime = new Date(selectedDateObj);
+      startTime.setHours(9, 30, 0, 0); // Start at 9:30 AM
+      
+      // If it's today, start from 30 minutes from now (or current time if it's past business hours)
+      if (isToday) {
+        const thirtyMinutesLater = new Date(now);
+        thirtyMinutesLater.setMinutes(thirtyMinutesLater.getMinutes() + 30);
+        
+        // If 30 minutes later is still within business hours, use that as start time
+        if (thirtyMinutesLater.getHours() < businessEnd || 
+            (thirtyMinutesLater.getHours() === Math.floor(businessEnd) && 
+             thirtyMinutesLater.getMinutes() <= (businessEnd - Math.floor(businessEnd)) * 60)) {
+          startTime = thirtyMinutesLater;
+        } else {
+          // If it's past business hours today, return empty slots
+          return [];
+        }
+      }
+      
+      return generateTimeSlots(startTime);
+    }
+
+    // Default logic when no date is selected (for initial load)
     // Business hours: Monday-Thursday 9:30 AM to 7:30 PM, Friday 9:30 AM to 5:30 PM, Saturday 9:30 AM to 1:30 PM
     const isWeekend = now.getDay() === 0 || now.getDay() === 6; // Sunday = 0, Saturday = 6
     const isSaturday = now.getDay() === 6;
