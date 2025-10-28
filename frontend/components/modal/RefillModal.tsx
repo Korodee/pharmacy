@@ -771,29 +771,57 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
                         <hr className="border-gray-200" />
                         {/* Time Slots */}
                         <div className="p-4 max-h-96 overflow-y-auto">
-                          <div className="space-y-2">
-                            {getAvailableTimes(formData.preferredDate).map(
-                              (slot, index) => (
-                                <button
-                                  key={index}
-                                  onClick={() => {
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      preferredTime: slot.value,
-                                      estimatedTime:
-                                        `${prev.preferredDate} ${slot.value}`.trim(),
-                                    }));
-                                    setShowTimePicker(false);
-                                  }}
-                                  className="w-full p-3 text-left hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                          {getAvailableTimes(formData.preferredDate).length > 0 ? (
+                            <div className="space-y-2">
+                              {getAvailableTimes(formData.preferredDate).map(
+                                (slot, index) => (
+                                  <button
+                                    key={index}
+                                    onClick={() => {
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        preferredTime: slot.value,
+                                        estimatedTime:
+                                          `${prev.preferredDate} ${slot.value}`.trim(),
+                                      }));
+                                      setShowTimePicker(false);
+                                    }}
+                                    className="w-full p-3 text-left hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                                  >
+                                    <span className="text-gray-900 font-medium">
+                                      {slot.label}
+                                    </span>
+                                  </button>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg
+                                  className="w-8 h-8 text-gray-400"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
                                 >
-                                  <span className="text-gray-900 font-medium">
-                                    {slot.label}
-                                  </span>
-                                </button>
-                              )
-                            )}
-                          </div>
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                  />
+                                </svg>
+                              </div>
+                              <h5 className="text-lg font-medium text-gray-900 mb-2">
+                                No Available Times
+                              </h5>
+                              <p className="text-gray-600 text-sm leading-relaxed">
+                                {formData.preferredDate && new Date(formData.preferredDate).toDateString() === new Date().toDateString()
+                                  ? "All available time slots for today have passed. We need 4 hours to prepare your prescription. Please select a future date."
+                                  : "No time slots are available for the selected date. Please choose a different date."}
+                              </p>
+                            </div>
+                          )}
 
                           {/* Business Hours Info */}
                           <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg mt-4">

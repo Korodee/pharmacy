@@ -449,6 +449,7 @@ export default function ConsultationModal({
                   Choose a service
                 </option>
                 <option value="smoking-cessation">Smoking Cessation</option>
+                <option value="uti-testing-treatment">UTI Testing & Treatment</option>
                 <option value="lice">Lice</option>
                 <option value="travellers-diarrhea">
                   Traveller's Diarrhea
@@ -483,6 +484,7 @@ export default function ConsultationModal({
                   Throat Infection: Strep A Test
                 </option>
                 <option value="mild-acne">Mild Acne</option>
+                <option value="allergies-treatment">Allergies Treatment</option>
                 <option value="seasonal-allergy">Seasonal Allergy</option>
                 <option value="eyes-allergy">Eyes Allergy</option>
                 <option value="pink-eye-infection">Pink Eye (Infection)</option>
@@ -799,27 +801,55 @@ export default function ConsultationModal({
                 </div>
 
                 <div className="max-h-60 overflow-y-auto">
-                  {getAvailableTimes(formData.preferredDate).map(
-                    (time, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            preferredTime: time.value,
-                          }));
-                          setShowTimePicker(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-colors ${
-                          formData.preferredTime === time.value
-                            ? "bg-[#0A438C] text-white"
-                            : "bg-gray-50 hover:bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {time.label}
-                      </button>
+                  {getAvailableTimes(formData.preferredDate).length > 0 ? (
+                    getAvailableTimes(formData.preferredDate).map(
+                      (time, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              preferredTime: time.value,
+                            }));
+                            setShowTimePicker(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-colors ${
+                            formData.preferredTime === time.value
+                              ? "bg-[#0A438C] text-white"
+                              : "bg-gray-50 hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {time.label}
+                        </button>
+                      )
                     )
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg
+                          className="w-8 h-8 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <h5 className="text-lg font-medium text-gray-900 mb-2">
+                        No Available Times
+                      </h5>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {formData.preferredDate && new Date(formData.preferredDate).toDateString() === new Date().toDateString()
+                          ? "All available time slots for today have passed. Please select a future date."
+                          : "No time slots are available for the selected date. Please choose a different date."}
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
