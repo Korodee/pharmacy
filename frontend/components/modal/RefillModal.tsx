@@ -128,12 +128,12 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       return generateTimeSlots(nextBusinessDay);
     }
 
-    // If it's during business hours, start 30 minutes from now
-    const thirtyMinutesLater = new Date(now);
-    thirtyMinutesLater.setMinutes(thirtyMinutesLater.getMinutes() + 30);
+    // If it's during business hours, start 4 hours from now
+    const fourHoursLater = new Date(now);
+    fourHoursLater.setHours(fourHoursLater.getHours() + 4);
 
-    // If 30 minutes later is after business hours, start next business day
-    if (thirtyMinutesLater.getHours() >= businessEnd) {
+    // If 4 hours later is after business hours, start next business day
+    if (fourHoursLater.getHours() >= businessEnd) {
       const nextBusinessDay = new Date(now);
       if (isSaturday) {
         // If it's Saturday, go to Monday
@@ -149,7 +149,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
       return generateTimeSlots(nextBusinessDay);
     }
 
-    return generateTimeSlots(thirtyMinutesLater);
+    return generateTimeSlots(fourHoursLater);
   };
 
   // Generate time slots starting from a given time
