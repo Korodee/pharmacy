@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 
 export interface UploadedFile {
   filename: string;
-  filePath: string;
+  filePath: string; // Base64 data URL
   uploadDate: string;
+  type: string;
 }
 
 interface FileUploadProps {
@@ -61,15 +62,23 @@ export default function FileUpload({
 
     setIsUploading(true);
     const uploaded: UploadedFile[] = [];
+    
     for (const file of validFiles) {
-      const fd = new FormData();
-      fd.append('file', file);
       try {
-        const res = await fetch('/api/uploads', { method: 'POST', body: fd });
-        const data = await res.json();
-        if (data?.success && data?.file) {
-          uploaded.push(data.file as UploadedFile);
-        }
+        // Convert file to base64 data URL
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        uploaded.push({
+          filename: file.name,
+          filePath: dataUrl, // Store base64 data URL
+          uploadDate: new Date().toISOString(),
+          type: file.type,
+        });
       } catch (e) {
         console.error('Upload error', e);
       }

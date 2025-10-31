@@ -26,6 +26,7 @@ interface ClaimDocument {
     filename: string;
     filePath: string;
     uploadDate: string;
+    type: string;
   }>;
   notes?: Array<{
     id: string;
