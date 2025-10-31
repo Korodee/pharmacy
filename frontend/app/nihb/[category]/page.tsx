@@ -109,13 +109,14 @@ export default function NIHBCategoryPage() {
       if (data.success) {
         if (newStatus === 'authorized') {
           showSuccess("Status updated successfully. Please update authorization start and end dates.", 8000);
-        } else {
-          showSuccess("Status updated successfully.", 6000);
-        }
-        // If marked as authorized, take user to edit page to set auth dates
-        if (newStatus === 'authorized') {
           router.push(`${baseNIHBPath}/${category}/add?id=${claimId}` as any);
           return;
+        } else if (newStatus === 'case-number-open') {
+          showSuccess("Status updated successfully. Please add the case number.", 8000);
+          router.push(`${baseNIHBPath}/${category}/add?id=${claimId}` as any);
+          return;
+        } else {
+          showSuccess("Status updated successfully.", 6000);
         }
         fetchClaims();
       } else {

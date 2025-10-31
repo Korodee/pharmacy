@@ -37,6 +37,8 @@ export default function ClaimDetailsModal({
   const [newNote, setNewNote] = useState("");
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [isDeletingNote, setIsDeletingNote] = useState<string | null>(null);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showAddNoteInput, setShowAddNoteInput] = useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -111,7 +113,8 @@ export default function ClaimDetailsModal({
       if (data.success) {
         showSuccess("Note added successfully");
         setNewNote("");
-        onUpdate();
+        setShowAddNoteInput(false);
+        onUpdate(); // This will refresh the claim data
       } else {
         showError(data.error || "Failed to add note");
       }
@@ -288,6 +291,42 @@ export default function ClaimDetailsModal({
                   <StatusBadge status={claim.claimStatus} size="sm" />
                 </span>
               </div>
+
+              {(claim as any).caseNumber && (
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-600">Case Number</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {(claim as any).caseNumber}
+                  </span>
+                </div>
+              )}
+
+              {(claim as any).authorizationStartDate && (
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-600">Authorization Start</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatDate((claim as any).authorizationStartDate)}
+                  </span>
+                </div>
+              )}
+
+              {(claim as any).authorizationEndDate && (
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-600">Authorization End</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {formatDate((claim as any).authorizationEndDate)}
+                  </span>
+                </div>
+              )}
+
+              {(claim as any).authorizationNumber && (
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-600">Authorization Number</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    {(claim as any).authorizationNumber}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Documents link */}
@@ -314,6 +353,32 @@ export default function ClaimDetailsModal({
                 View Documents
               </a>
             </div>
+
+            {/* Notes section */}
+            {claim.notes && claim.notes.length > 0 && (
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-200">
+                <span className="text-sm text-gray-600">Notes</span>
+                <button
+                  onClick={() => setShowNotesModal(true)}
+                  className="flex items-center text-sm text-[#0A438C] hover:underline"
+                >
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  View Notes ({claim.notes.length})
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -335,6 +400,101 @@ export default function ClaimDetailsModal({
           </div>
         </motion.div>
       </div>
+
+      {/* Notes Modal */}
+      {showNotesModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold text-gray-900">Notes</h2>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setShowAddNoteInput(true)}
+                    className="px-4 py-2 bg-[#0A438C] text-white rounded-lg hover:bg-[#003366] transition-colors text-sm font-medium"
+                  >
+                    Add Note
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNotesModal(false);
+                      setShowAddNoteInput(false);
+                    }}
+                    className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 shadow-sm"
+                    aria-label="Close"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto" style={{ maxHeight: "calc(80vh - 180px)" }}>
+              {/* Add Note Input */}
+              {showAddNoteInput && (
+                <div className="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1">
+                      <textarea
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                        placeholder="Add a note..."
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none resize-none text-sm"
+                      />
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          onClick={handleAddNote}
+                          disabled={isAddingNote}
+                          className="px-4 py-2 bg-[#0A438C] text-white rounded-lg hover:bg-[#003366] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isAddingNote ? "Adding..." : "Save"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowAddNoteInput(false);
+                            setNewNote("");
+                          }}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Notes List */}
+              {claim.notes && claim.notes.length > 0 ? (
+                <div className="space-y-3">
+                  {claim.notes.map((note: any) => (
+                    <NoteItem
+                      key={note.id}
+                      note={note}
+                      onDelete={handleDeleteNote}
+                      canDelete={true}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No notes yet</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }

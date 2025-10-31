@@ -28,6 +28,7 @@ export default function ClaimsTable({
   onAddNew,
 }: ClaimsTableProps) {
   const [showMenu, setShowMenu] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -155,6 +156,18 @@ export default function ClaimsTable({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          const viewportHeight = window.innerHeight;
+                          const menuHeight = 100;
+                          const spaceBelow = viewportHeight - rect.bottom;
+                          const spaceAbove = rect.top;
+                          
+                          const showAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+                          
+                          setMenuPosition({
+                            x: rect.right - 160,
+                            y: showAbove ? rect.top - menuHeight + 6 : rect.bottom + 4,
+                          });
                           setShowMenu(showMenu === claim.id ? null : claim.id);
                         }}
                         className="text-[#888888] hover:text-gray-900 transition-colors"
@@ -173,38 +186,6 @@ export default function ClaimsTable({
                           />
                         </svg>
                       </button>
-
-                      {showMenu === claim.id && (
-                        <>
-                          <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEdit(claim);
-                                setShowMenu(null);
-                              }}
-                              className="w-full text-left px-4 py-3 text-sm text-[#0A438C] font-[300] hover:bg-gray-50"
-                            >
-                              Edit Claim
-                            </button>
-                            <div className="border-t border-gray-200"></div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onClaimClick(claim);
-                                setShowMenu(null);
-                              }}
-                              className="w-full text-left px-4 py-3 text-sm text-[#0A438C] font-[300] hover:bg-gray-50 "
-                            >
-                              View Claim
-                            </button>
-                          </div>
-                          <div
-                            className="fixed inset-0 z-40"
-                            onClick={() => setShowMenu(null)}
-                          />
-                        </>
-                      )}
                     </div>
                   </td>
                 </tr>
@@ -213,6 +194,53 @@ export default function ClaimsTable({
           </tbody>
         </table>
       </div>
+
+      {/* Fixed dropdown outside table overflow */}
+      {showMenu && menuPosition && (
+        <>
+          <div
+            className="fixed w-40 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden"
+            style={{
+              left: `${menuPosition.x}px`,
+              top: `${menuPosition.y}px`,
+              zIndex: 9999,
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const claim = claims.find(c => c.id === showMenu);
+                if (claim) onEdit(claim);
+                setShowMenu(null);
+                setMenuPosition(null);
+              }}
+              className="w-full text-left px-4 py-3 text-sm text-[#0A438C] font-[300] hover:bg-gray-50"
+            >
+              Edit Claim
+            </button>
+            <div className="border-t border-gray-200"></div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const claim = claims.find(c => c.id === showMenu);
+                if (claim) onClaimClick(claim);
+                setShowMenu(null);
+                setMenuPosition(null);
+              }}
+              className="w-full text-left px-4 py-3 text-sm text-[#0A438C] font-[300] hover:bg-gray-50"
+            >
+              View Claim
+            </button>
+          </div>
+          <div
+            className="fixed inset-0 z-[9998]"
+            onClick={() => {
+              setShowMenu(null);
+              setMenuPosition(null);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -13,6 +13,7 @@ export interface ClaimDocument {
   dateOfPrescription: string;
   type: 'new' | 'renewal' | 'prior-authorization';
   claimStatus: 'new' | 'case-number-open' | 'authorized';
+  caseNumber?: string;
   authorizationNumber?: string;
   authorizationStartDate?: string;
   authorizationEndDate?: string;
@@ -50,6 +51,7 @@ export async function POST(request: NextRequest) {
       dateOfPrescription: body.dateOfPrescription,
       type: body.type,
       claimStatus: body.claimStatus,
+      caseNumber: body.caseNumber || '',
       authorizationNumber: body.authorizationNumber || '',
       authorizationStartDate: body.authorizationStartDate || '',
       authorizationEndDate: body.authorizationEndDate || '',

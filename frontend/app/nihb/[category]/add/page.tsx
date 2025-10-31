@@ -33,9 +33,12 @@ export default function AddClaimPage() {
     dateOfPrescription: "",
     type: "new" as "new" | "renewal",
     claimStatus: "new" as "new" | "case-number-open" | "authorized",
+    caseNumber: "",
+    authorizationNumber: "",
     authorizationStartDate: "",
     authorizationEndDate: "",
     priority: false,
+    note: "",
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -62,9 +65,12 @@ export default function AddClaimPage() {
             dateOfPrescription: c.dateOfPrescription || "",
             type: c.type || "new",
             claimStatus: c.claimStatus || "new",
+            caseNumber: c.caseNumber || "",
+            authorizationNumber: c.authorizationNumber || "",
             authorizationStartDate: c.authorizationStartDate || "",
             authorizationEndDate: c.authorizationEndDate || "",
             priority: Boolean(c.priority),
+            note: "",
           });
           setUploadedFiles(c.documents || []);
         } else {
@@ -83,9 +89,12 @@ export default function AddClaimPage() {
               dateOfPrescription: c.dateOfPrescription || "",
               type: c.type || "new",
               claimStatus: c.claimStatus || "new",
+              caseNumber: c.caseNumber || "",
+              authorizationNumber: c.authorizationNumber || "",
               authorizationStartDate: c.authorizationStartDate || "",
               authorizationEndDate: c.authorizationEndDate || "",
               priority: Boolean(c.priority),
+              note: "",
             });
             setUploadedFiles(c.documents || []);
           }
@@ -98,10 +107,16 @@ export default function AddClaimPage() {
   }, [claimId, category]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // For caseNumber, only allow digits
+    if (name === "caseNumber") {
+      const digitsOnly = value.replace(/\D/g, "");
+      setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,6 +240,10 @@ export default function AddClaimPage() {
     return formData.claimStatus === "authorized";
   };
 
+  const shouldShowCaseNumber = () => {
+    return formData.claimStatus === "case-number-open";
+  };
+
   const validateForm = (): boolean => {
     if (
       !formData.rxNumber ||
@@ -269,6 +288,21 @@ export default function AddClaimPage() {
       const data = await response.json();
 
       if (data.success) {
+        // If there's a note, add it to the claim
+        if (formData.note.trim()) {
+          await fetch("/api/claims/notes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              claimId: data.claim?.id || claimId,
+              text: formData.note,
+              staffUsername: "Admin User", // TODO: Get from auth context
+            }),
+          });
+        }
+
         showSuccess(claimId ? "Claim updated successfully" : "Claim successfully added");
         setShowSuccessModal(true);
       } else {
@@ -484,6 +518,23 @@ export default function AddClaimPage() {
                 </div>
               </div>
 
+              {shouldShowCaseNumber() && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Case Number
+                  </label>
+                  <input
+                    type="text"
+                    name="caseNumber"
+                    value={formData.caseNumber}
+                    onChange={handleInputChange}
+                    placeholder="12345678"
+                    maxLength={8}
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
+              )}
+
               {shouldShowAuthorization() && (
                 <>
                   <div>
@@ -563,8 +614,40 @@ export default function AddClaimPage() {
                       </button>
                     </div>
                   </div>
+
                 </>
               )}
+            </div>
+
+            {shouldShowAuthorization() && (
+              <div className="mb-8">
+                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                  Authorization Number
+                </label>
+                <input
+                  type="text"
+                  name="authorizationNumber"
+                  value={formData.authorizationNumber}
+                  onChange={handleInputChange}
+                  placeholder="E1234567"
+                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                />
+              </div>
+            )}
+
+            {/* Notes Section */}
+            <div className="mb-8">
+              <h3 className="block text-sm font-medium text-[#6E6C70] mb-2">
+                Notes
+              </h3>
+              <textarea
+                name="note"
+                value={formData.note}
+                onChange={handleInputChange}
+                placeholder="Add any additional notes about this claim..."
+                rows={4}
+                className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none resize-none placeholder:text-gray-400 text-gray-900"
+              />
             </div>
 
             {/* Upload Section */}

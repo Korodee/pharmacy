@@ -10,6 +10,8 @@ interface StatusBadgeProps {
 
 export default function StatusBadge({ status, size = 'md', onChange }: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const menuRef = useState<HTMLDivElement | null>(null)[0];
 
   const getStatusConfig = (statusValue: string) => {
     switch (statusValue) {
@@ -67,34 +69,56 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
   };
 
   return (
-    <div className="relative inline-block">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-        }}
-        className={`inline-flex items-center gap-1.5 font-medium rounded-full cursor-pointer transition-all hover:opacity-80 ${badgeClass} ${getSizeClass()}`}
-      >
-        <span className={`w-2 h-2 rounded-full ${dotColor}`} />
-        {label}
-        <svg
-          className="w-3 h-3 ml-0.5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+    <>
+      <div className="relative inline-block">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            const viewportHeight = window.innerHeight;
+            const spaceBelow = viewportHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            const menuHeight = 130; // Approximate height based on 3 options
+            
+            // If not enough space below but more space above, show above
+            const showAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+            
+            setMenuPosition({
+              x: rect.left,
+              y: showAbove ? rect.top - menuHeight + 6 : rect.bottom + 4,
+            });
+            setIsOpen(!isOpen);
+          }}
+          className={`inline-flex items-center gap-1.5 font-medium rounded-full cursor-pointer transition-all hover:opacity-80 ${badgeClass} ${getSizeClass()}`}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </button>
+          <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+          {label}
+          <svg
+            className="w-3 h-3 ml-0.5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+      </div>
 
-      {isOpen && (
+      {/* Fixed dropdown outside container overflow */}
+      {isOpen && menuPosition && (
         <>
-          <div className="absolute left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+          <div
+            className="fixed w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-[9999]"
+            style={{
+              left: `${menuPosition.x}px`,
+              top: `${menuPosition.y}px`,
+            }}
+          >
             {options.map((option) => {
               const config = getStatusConfig(option.value);
               return (
@@ -113,12 +137,15 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
             })}
           </div>
           <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 z-[9998]"
+            onClick={() => {
+              setIsOpen(false);
+              setMenuPosition(null);
+            }}
           />
         </>
       )}
-    </div>
+    </>
   );
 }
 
