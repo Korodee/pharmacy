@@ -211,6 +211,16 @@ export default function AddClaimPage() {
     }
   };
 
+  const normalizeForStorage = (value: string) => {
+    if (!value) return "";
+    // Accept both MM/DD/YYYY and YYYY-MM-DD and always return YYYY-MM-DD
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+      const [mm, dd, yyyy] = value.split('/');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    return value; // assume already YYYY-MM-DD
+  };
+
   const shouldShowAuthorization = () => {
     return formData.claimStatus === "authorized";
   };
@@ -239,8 +249,13 @@ export default function AddClaimPage() {
     try {
       const payload = {
         ...formData,
+        // Ensure date fields are saved in canonical YYYY-MM-DD
+        dateOfPrescription: normalizeForStorage(formData.dateOfPrescription),
+        authorizationStartDate: normalizeForStorage(formData.authorizationStartDate),
+        authorizationEndDate: normalizeForStorage(formData.authorizationEndDate),
         category,
         documents: uploadedFiles,
+        ...(claimId ? { id: claimId } : {}),
       };
 
       const response = await fetch(claimId ? `/api/claims?id=${claimId}` : "/api/claims", {
