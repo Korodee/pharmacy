@@ -332,26 +332,30 @@ export default function ClaimDetailsModal({
             {/* Documents link */}
             <div className="flex items-center justify-between pt-2">
               <span className="text-sm text-gray-600">Documents</span>
-              <a
-                href={claim.documents && (claim.documents as any).length > 0 ? (claim.documents as any)[0].filePath : '#'}
-                download={claim.documents && (claim.documents as any).length > 0 ? (claim.documents as any)[0].filename : undefined}
-                className="flex items-center text-sm text-[#0A438C] hover:underline"
-              >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {claim.documents && (claim.documents as any).length > 0 ? (
+                <a
+                  href={(claim.documents as any)[0].filePath}
+                  download={(claim.documents as any)[0].filename || ''}
+                  className="flex items-center text-sm text-[#0A438C] hover:underline"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                View Documents
-              </a>
+                  <svg
+                    className="w-4 h-4 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  View Documents
+                </a>
+              ) : (
+                <span className="text-sm text-gray-500">No Documents</span>
+              )}
             </div>
 
             {/* Notes section */}
@@ -449,7 +453,7 @@ export default function ClaimDetailsModal({
                         onChange={(e) => setNewNote(e.target.value)}
                         placeholder="Add a note..."
                         rows={3}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none resize-none text-sm"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none resize-none text-sm placeholder:text-gray-400 text-gray-900"
                       />
                       <div className="flex items-center gap-2 mt-2">
                         <button

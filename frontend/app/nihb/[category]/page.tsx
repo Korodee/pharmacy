@@ -321,7 +321,15 @@ export default function NIHBCategoryPage() {
             setSelectedClaim(null);
             if (id) router.push(`${baseNIHBPath}/${category}/add?id=${id}` as any);
           }}
-          onUpdate={fetchClaims}
+          onUpdate={async () => {
+            await fetchClaims();
+            // Find the updated claim in the fetched list and update selectedClaim
+            const response = await fetch(`/api/claims?id=${selectedClaim?.id}`);
+            const data = await response.json();
+            if (data.success && data.claim) {
+              setSelectedClaim(data.claim);
+            }
+          }}
         />
       )}
     </>
