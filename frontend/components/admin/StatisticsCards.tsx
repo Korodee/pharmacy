@@ -32,9 +32,9 @@ export default function StatisticsCards({
                   {totalRequests}
                 </p>
               </div>
-              <div className="bg-blue-100 p-2 rounded-lg">
+              {/* <div className="bg-blue-100 p-2 rounded-lg">
                 <span className="text-lg">📊</span>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -46,41 +46,37 @@ export default function StatisticsCards({
                   {pendingRequests}
                 </p>
               </div>
-              <div className="bg-amber-100 p-2 rounded-lg">
+              {/* <div className="bg-amber-100 p-2 rounded-lg">
                 <span className="text-lg">⏳</span>
-              </div>
+              </div> */}
             </div>
           </div>
 
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-md font-medium text-gray-600">
-                  In Progress
-                </p>
+                <p className="text-md font-medium text-gray-600">In Progress</p>
                 <p className="text-xl font-bold text-blue-600">
                   {inProgressRequests}
                 </p>
               </div>
-              <div className="bg-blue-100 p-2 rounded-lg">
+              {/* <div className="bg-blue-100 p-2 rounded-lg">
                 <span className="text-lg">🔄</span>
-              </div>
+              </div> */}
             </div>
           </div>
 
           <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-md font-medium text-gray-600">
-                  Completed
-                </p>
+                <p className="text-md font-medium text-gray-600">Completed</p>
                 <p className="text-xl font-bold text-emerald-600">
                   {completedRequests}
                 </p>
               </div>
-              <div className="bg-emerald-100 p-2 rounded-lg">
+              {/* <div className="bg-emerald-100 p-2 rounded-lg">
                 <span className="text-lg">✅</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
