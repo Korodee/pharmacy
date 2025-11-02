@@ -673,7 +673,7 @@ export default function AddClaimPage() {
                         <p className="text-sm font-medium text-gray-900">
                           Patient Letter Template
                         </p>
-                        <p className="text-xs text-gray-500">Standard letter for patient</p>
+                        <p className="text-xs text-gray-500">Standard letter for the patient</p>
                       </div>
                     </div>
                     <svg
@@ -716,7 +716,7 @@ export default function AddClaimPage() {
                         <p className="text-sm font-medium text-gray-900">
                           Doctor Letter Template
                         </p>
-                        <p className="text-xs text-gray-500">Letter for prescribing doctor</p>
+                        <p className="text-xs text-gray-500">Letter for the doctor</p>
                       </div>
                     </div>
                     <svg
