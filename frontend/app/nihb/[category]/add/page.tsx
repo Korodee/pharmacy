@@ -395,65 +395,131 @@ export default function AddClaimPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Prescriber Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="prescriberName"
-                  value={formData.prescriberName}
-                  onChange={handleInputChange}
-                  placeholder="eg. Dr. A. Johnson"
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
-              </div>
+              {category === "appeals" ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      DIN/#Item
+                    </label>
+                    <input
+                      type="tel"
+                      name="prescriberPhone"
+                      value={formData.prescriberPhone}
+                      onChange={(e) =>
+                        handlePhoneChange(e.target.name, e.target.value)
+                      }
+                      placeholder="DIN-XXXXXXX"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Prescriber License <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="prescriberLicense"
-                  value={formData.prescriberLicense}
-                  onChange={handleInputChange}
-                  placeholder="eg. CPSO #87921"
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Prescriber Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="prescriberName"
+                      value={formData.prescriberName}
+                      onChange={handleInputChange}
+                      placeholder="eg. Dr. A. Johnson"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Prescriber Fax
-                </label>
-                <input
-                  type="tel"
-                  name="prescriberFax"
-                  value={formData.prescriberFax}
-                  onChange={(e) =>
-                    handlePhoneChange(e.target.name, e.target.value)
-                  }
-                  placeholder="(XXX) XXX-XXXX"
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Prescriber License <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="prescriberLicense"
+                      value={formData.prescriberLicense}
+                      onChange={handleInputChange}
+                      placeholder="eg. CPSO #87921"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  {category === "medications" ? "DIN/#Item" : "Prescriber Phone"}
-                </label>
-                <input
-                  type="tel"
-                  name="prescriberPhone"
-                  value={formData.prescriberPhone}
-                  onChange={(e) =>
-                    handlePhoneChange(e.target.name, e.target.value)
-                  }
-                  placeholder={category === "medications" ? "DIN-XXXXXXX" : "(XXX) XXX-XXXX"}
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Prescriber Fax
+                    </label>
+                    <input
+                      type="tel"
+                      name="prescriberFax"
+                      value={formData.prescriberFax}
+                      onChange={(e) =>
+                        handlePhoneChange(e.target.name, e.target.value)
+                      }
+                      placeholder="(XXX) XXX-XXXX"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Prescriber Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="prescriberName"
+                      value={formData.prescriberName}
+                      onChange={handleInputChange}
+                      placeholder="eg. Dr. A. Johnson"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Prescriber License <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="prescriberLicense"
+                      value={formData.prescriberLicense}
+                      onChange={handleInputChange}
+                      placeholder="eg. CPSO #87921"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Prescriber Fax
+                    </label>
+                    <input
+                      type="tel"
+                      name="prescriberFax"
+                      value={formData.prescriberFax}
+                      onChange={(e) =>
+                        handlePhoneChange(e.target.name, e.target.value)
+                      }
+                      placeholder="(XXX) XXX-XXXX"
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      {category === "medications" ? "DIN/#Item" : "Prescriber Phone"}
+                    </label>
+                    <input
+                      type="tel"
+                      name="prescriberPhone"
+                      value={formData.prescriberPhone}
+                      onChange={(e) =>
+                        handlePhoneChange(e.target.name, e.target.value)
+                      }
+                      placeholder={category === "medications" ? "DIN-XXXXXXX" : "(XXX) XXX-XXXX"}
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-[#6E6C70] mb-2">
