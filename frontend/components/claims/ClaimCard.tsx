@@ -17,7 +17,7 @@ interface ClaimDocument {
   prescriberPhone?: string;
   dateOfPrescription: string;
   type: "new" | "renewal" | "prior-authorization";
-  claimStatus: "new" | "case-number-open" | "authorized" | "denied";
+  claimStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer";
   caseNumber?: string;
   authorizationNumber?: string;
   authorizationStartDate?: string;
@@ -86,7 +86,7 @@ export default function ClaimCard({
                   </svg>
                 </span>
               )}
-              <StatusBadge status={claim.claimStatus} size="sm" />
+              <StatusBadge status={claim.claimStatus} size="sm" category={claim.category} />
               <TypeBadge type={claim.type} size="sm" />
             </div>
             <p className="text-sm font-medium text-gray-900 mb-1">

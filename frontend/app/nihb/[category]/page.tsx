@@ -96,7 +96,7 @@ export default function NIHBCategoryPage() {
     }
   };
 
-  const handleStatusChange = async (claimId: string, newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied') => {
+  const handleStatusChange = async (claimId: string, newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer') => {
     try {
       const response = await fetch(`/api/claims?id=${claimId}`, {
         method: "PUT",
@@ -279,6 +279,7 @@ export default function NIHBCategoryPage() {
             onDateChange={setDateFilter}
             productFilter={productFilter}
             onProductChange={setProductFilter}
+            category={category}
           />
           
           {/* Table Container */}

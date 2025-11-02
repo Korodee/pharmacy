@@ -59,7 +59,7 @@ export default function ClaimDetailsModal({
   };
 
   const handleStatusUpdate = async (
-    newStatus: "new" | "case-number-open" | "authorized" | "denied"
+    newStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer"
   ) => {
     try {
       const response = await fetch("/api/claims", {
@@ -288,7 +288,7 @@ export default function ClaimDetailsModal({
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <span className="text-sm text-gray-600">Status</span>
                 <span className="text-sm font-medium text-gray-900">
-                  <StatusBadge status={claim.claimStatus} size="sm" />
+                  <StatusBadge status={claim.claimStatus} size="sm" category={claim.category} />
                 </span>
               </div>
 

@@ -16,6 +16,7 @@ interface ClaimFiltersProps {
   onDateChange: (value: string) => void;
   productFilter: string;
   onProductChange: (value: string) => void;
+  category?: string;
 }
 
 export default function ClaimFilters({
@@ -26,14 +27,31 @@ export default function ClaimFilters({
   onStatusChange,
   dateFilter,
   onDateChange,
+  category,
 }: ClaimFiltersProps) {
-  const statusOptions = [
-    { value: "all", label: "Status" },
-    { value: "new", label: "New" },
-    { value: "case-number-open", label: "Case Number Open" },
-    { value: "authorized", label: "Authorized" },
-    { value: "denied", label: "Denied" },
-  ];
+  const getStatusOptions = () => {
+    if (category === "appeals") {
+      return [
+        { value: "all", label: "Status" },
+        { value: "new", label: "New" },
+        { value: "patient-signed-letter", label: "Patient Signed Letter" },
+        { value: "letter-sent-to-doctor", label: "Letter Sent to Doctor" },
+        { value: "awaiting-answer", label: "Awaiting Answer" },
+        { value: "authorized", label: "Authorized" },
+        { value: "denied", label: "Denied" },
+      ];
+    } else {
+      return [
+        { value: "all", label: "Status" },
+        { value: "new", label: "New" },
+        { value: "case-number-open", label: "Case Number Open" },
+        { value: "authorized", label: "Authorized" },
+        { value: "denied", label: "Denied" },
+      ];
+    }
+  };
+
+  const statusOptions = getStatusOptions();
 
   const dateOptions = [
     { value: "all", label: "Date" },

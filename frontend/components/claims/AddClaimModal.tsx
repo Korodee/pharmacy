@@ -35,7 +35,7 @@ export default function AddClaimModal({
     prescriberPhone: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal" | "prior-authorization",
-    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied",
+    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer",
     authorizationNumber: "",
     authorizationStartDate: "",
     authorizationEndDate: "",

@@ -14,7 +14,7 @@ interface ClaimsTableProps {
   onDelete: (claim: ClaimDocument) => void;
   onStatusChange?: (
     claimId: string,
-    newStatus: "new" | "case-number-open" | "authorized" | "denied"
+    newStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer"
   ) => void;
   onAddNew?: () => void;
 }
@@ -114,6 +114,7 @@ export default function ClaimsTable({
                     <StatusBadge
                       status={claim.claimStatus}
                       size="sm"
+                      category={claim.category}
                       onChange={(newStatus) =>
                         onStatusChange?.(claim.id, newStatus)
                       }

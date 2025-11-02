@@ -12,7 +12,7 @@ export interface ClaimDocument {
   prescriberPhone?: string;
   dateOfPrescription: string;
   type: 'new' | 'renewal' | 'prior-authorization';
-  claimStatus: 'new' | 'case-number-open' | 'authorized' | 'denied';
+  claimStatus: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer';
   caseNumber?: string;
   authorizationNumber?: string;
   authorizationStartDate?: string;

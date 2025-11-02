@@ -3,12 +3,13 @@
 import { useState } from "react";
 
 interface StatusBadgeProps {
-  status: 'new' | 'case-number-open' | 'authorized' | 'denied';
+  status: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer';
   size?: 'sm' | 'md' | 'lg';
-  onChange?: (newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied') => void;
+  onChange?: (newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer') => void;
+  category?: string;
 }
 
-export default function StatusBadge({ status, size = 'md', onChange }: StatusBadgeProps) {
+export default function StatusBadge({ status, size = 'md', onChange, category }: StatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const menuRef = useState<HTMLDivElement | null>(null)[0];
@@ -26,6 +27,24 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
           label: 'Case Number Open',
           dotColor: 'bg-[#0A438C]',
           badgeClass: 'bg-[#E0F2F7] text-[#0A438C] border-[#0A438C]',
+        };
+      case 'patient-signed-letter':
+        return {
+          label: 'Patient Signed Letter',
+          dotColor: 'bg-yellow-600',
+          badgeClass: 'bg-yellow-50 text-yellow-600 border-yellow-600',
+        };
+      case 'letter-sent-to-doctor':
+        return {
+          label: 'Letter Sent to Doctor',
+          dotColor: 'bg-[#0A438C]',
+          badgeClass: 'bg-[#E0F2F7] text-[#0A438C] border-[#0A438C]',
+        };
+      case 'awaiting-answer':
+        return {
+          label: 'Awaiting Answer',
+          dotColor: 'bg-gray-500',
+          badgeClass: 'bg-gray-100 text-gray-800 border-gray-300',
         };
       case 'authorized':
         return {
@@ -63,14 +82,30 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
 
   const { label, dotColor, badgeClass } = getStatusConfig(status);
 
-  const options = [
-    { value: 'new', label: 'New', dotColor: 'bg-[#E97726]' },
-    { value: 'case-number-open', label: 'Case Number Open', dotColor: 'bg-[#0A438C]' },
-    { value: 'authorized', label: 'Authorized', dotColor: 'bg-[#007E2C]' },
-    { value: 'denied', label: 'Denied', dotColor: 'bg-red-600' },
-  ];
+  const getOptionsForCategory = () => {
+    if (category === 'appeals') {
+      return [
+        { value: 'new', label: 'New', dotColor: 'bg-[#E97726]' },
+        { value: 'patient-signed-letter', label: 'Patient Signed Letter', dotColor: 'bg-yellow-600' },
+        { value: 'letter-sent-to-doctor', label: 'Letter Sent to Doctor', dotColor: 'bg-[#0A438C]' },
+        { value: 'awaiting-answer', label: 'Awaiting Answer', dotColor: 'bg-gray-500' },
+        { value: 'authorized', label: 'Authorized', dotColor: 'bg-[#007E2C]' },
+        { value: 'denied', label: 'Denied', dotColor: 'bg-red-600' },
+      ];
+    } else {
+      // Medications and other categories
+      return [
+        { value: 'new', label: 'New', dotColor: 'bg-[#E97726]' },
+        { value: 'case-number-open', label: 'Case Number Open', dotColor: 'bg-[#0A438C]' },
+        { value: 'authorized', label: 'Authorized', dotColor: 'bg-[#007E2C]' },
+        { value: 'denied', label: 'Denied', dotColor: 'bg-red-600' },
+      ];
+    }
+  };
 
-  const handleSelect = (newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied') => {
+  const options = getOptionsForCategory();
+
+  const handleSelect = (newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer') => {
     onChange?.(newStatus);
     setIsOpen(false);
   };
@@ -85,7 +120,7 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - rect.bottom;
             const spaceAbove = rect.top;
-            const menuHeight = 170; // Approximate height based on 4 options
+            const menuHeight = category === 'appeals' ? 260 : 170; // Appeals has 6 options, others have 4
             
             // If not enough space below but more space above, show above
             const showAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;

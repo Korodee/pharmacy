@@ -32,7 +32,7 @@ export default function AddClaimPage() {
     prescriberPhone: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal",
-    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied",
+    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer",
     caseNumber: "",
     authorizationNumber: "",
     authorizationStartDate: "",
@@ -251,9 +251,13 @@ export default function AddClaimPage() {
       !formData.prescriberName ||
       !formData.prescriberLicense ||
       !formData.dateOfPrescription ||
-      !formData.type ||
       !formData.claimStatus
     ) {
+      showError("Please fill in all required fields");
+      return false;
+    }
+    // Type is only required for non-appeals categories
+    if (category !== "appeals" && !formData.type) {
       showError("Please fill in all required fields");
       return false;
     }
@@ -379,14 +383,14 @@ export default function AddClaimPage() {
 
               <div>
                 <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Product Name <span className="text-red-500">*</span>
+                  {category === "appeals" ? "Medication Name" : "Product Name"} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   name="productName"
                   value={formData.productName}
                   onChange={handleInputChange}
-                  placeholder="e.g Amoxicillin"
+                  placeholder={category === "appeals" ? "e.g Ozempic 0.5mg Pen" : "e.g Amoxicillin"}
                   className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                 />
               </div>
@@ -488,35 +492,37 @@ export default function AddClaimPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Type <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className="w-full px-4 text-[14px] py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none appearance-none bg-white text-gray-900"
-                  >
-                    <option value="new">New</option>
-                    <option value="renewal">Renewal</option>
-                  </select>
-                  <svg
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
+              {category !== "appeals" && (
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Type <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="type"
+                      value={formData.type}
+                      onChange={handleInputChange}
+                      className="w-full px-4 text-[14px] py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none appearance-none bg-white text-gray-900"
+                    >
+                      <option value="new">New</option>
+                      <option value="renewal">Renewal</option>
+                    </select>
+                    <svg
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {shouldShowCaseNumber() && (
                 <div className="md:col-span-2">
@@ -632,6 +638,102 @@ export default function AddClaimPage() {
                   placeholder="E1234567"
                   className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                 />
+              </div>
+            )}
+
+            {/* PDF Templates for Appeals */}
+            {category === "appeals" && (
+              <div className="mb-8">
+                <h3 className="block text-sm font-medium text-[#6E6C70] mb-4">
+                  Download Letter Templates
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <a
+                    href="/appeals-patient-letter.pdf"
+                    download="Patient_Letter_Template.pdf"
+                    className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                        <svg
+                          className="w-6 h-6 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          Patient Letter Template
+                        </p>
+                        <p className="text-xs text-gray-500">Standard letter for patient</p>
+                      </div>
+                    </div>
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                  </a>
+
+                  <a
+                    href="/appeals-doctor-letter.pdf"
+                    download="Doctor_Letter_Template.pdf"
+                    className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                        <svg
+                          className="w-6 h-6 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          Doctor Letter Template
+                        </p>
+                        <p className="text-xs text-gray-500">Letter for prescribing doctor</p>
+                      </div>
+                    </div>
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                  </a>
+                </div>
               </div>
             )}
 
