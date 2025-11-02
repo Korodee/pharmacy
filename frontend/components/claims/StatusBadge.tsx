@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 interface StatusBadgeProps {
-  status: 'new' | 'case-number-open' | 'authorized';
+  status: 'new' | 'case-number-open' | 'authorized' | 'denied';
   size?: 'sm' | 'md' | 'lg';
-  onChange?: (newStatus: 'new' | 'case-number-open' | 'authorized') => void;
+  onChange?: (newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied') => void;
 }
 
 export default function StatusBadge({ status, size = 'md', onChange }: StatusBadgeProps) {
@@ -32,6 +32,12 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
           label: 'Authorized',
           dotColor: 'bg-[#007E2C]',
           badgeClass: 'bg-[#E6F7ED] text-[#007E2C] border-[#007E2C]',
+        };
+      case 'denied':
+        return {
+          label: 'Denied',
+          dotColor: 'bg-red-600',
+          badgeClass: 'bg-red-50 text-red-600 border-red-600',
         };
       default:
         return {
@@ -61,9 +67,10 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
     { value: 'new', label: 'New', dotColor: 'bg-[#E97726]' },
     { value: 'case-number-open', label: 'Case Number Open', dotColor: 'bg-[#0A438C]' },
     { value: 'authorized', label: 'Authorized', dotColor: 'bg-[#007E2C]' },
+    { value: 'denied', label: 'Denied', dotColor: 'bg-red-600' },
   ];
 
-  const handleSelect = (newStatus: 'new' | 'case-number-open' | 'authorized') => {
+  const handleSelect = (newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied') => {
     onChange?.(newStatus);
     setIsOpen(false);
   };
@@ -78,7 +85,7 @@ export default function StatusBadge({ status, size = 'md', onChange }: StatusBad
             const viewportHeight = window.innerHeight;
             const spaceBelow = viewportHeight - rect.bottom;
             const spaceAbove = rect.top;
-            const menuHeight = 130; // Approximate height based on 3 options
+            const menuHeight = 170; // Approximate height based on 4 options
             
             // If not enough space below but more space above, show above
             const showAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;

@@ -59,7 +59,7 @@ export default function ClaimDetailsModal({
   };
 
   const handleStatusUpdate = async (
-    newStatus: "new" | "case-number-open" | "authorized"
+    newStatus: "new" | "case-number-open" | "authorized" | "denied"
   ) => {
     try {
       const response = await fetch("/api/claims", {
@@ -267,7 +267,7 @@ export default function ClaimDetailsModal({
 
               {claim.prescriberPhone && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Prescriber Phone</span>
+                  <span className="text-sm text-gray-600">{claim.category === "medications" ? "DIN/#Item" : "Prescriber Phone"}</span>
                   <span className="text-sm font-medium text-gray-900">{claim.prescriberPhone}</span>
                 </div>
               )}

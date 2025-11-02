@@ -32,7 +32,7 @@ export default function AddClaimPage() {
     prescriberPhone: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal",
-    claimStatus: "new" as "new" | "case-number-open" | "authorized",
+    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied",
     caseNumber: "",
     authorizationNumber: "",
     authorizationStartDate: "",
@@ -437,7 +437,7 @@ export default function AddClaimPage() {
 
               <div>
                 <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Prescriber Phone
+                  {category === "medications" ? "DIN/#Item" : "Prescriber Phone"}
                 </label>
                 <input
                   type="tel"
@@ -446,7 +446,7 @@ export default function AddClaimPage() {
                   onChange={(e) =>
                     handlePhoneChange(e.target.name, e.target.value)
                   }
-                  placeholder="(XXX) XXX-XXXX"
+                  placeholder={category === "medications" ? "DIN-XXXXXXX" : "(XXX) XXX-XXXX"}
                   className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                 />
               </div>

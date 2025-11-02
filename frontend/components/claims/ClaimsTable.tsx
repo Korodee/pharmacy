@@ -14,7 +14,7 @@ interface ClaimsTableProps {
   onDelete: (claim: ClaimDocument) => void;
   onStatusChange?: (
     claimId: string,
-    newStatus: "new" | "case-number-open" | "authorized"
+    newStatus: "new" | "case-number-open" | "authorized" | "denied"
   ) => void;
   onAddNew?: () => void;
 }

@@ -35,7 +35,7 @@ export default function AddClaimModal({
     prescriberPhone: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal" | "prior-authorization",
-    claimStatus: "new" as "new" | "case-number-open" | "authorized",
+    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied",
     authorizationNumber: "",
     authorizationStartDate: "",
     authorizationEndDate: "",
@@ -336,14 +336,14 @@ export default function AddClaimModal({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prescriber Phone (Optional)
+                    {category === "medications" ? "DIN/#Item (Optional)" : "Prescriber Phone (Optional)"}
                   </label>
                   <input
                     type="text"
                     name="prescriberPhone"
                     value={formData.prescriberPhone}
                     onChange={handleInputChange}
-                    placeholder="+1 (416) 123-4567"
+                    placeholder={category === "medications" ? "DIN-XXXXXXX" : "+1 (416) 123-4567"}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
                 </div>
@@ -392,6 +392,7 @@ export default function AddClaimModal({
                     <option value="new">New</option>
                     <option value="case-number-open">Case Number Open</option>
                     <option value="authorized">Authorized</option>
+                    <option value="denied">Denied</option>
                   </select>
                 </div>
 

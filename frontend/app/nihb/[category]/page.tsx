@@ -96,7 +96,7 @@ export default function NIHBCategoryPage() {
     }
   };
 
-  const handleStatusChange = async (claimId: string, newStatus: 'new' | 'case-number-open' | 'authorized') => {
+  const handleStatusChange = async (claimId: string, newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied') => {
     try {
       const response = await fetch(`/api/claims?id=${claimId}`, {
         method: "PUT",
@@ -135,6 +135,7 @@ export default function NIHBCategoryPage() {
     caseNumberOpen: claims.filter((c) => c.claimStatus === "case-number-open")
       .length,
     completed: claims.filter((c) => c.claimStatus === "authorized").length,
+    denied: claims.filter((c) => c.claimStatus === "denied").length,
   };
 
   // Filter claims
@@ -257,6 +258,7 @@ export default function NIHBCategoryPage() {
           new={stats.new}
           caseNumberOpen={stats.caseNumberOpen}
           completed={stats.completed}
+          denied={stats.denied}
           category={category}
           onAddClaim={() => {}}
         />

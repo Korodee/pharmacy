@@ -7,6 +7,7 @@ interface DashboardSummaryProps {
   new: number;
   caseNumberOpen: number;
   completed: number;
+  denied: number;
   category: string;
   onAddClaim: () => void;
 }
@@ -16,6 +17,7 @@ export default function DashboardSummary({
   new: newCount,
   caseNumberOpen,
   completed,
+  denied,
   category,
   onAddClaim,
 }: DashboardSummaryProps) {
@@ -23,11 +25,12 @@ export default function DashboardSummary({
     { label: "Total Claims", value: total },
     { label: "New Claims", value: newCount },
     { label: "Case Number Open", value: caseNumberOpen },
+    { label: "Denied", value: denied },
     { label: "Completed", value: completed },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       {stats.map((stat, index) => (
         <div
           key={stat.label}

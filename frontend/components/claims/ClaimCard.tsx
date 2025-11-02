@@ -17,7 +17,7 @@ interface ClaimDocument {
   prescriberPhone?: string;
   dateOfPrescription: string;
   type: "new" | "renewal" | "prior-authorization";
-  claimStatus: "new" | "case-number-open" | "authorized";
+  claimStatus: "new" | "case-number-open" | "authorized" | "denied";
   caseNumber?: string;
   authorizationNumber?: string;
   authorizationStartDate?: string;

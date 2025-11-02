@@ -32,6 +32,7 @@ export default function ClaimFilters({
     { value: "new", label: "New" },
     { value: "case-number-open", label: "Case Number Open" },
     { value: "authorized", label: "Authorized" },
+    { value: "denied", label: "Denied" },
   ];
 
   const dateOptions = [
