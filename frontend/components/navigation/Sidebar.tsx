@@ -155,8 +155,24 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
         ))}
       </nav>
 
+      {/* Deleted Claims Link */}
+      <div className="border-t border-gray-200 p-2">
+        <Link href="/admin/deleted-claims">
+          <div className={`flex items-center space-x-3 py-3 px-4 rounded-lg transition-colors ${
+            pathname?.includes("/admin/deleted-claims")
+              ? "bg-[#0A438C] text-white"
+              : "text-[#6E6C70] hover:bg-gray-50"
+          }`}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span className="text-sm font-medium">Deleted Claims</span>
+          </div>
+        </Link>
+      </div>
+
       {/* Sign Out */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t pt-4 border-gray-200 px-4 pb-4">
         <button
           onClick={onSignOut}
           className="flex items-center space-x-3 w-full text-[#DC3545] hover:text-red-700 transition-colors"

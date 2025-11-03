@@ -21,16 +21,25 @@ export default function DashboardSummary({
   category,
   onAddClaim,
 }: DashboardSummaryProps) {
-  const stats = [
-    { label: "Total Claims", value: total },
-    { label: "New Claims", value: newCount },
-    { label: "Case Number Open", value: caseNumberOpen },
-    { label: "Denied", value: denied },
-    { label: "Completed", value: completed },
-  ];
+  const stats = category === "appeals" 
+    ? [
+        { label: "Total Claims", value: total },
+        { label: "New Claims", value: newCount },
+        { label: "Denied", value: denied },
+        { label: "Completed", value: completed },
+      ]
+    : [
+        { label: "Total Claims", value: total },
+        { label: "New Claims", value: newCount },
+        { label: "Case Number Open", value: caseNumberOpen },
+        { label: "Denied", value: denied },
+        { label: "Completed", value: completed },
+      ];
+
+  const gridCols = category === "appeals" ? "lg:grid-cols-4" : "lg:grid-cols-5";
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 ${gridCols} gap-4`}>
       {stats.map((stat, index) => (
         <div
           key={stat.label}

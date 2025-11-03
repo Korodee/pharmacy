@@ -165,7 +165,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     const body = await request.json().catch(() => ({}));
-    const { deletionNote } = body;
+    const { deletionNote, deletedBy } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -192,7 +192,7 @@ export async function DELETE(request: NextRequest) {
       ...claim,
       archivedAt: new Date().toISOString(),
       deletionNote: deletionNote || '',
-      archivedBy: 'Admin User', // TODO: Get from auth context
+      archivedBy: deletedBy || 'Admin User',
     };
     
     await archivesCollection.insertOne(archivedClaim);

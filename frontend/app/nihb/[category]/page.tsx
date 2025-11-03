@@ -72,14 +72,14 @@ export default function NIHBCategoryPage() {
     router.push(`${baseNIHBPath}/${category}/add?id=${claim.id}` as any);
   };
 
-  const handleDelete = async (claim: ClaimDocument, deletionNote?: string) => {
+  const handleDelete = async (claim: ClaimDocument, deletionNote?: string, deletedBy?: string) => {
     try {
       const response = await fetch(`/api/claims?id=${claim.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ deletionNote: deletionNote || '' }),
+        body: JSON.stringify({ deletionNote: deletionNote || '', deletedBy: deletedBy || '' }),
       });
 
       const data = await response.json();
