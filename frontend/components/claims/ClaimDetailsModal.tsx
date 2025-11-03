@@ -279,12 +279,14 @@ export default function ClaimDetailsModal({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <span className="text-sm text-gray-600">Prescription Type</span>
-                <span className="text-sm font-medium text-gray-900">
-                  <TypeBadge type={claim.type} size="sm" />
-                </span>
-              </div>
+              {claim.category !== "appeals" && (
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-600">Prescription Type</span>
+                  <span className="text-sm font-medium text-gray-900">
+                    <TypeBadge type={claim.type} size="sm" />
+                  </span>
+                </div>
+              )}
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <span className="text-sm text-gray-600">Status</span>
                 <span className="text-sm font-medium text-gray-900">

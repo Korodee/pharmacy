@@ -87,7 +87,7 @@ export default function ClaimCard({
                 </span>
               )}
               <StatusBadge status={claim.claimStatus} size="sm" category={claim.category} />
-              <TypeBadge type={claim.type} size="sm" />
+              {claim.category !== "appeals" && <TypeBadge type={claim.type} size="sm" />}
             </div>
             <p className="text-sm font-medium text-gray-900 mb-1">
               {claim.productName}

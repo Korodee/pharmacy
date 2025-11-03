@@ -292,6 +292,7 @@ export default function NIHBCategoryPage() {
               onDelete={handleDelete}
               onStatusChange={handleStatusChange}
               onAddNew={() => router.push(`${baseNIHBPath}/${category}/add` as any)}
+              category={category}
             />
 
             {/* Pagination */}

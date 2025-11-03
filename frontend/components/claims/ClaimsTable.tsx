@@ -17,6 +17,7 @@ interface ClaimsTableProps {
     newStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer"
   ) => void;
   onAddNew?: () => void;
+  category?: string;
 }
 
 export default function ClaimsTable({
@@ -26,7 +27,9 @@ export default function ClaimsTable({
   onDelete,
   onStatusChange,
   onAddNew,
+  category,
 }: ClaimsTableProps) {
+  const isAppeals = category === 'appeals';
   const [showMenu, setShowMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
@@ -56,9 +59,11 @@ export default function ClaimsTable({
               <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
                 Prescription Date
               </th>
-              <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
-                Type
-              </th>
+              {!isAppeals && (
+                <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
+                  Type
+                </th>
+              )}
               <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
                 Status
               </th>
@@ -72,7 +77,7 @@ export default function ClaimsTable({
           <tbody className="bg-white divide-y divide-gray-200">
                 {claims.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-12 text-center">
+                <td colSpan={isAppeals ? 8 : 9} className="px-4 py-12 text-center">
                   <div className="text-[#888888] text-sm mb-4">No Feedback</div>
                   <button
                     onClick={(e) => {
@@ -107,9 +112,11 @@ export default function ClaimsTable({
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                     {formatDate(claim.dateOfPrescription)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <TypeBadge type={claim.type} size="sm" />
-                  </td>
+                  {!isAppeals && (
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <TypeBadge type={claim.type} size="sm" />
+                    </td>
+                  )}
                   <td className="px-4 py-3 whitespace-nowrap">
                     <StatusBadge
                       status={claim.claimStatus}
