@@ -11,7 +11,7 @@ interface ClaimsTableProps {
   claims: ClaimDocument[];
   onClaimClick: (claim: ClaimDocument) => void;
   onEdit: (claim: ClaimDocument) => void;
-  onDelete: (claim: ClaimDocument) => void;
+  onDelete: (claim: ClaimDocument, deletionNote?: string) => void;
   onStatusChange?: (
     claimId: string,
     newStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer"
@@ -32,6 +32,9 @@ export default function ClaimsTable({
   const isAppeals = category === 'appeals';
   const [showMenu, setShowMenu] = useState<string | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [claimToDelete, setClaimToDelete] = useState<ClaimDocument | null>(null);
+  const [deleteNote, setDeleteNote] = useState("");
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -39,6 +42,22 @@ export default function ClaimsTable({
       month: "2-digit",
       day: "2-digit",
     });
+  };
+
+  const handleDeleteClick = (claim: ClaimDocument) => {
+    setClaimToDelete(claim);
+    setShowDeleteModal(true);
+    setShowMenu(null);
+    setMenuPosition(null);
+  };
+
+  const handleConfirmDelete = () => {
+    if (claimToDelete && deleteNote.trim()) {
+      onDelete(claimToDelete, deleteNote);
+      setShowDeleteModal(false);
+      setClaimToDelete(null);
+      setDeleteNote("");
+    }
   };
 
   return (
@@ -239,6 +258,17 @@ export default function ClaimsTable({
             >
               View Claim
             </button>
+            <div className="border-t border-gray-200"></div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                const claim = claims.find(c => c.id === showMenu);
+                if (claim) handleDeleteClick(claim);
+              }}
+              className="w-full text-left px-4 py-3 text-sm text-red-600 font-[300] hover:bg-gray-50"
+            >
+              Delete Claim
+            </button>
           </div>
           <div
             className="fixed inset-0 z-[9998]"
@@ -247,6 +277,74 @@ export default function ClaimsTable({
               setMenuPosition(null);
             }}
           />
+        </>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center"
+            onClick={() => {
+              setShowDeleteModal(false);
+              setClaimToDelete(null);
+              setDeleteNote("");
+            }}
+          >
+            <div
+              className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Delete Claim
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Are you sure you want to delete this claim? This action cannot be undone.
+              </p>
+              {claimToDelete && (
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  <p className="text-sm font-medium text-gray-900">
+                    {claimToDelete.rxNumber} - {claimToDelete.productName}
+                  </p>
+                </div>
+              )}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reason for deletion <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={deleteNote}
+                  onChange={(e) => setDeleteNote(e.target.value)}
+                  placeholder="Enter a note explaining why this claim is being deleted..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 resize-none"
+                  rows={4}
+                />
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setClaimToDelete(null);
+                    setDeleteNote("");
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  disabled={!deleteNote.trim()}
+                  className={`px-4 py-2 text-sm font-medium text-white rounded-lg ${
+                    deleteNote.trim()
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  Delete Claim
+                </button>
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>

@@ -72,20 +72,20 @@ export default function NIHBCategoryPage() {
     router.push(`${baseNIHBPath}/${category}/add?id=${claim.id}` as any);
   };
 
-  const handleDelete = async (claim: ClaimDocument) => {
-    if (!confirm(`Are you sure you want to delete claim ${claim.rxNumber}?`)) {
-      return;
-    }
-
+  const handleDelete = async (claim: ClaimDocument, deletionNote?: string) => {
     try {
       const response = await fetch(`/api/claims?id=${claim.id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ deletionNote: deletionNote || '' }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        showSuccess("Claim deleted successfully");
+        showSuccess("Claim archived successfully");
         fetchClaims();
       } else {
         showError(data.error || "Failed to delete claim");

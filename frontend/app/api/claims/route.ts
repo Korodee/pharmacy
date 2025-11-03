@@ -164,6 +164,8 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const body = await request.json().catch(() => ({}));
+    const { deletionNote } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -173,18 +175,41 @@ export async function DELETE(request: NextRequest) {
     }
 
     const collection = await getCollection(COLLECTION_NAME);
-    const result = await collection.deleteOne({ id });
-
-    if (result.deletedCount === 0) {
+    const archivesCollection = await getCollection('archived_claims');
+    
+    // Get the claim before deleting
+    const claim = await collection.findOne({ id });
+    
+    if (!claim) {
       return NextResponse.json(
         { success: false, error: 'Claim not found' },
         { status: 404 }
       );
     }
 
+    // Archive the claim with deletion note
+    const archivedClaim = {
+      ...claim,
+      archivedAt: new Date().toISOString(),
+      deletionNote: deletionNote || '',
+      archivedBy: 'Admin User', // TODO: Get from auth context
+    };
+    
+    await archivesCollection.insertOne(archivedClaim);
+
+    // Delete from main collection
+    const result = await collection.deleteOne({ id });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to delete claim' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ 
       success: true,
-      message: 'Claim deleted successfully'
+      message: 'Claim archived successfully'
     });
   } catch (error) {
     console.error('Error deleting claim:', error);
