@@ -402,12 +402,10 @@ export default function AddClaimPage() {
                       DIN/#Item
                     </label>
                     <input
-                      type="tel"
+                      type="text"
                       name="prescriberPhone"
                       value={formData.prescriberPhone}
-                      onChange={(e) =>
-                        handlePhoneChange(e.target.name, e.target.value)
-                      }
+                      onChange={handleInputChange}
                       placeholder="DIN-XXXXXXX"
                       className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                     />
@@ -508,12 +506,10 @@ export default function AddClaimPage() {
                       {category === "medications" ? "DIN/#Item" : "Prescriber Phone"}
                     </label>
                     <input
-                      type="tel"
+                      type={category === "medications" ? "text" : "tel"}
                       name="prescriberPhone"
                       value={formData.prescriberPhone}
-                      onChange={(e) =>
-                        handlePhoneChange(e.target.name, e.target.value)
-                      }
+                      onChange={category === "medications" ? handleInputChange : (e) => handlePhoneChange(e.target.name, e.target.value)}
                       placeholder={category === "medications" ? "DIN-XXXXXXX" : "(XXX) XXX-XXXX"}
                       className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                     />
