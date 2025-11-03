@@ -32,7 +32,7 @@ export default function AddClaimModal({
     prescriberName: "",
     prescriberLicense: "",
     prescriberFax: "",
-    prescriberPhone: "",
+    dinItem: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal" | "prior-authorization",
     claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer",
@@ -52,7 +52,7 @@ export default function AddClaimModal({
         prescriberName: existingClaim.prescriberName,
         prescriberLicense: existingClaim.prescriberLicense,
         prescriberFax: existingClaim.prescriberFax || "",
-        prescriberPhone: existingClaim.prescriberPhone || "",
+        dinItem: existingClaim.dinItem || "",
         dateOfPrescription: existingClaim.dateOfPrescription,
         type: existingClaim.type,
         claimStatus: existingClaim.claimStatus,
@@ -70,7 +70,7 @@ export default function AddClaimModal({
         prescriberName: "",
         prescriberLicense: "",
         prescriberFax: "",
-        prescriberPhone: "",
+        dinItem: "",
         dateOfPrescription: "",
         type: "new",
         claimStatus: "new",
@@ -336,14 +336,14 @@ export default function AddClaimModal({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {category === "medications" ? "DIN/#Item (Optional)" : "Prescriber Phone (Optional)"}
+                    DIN/#Item (Optional)
                   </label>
                   <input
                     type="text"
-                    name="prescriberPhone"
-                    value={formData.prescriberPhone}
+                    name="dinItem"
+                    value={formData.dinItem}
                     onChange={handleInputChange}
-                    placeholder={category === "medications" ? "DIN-XXXXXXX" : "+1 (416) 123-4567"}
+                    placeholder="DIN-XXXXXXX"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
                 </div>

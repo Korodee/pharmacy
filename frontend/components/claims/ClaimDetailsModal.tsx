@@ -265,10 +265,10 @@ export default function ClaimDetailsModal({
                 </div>
               )}
 
-              {claim.prescriberPhone && (
+              {claim.dinItem && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">{claim.category === "medications" ? "DIN/#Item" : "Prescriber Phone"}</span>
-                  <span className="text-sm font-medium text-gray-900">{claim.prescriberPhone}</span>
+                  <span className="text-sm text-gray-600">DIN/#Item</span>
+                  <span className="text-sm font-medium text-gray-900">{claim.dinItem}</span>
                 </div>
               )}
 

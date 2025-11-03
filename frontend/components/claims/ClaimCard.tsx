@@ -14,7 +14,7 @@ interface ClaimDocument {
   prescriberName: string;
   prescriberLicense: string;
   prescriberFax?: string;
-  prescriberPhone?: string;
+  dinItem?: string;
   dateOfPrescription: string;
   type: "new" | "renewal" | "prior-authorization";
   claimStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer";

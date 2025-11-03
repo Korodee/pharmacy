@@ -9,7 +9,7 @@ export interface ClaimDocument {
   prescriberName: string;
   prescriberLicense: string;
   prescriberFax?: string;
-  prescriberPhone?: string;
+  dinItem?: string;
   dateOfPrescription: string;
   type: 'new' | 'renewal' | 'prior-authorization';
   claimStatus: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer';
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       prescriberName: body.prescriberName,
       prescriberLicense: body.prescriberLicense,
       prescriberFax: body.prescriberFax || '',
-      prescriberPhone: body.prescriberPhone || '',
+      dinItem: body.dinItem || '',
       dateOfPrescription: body.dateOfPrescription,
       type: body.type,
       claimStatus: body.claimStatus,

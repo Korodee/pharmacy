@@ -29,7 +29,7 @@ export default function AddClaimPage() {
     prescriberName: "",
     prescriberLicense: "",
     prescriberFax: "",
-    prescriberPhone: "",
+    dinItem: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal",
     claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer",
@@ -61,7 +61,7 @@ export default function AddClaimPage() {
             prescriberName: c.prescriberName || "",
             prescriberLicense: c.prescriberLicense || "",
             prescriberFax: c.prescriberFax || "",
-            prescriberPhone: c.prescriberPhone || "",
+            dinItem: c.dinItem || "",
             dateOfPrescription: c.dateOfPrescription || "",
             type: c.type || "new",
             claimStatus: c.claimStatus || "new",
@@ -85,7 +85,7 @@ export default function AddClaimPage() {
               prescriberName: c.prescriberName || "",
               prescriberLicense: c.prescriberLicense || "",
               prescriberFax: c.prescriberFax || "",
-              prescriberPhone: c.prescriberPhone || "",
+              dinItem: c.dinItem || "",
               dateOfPrescription: c.dateOfPrescription || "",
               type: c.type || "new",
               claimStatus: c.claimStatus || "new",
@@ -403,8 +403,8 @@ export default function AddClaimPage() {
                     </label>
                     <input
                       type="text"
-                      name="prescriberPhone"
-                      value={formData.prescriberPhone}
+                      name="dinItem"
+                      value={formData.dinItem}
                       onChange={handleInputChange}
                       placeholder="DIN-XXXXXXX"
                       className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
@@ -503,14 +503,14 @@ export default function AddClaimPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      {category === "medications" ? "DIN/#Item" : "Prescriber Phone"}
+                      DIN/#Item
                     </label>
                     <input
-                      type={category === "medications" ? "text" : "tel"}
-                      name="prescriberPhone"
-                      value={formData.prescriberPhone}
-                      onChange={category === "medications" ? handleInputChange : (e) => handlePhoneChange(e.target.name, e.target.value)}
-                      placeholder={category === "medications" ? "DIN-XXXXXXX" : "(XXX) XXX-XXXX"}
+                      type="text"
+                      name="dinItem"
+                      value={formData.dinItem}
+                      onChange={handleInputChange}
+                      placeholder="DIN-XXXXXXX"
                       className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                     />
                   </div>
