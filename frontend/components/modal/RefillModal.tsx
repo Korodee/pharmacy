@@ -199,8 +199,6 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     const isFriday = dayOfWeek === 5;
     const businessEnd = isSaturday ? 13.5 : isFriday ? 17.5 : 19.5; // 1:30 PM Saturday, 5:30 PM Friday, 7:30 PM other days
 
-    console.log(`RefillModal: Generating slots for selected date: ${formData.preferredDate}, day ${dayOfWeek}, businessEnd: ${businessEnd}`);
-
     let currentTime = new Date(startTime);
 
     // If it's exactly 9:30 AM, start there; otherwise round up to next 15-minute interval
@@ -238,8 +236,6 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
         minute: "2-digit",
         hour12: true,
       });
-
-      console.log(`RefillModal: Adding slot: ${timeString} (${currentTime.getHours()}:${currentTime.getMinutes()})`);
 
       slots.push({
         value: timeString,
@@ -361,6 +357,10 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
     setIsSubmitting(true);
 
     try {
+      // Get CAPTCHA token
+      const { getCaptchaToken } = await import("@/lib/captcha");
+      const captchaToken = await getCaptchaToken("refill_submit");
+
       const response = await fetch("/api/requests", {
         method: "POST",
         headers: {
@@ -375,6 +375,7 @@ export default function RefillModal({ isOpen, onClose }: RefillModalProps) {
           preferredDate: formData.preferredDate,
           preferredTime: formData.preferredTime,
           comments: formData.comments,
+          captchaToken,
         }),
       });
 

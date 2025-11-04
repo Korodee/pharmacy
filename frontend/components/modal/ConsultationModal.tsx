@@ -241,8 +241,6 @@ export default function ConsultationModal({
         hour12: true,
       });
 
-      console.log(`Adding slot: ${timeString} (${currentTime.getHours()}:${currentTime.getMinutes()})`);
-
       slots.push({
         value: timeString,
         label: timeString,
@@ -390,6 +388,10 @@ export default function ConsultationModal({
     setIsSubmitting(true);
 
     try {
+      // Get CAPTCHA token
+      const { getCaptchaToken } = await import("@/lib/captcha");
+      const captchaToken = await getCaptchaToken("consultation_submit");
+
       const response = await fetch("/api/requests", {
         method: "POST",
         headers: {
@@ -401,6 +403,7 @@ export default function ConsultationModal({
           service: formData.service,
           preferredDateTime: `${formData.preferredDate} ${formData.preferredTime}`,
           additionalNote: formData.additionalNote,
+          captchaToken,
         }),
       });
 

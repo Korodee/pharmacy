@@ -1,9 +1,21 @@
 import { jwtVerify } from 'jose';
 import { NextRequest } from 'next/server';
+import { getAuthConfig } from './authConfig';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
-);
+function getJwtSecret() {
+  try {
+    const authConfig = getAuthConfig();
+    return new TextEncoder().encode(authConfig.jwtSecret);
+  } catch (error) {
+    // Fallback for development only - should not happen in production
+    console.error('Error getting auth config:', error);
+    const secret = process.env.JWT_SECRET;
+    if (!secret || secret === 'your-super-secret-jwt-key-change-this-in-production') {
+      throw new Error('JWT_SECRET must be configured in environment variables');
+    }
+    return new TextEncoder().encode(secret);
+  }
+}
 
 export async function verifyToken(request: NextRequest) {
   try {
@@ -13,6 +25,7 @@ export async function verifyToken(request: NextRequest) {
       return null;
     }
 
+    const JWT_SECRET = getJwtSecret();
     const { payload } = await jwtVerify(token, JWT_SECRET);
     return payload;
   } catch (error) {

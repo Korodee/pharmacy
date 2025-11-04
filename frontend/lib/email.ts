@@ -39,7 +39,6 @@ export async function sendEmail({ to, subject, html }: EmailData) {
     }
 
     const result = await response.json();
-    console.log('Email sent successfully:', result);
     return result;
   } catch (error) {
     console.error('Failed to send email:', error);

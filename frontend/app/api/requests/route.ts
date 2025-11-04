@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email';
 import { getCollection } from '@/lib/mongodb';
+import { verifyCaptcha } from '@/lib/captcha';
 
 export interface RefillRequest {
   id: string;
@@ -33,7 +34,25 @@ const COLLECTION_NAME = 'requests';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { type, ...data } = body;
+    const { type, captchaToken, ...data } = body;
+
+    // Verify CAPTCHA
+    if (process.env.RECAPTCHA_SECRET_KEY) {
+      if (!captchaToken) {
+        return NextResponse.json(
+          { success: false, error: 'CAPTCHA verification required' },
+          { status: 400 }
+        );
+      }
+
+      const isValid = await verifyCaptcha(captchaToken);
+      if (!isValid) {
+        return NextResponse.json(
+          { success: false, error: 'CAPTCHA verification failed. Please try again.' },
+          { status: 400 }
+        );
+      }
+    }
 
     const newRequest: RequestData = {
       id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,

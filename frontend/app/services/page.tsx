@@ -171,7 +171,6 @@ export default function ServicesPage() {
     e.preventDefault();
     if (selectedService && phoneNumber) {
       // Here you would typically send the data to your backend
-      console.log("Service Request:", { selectedService, phoneNumber });
       setIsSubmitted(true);
     }
   };
