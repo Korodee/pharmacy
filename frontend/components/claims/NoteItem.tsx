@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface Note {
   id: string;
   text: string;
@@ -14,6 +16,7 @@ interface NoteItemProps {
 }
 
 export default function NoteItem({ note, onDelete, canDelete = false }: NoteItemProps) {
+  const [copied, setCopied] = useState(false);
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -47,26 +50,44 @@ export default function NoteItem({ note, onDelete, canDelete = false }: NoteItem
           </p>
           <p className="text-xs text-gray-500">{formatTimestamp(note.timestamp)}</p>
         </div>
-        {canDelete && onDelete && (
+        <div className="flex items-center gap-3">
           <button
-            onClick={() => onDelete(note.id)}
-            className="text-red-600 hover:text-red-800 transition-colors"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(note.text || "");
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              } catch (e) {
+                // silently fail
+              }
+            }}
+            className="text-[#0A438C] hover:text-[#003366] text-xs font-medium"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
+            {copied ? 'Copied' : 'Copy'}
           </button>
-        )}
+          {canDelete && onDelete && (
+            <button
+              onClick={() => onDelete(note.id)}
+              className="text-red-600 hover:text-red-800 transition-colors"
+              aria-label="Delete note"
+              title="Delete"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
       <p className="text-sm text-gray-700 whitespace-pre-wrap">{note.text}</p>
     </div>

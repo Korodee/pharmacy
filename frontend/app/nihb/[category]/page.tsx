@@ -26,6 +26,107 @@ export default function NIHBCategoryPage() {
     null
   );
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [showMetaModal, setShowMetaModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<
+    | null
+    | "authorized"
+    | "case-number-open"
+  >(null);
+  const [pendingClaimId, setPendingClaimId] = useState<string | null>(null);
+  const [authNumber, setAuthNumber] = useState("");
+  const [authStartDate, setAuthStartDate] = useState("");
+  const [authEndDate, setAuthEndDate] = useState("");
+  const [caseNumber, setCaseNumber] = useState("");
+
+  // Date picker state for modal (reuse UX)
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [currentDateField, setCurrentDateField] = useState<
+    "authorizationStartDate" | "authorizationEndDate" | ""
+  >("");
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const formatDateForDisplay = (yyyyMmDd: string) => {
+    if (!yyyyMmDd) return "";
+    const [y, m, d] = yyyyMmDd.split("-");
+    if (!y || !m || !d) return yyyyMmDd;
+    return `${m}/${d}/${y}`;
+  };
+
+  const openDatePicker = (
+    fieldName: "authorizationStartDate" | "authorizationEndDate"
+  ) => {
+    setCurrentDateField(fieldName);
+    setShowDatePicker(true);
+  };
+
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentMonth((prev) => {
+      const newMonth = new Date(prev);
+      if (direction === "prev") {
+        newMonth.setMonth(prev.getMonth() - 1);
+      } else {
+        newMonth.setMonth(prev.getMonth() + 1);
+      }
+      return newMonth;
+    });
+  };
+
+  const generateCalendarDays = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    // Allow selecting past dates as requested
+    const allowPastDates = true;
+
+    const days: Array<{
+      date: Date;
+      isCurrentMonth: boolean;
+      isToday: boolean;
+      isPast: boolean;
+      isSunday: boolean;
+      isAvailable: boolean;
+      dayNumber: number;
+    }> = [];
+    const cursor = new Date(startDate);
+    for (let i = 0; i < 42; i++) {
+      const isCurrentMonth = cursor.getMonth() === month;
+      const isToday = cursor.toDateString() === today.toDateString();
+      const isPast = cursor < todayStart;
+      const isSunday = cursor.getDay() === 0;
+      const isAvailable = (allowPastDates || !isPast) && !isSunday;
+      days.push({
+        date: new Date(cursor),
+        isCurrentMonth,
+        isToday,
+        isPast,
+        isSunday,
+        isAvailable,
+        dayNumber: cursor.getDate(),
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    return days;
+  };
+
+  const selectDate = (date: Date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    const iso = `${y}-${m}-${d}`;
+    if (currentDateField === "authorizationStartDate") {
+      setAuthStartDate(iso);
+    } else if (currentDateField === "authorizationEndDate") {
+      setAuthEndDate(iso);
+    }
+    setShowDatePicker(false);
+  };
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,6 +221,18 @@ export default function NIHBCategoryPage() {
       | "sent"
       | "payment-received"
   ) => {
+    // If switching to statuses that require extra info, open modal instead
+    if (newStatus === "authorized" || newStatus === "case-number-open") {
+      setPendingClaimId(claimId);
+      setPendingStatus(newStatus);
+      setAuthNumber("");
+      setAuthStartDate("");
+      setAuthEndDate("");
+      setCaseNumber("");
+      setShowMetaModal(true);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/claims?id=${claimId}`, {
         method: "PUT",
@@ -130,23 +243,7 @@ export default function NIHBCategoryPage() {
       const data = await response.json();
 
       if (data.success) {
-        if (newStatus === "authorized") {
-          showSuccess(
-            "Status updated successfully. Please update authorization start and end dates.",
-            8000
-          );
-          router.push(`${baseNIHBPath}/${category}/add?id=${claimId}` as any);
-          return;
-        } else if (newStatus === "case-number-open") {
-          showSuccess(
-            "Status updated successfully. Please add the case number.",
-            8000
-          );
-          router.push(`${baseNIHBPath}/${category}/add?id=${claimId}` as any);
-          return;
-        } else {
-          showSuccess("Status updated successfully.", 6000);
-        }
+        showSuccess("Status updated successfully.", 6000);
         fetchClaims();
       } else {
         showError(data.error || "Failed to update status");
@@ -413,6 +510,222 @@ export default function NIHBCategoryPage() {
             }
           }}
         />
+      )}
+
+      {showMetaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {pendingStatus === "authorized"
+                  ? "Add Authorization Details"
+                  : "Add Case Number"}
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {pendingStatus === "authorized"
+                  ? "Provide the authorization number and end date."
+                  : "Provide the case number for this claim."}
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {pendingStatus === "authorized" ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Authorization Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none text-gray-900 placeholder:text-gray-400"
+                      value={authNumber}
+                      onChange={(e) => setAuthNumber(e.target.value)}
+                      placeholder="e.g. 123456"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Authorization Start Date <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={formatDateForDisplay(authStartDate)}
+                        onClick={() => openDatePicker("authorizationStartDate")}
+                        placeholder="mm/dd/yyyy"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => openDatePicker("authorizationStartDate")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Authorization End Date <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={formatDateForDisplay(authEndDate)}
+                        onClick={() => openDatePicker("authorizationEndDate")}
+                        placeholder="mm/dd/yyyy"
+                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => openDatePicker("authorizationEndDate")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Case Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none text-gray-900 placeholder:text-gray-400"
+                    value={caseNumber}
+                    onChange={(e) => setCaseNumber(e.target.value)}
+                    placeholder="e.g. CN-00001"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={() => {
+                  setShowMetaModal(false);
+                  setPendingStatus(null);
+                  setPendingClaimId(null);
+                  setShowDatePicker(false);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 rounded-md bg-[#0A438C] text-white hover:bg-[#003366]"
+                onClick={async () => {
+                  if (!pendingClaimId || !pendingStatus) return;
+                  if (
+                    (pendingStatus === "authorized" && (!authNumber.trim() || !authStartDate || !authEndDate)) ||
+                    (pendingStatus === "case-number-open" && !caseNumber.trim())
+                  ) {
+                    showError("Please fill in the required fields.");
+                    return;
+                  }
+                  try {
+                    const body: Record<string, any> = { claimStatus: pendingStatus };
+                    if (pendingStatus === "authorized") {
+                      body.authorizationNumber = authNumber.trim();
+                      body.authorizationStartDate = authStartDate; // yyyy-mm-dd
+                      body.authorizationEndDate = authEndDate; // yyyy-mm-dd
+                    } else if (pendingStatus === "case-number-open") {
+                      body.caseNumber = caseNumber.trim();
+                    }
+                    const resp = await fetch(`/api/claims?id=${pendingClaimId}`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(body),
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                      showSuccess("Details saved and status updated.");
+                      setShowMetaModal(false);
+                      setPendingStatus(null);
+                      setPendingClaimId(null);
+                      setShowDatePicker(false);
+                      await fetchClaims();
+                    } else {
+                      showError(data.error || "Failed to save details");
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    showError("Network error. Please try again.");
+                  }
+                }}
+              >
+                Save
+              </button>
+            </div>
+
+            {showDatePicker && (
+              <div className="mt-4 p-4 border rounded-lg shadow-sm">
+                {/* Month navigation */}
+                <div className="flex items-center justify-between mb-2">
+                  <button
+                    type="button"
+                    className="p-1 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+                    onClick={() => navigateMonth("prev")}
+                    aria-label="Previous month"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div className="text-sm font-medium text-gray-700">
+                    {currentMonth.toLocaleString("default", { month: "long" })} {currentMonth.getFullYear()}
+                  </div>
+                  <button
+                    type="button"
+                    className="p-1 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900"
+                    onClick={() => navigateMonth("next")}
+                    aria-label="Next month"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                    <div key={d} className="p-2 text-center text-xs font-medium text-gray-500">
+                      {d}
+                    </div>
+                  ))}
+                  {generateCalendarDays().map((day, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => day.isAvailable && selectDate(day.date)}
+                      disabled={!day.isAvailable}
+                      className={`p-2 text-xs rounded-lg transition-colors text-center ${
+                        day.isAvailable
+                          ? day.isToday
+                            ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                            : day.isCurrentMonth
+                            ? "hover:bg-gray-100 text-gray-700"
+                            : "text-gray-400 hover:bg-gray-100"
+                          : "text-gray-300 cursor-not-allowed"
+                      }`}
+                    >
+                      {day.dayNumber}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </>
   );
