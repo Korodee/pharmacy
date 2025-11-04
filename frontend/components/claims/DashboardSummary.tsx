@@ -69,11 +69,7 @@ export default function DashboardSummary({
         <div
           key={stat.label}
           onClick={() => handleCardClick(stat)}
-          className={`bg-[#F1FAFD] border-[.5px] border-[#85CEE8] rounded-lg p-4 ${
-            stat.label !== "Total Claims"
-              ? "cursor-pointer hover:bg-[#E1F4F9] hover:border-[#0A438C] transition-all duration-200"
-              : ""
-          }`}
+          className="bg-[#F1FAFD] border-[.5px] border-[#85CEE8] rounded-lg p-4 cursor-pointer hover:bg-[#E1F4F9] hover:border-[#0A438C] transition-all duration-200"
         >
           <div className="text-sm font-medium text-[#888292] mb-4">
             {stat.label}
