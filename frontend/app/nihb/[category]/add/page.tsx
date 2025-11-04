@@ -199,7 +199,9 @@ export default function AddClaimPage() {
     startDate.setDate(startDate.getDate() - firstDay.getDay());
 
     // For prescription date and refill date, allow past dates. For authorization dates, restrict past dates.
-    const allowPastDates = currentDateField === "dateOfPrescription" || currentDateField === "dateOfRefill";
+    const allowPastDates =
+      currentDateField === "dateOfPrescription" ||
+      currentDateField === "dateOfRefill";
 
     const days = [];
     const currentDate = new Date(startDate);
@@ -306,8 +308,7 @@ export default function AddClaimPage() {
         !formData.productName ||
         !formData.dinItem ||
         !formData.manualClaimType ||
-        !formData.dateOfRefill ||
-        !formData.claimStatus
+        !formData.dateOfRefill
       ) {
         showError("Please fill in all required fields");
         return false;
@@ -354,6 +355,9 @@ export default function AddClaimPage() {
     try {
       const payload = {
         ...formData,
+        // For manual claims, always set status to "new"
+        claimStatus:
+          category === "manual-claims" ? "new" : formData.claimStatus,
         // Ensure date fields are saved in canonical YYYY-MM-DD
         dateOfPrescription:
           category === "manual-claims"
@@ -509,11 +513,11 @@ export default function AddClaimPage() {
                 </div>
 
                 {/* Manual Claim Type Selection */}
-                <div>
+                <div className="flex flex-col">
                   <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                     Manual Claim Type <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex space-x-4">
+                  <div className="flex items-center space-x-6 h-[44px]">
                     <label className="flex items-center cursor-pointer">
                       <input
                         type="radio"
@@ -523,7 +527,9 @@ export default function AddClaimPage() {
                         onChange={handleInputChange}
                         className="w-4 h-4 text-[#0A438C] border-gray-300 focus:ring-[#0A438C] cursor-pointer"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Baby Manual Claim</span>
+                      <span className="ml-2 text-sm text-gray-700">
+                        Baby Manual Claim
+                      </span>
                     </label>
                     <label className="flex items-center cursor-pointer">
                       <input
@@ -534,7 +540,9 @@ export default function AddClaimPage() {
                         onChange={handleInputChange}
                         className="w-4 h-4 text-[#0A438C] border-gray-300 focus:ring-[#0A438C] cursor-pointer"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Old Claim</span>
+                      <span className="ml-2 text-sm text-gray-700">
+                        Old Claim
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -543,7 +551,8 @@ export default function AddClaimPage() {
                 {formData.manualClaimType === "baby" && (
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-[#6E6C70] mb-3">
-                      Patient Reminder Checklist <span className="text-red-500">*</span>
+                      Patient Reminder Checklist{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                       <label className="flex items-center cursor-pointer">
@@ -554,7 +563,9 @@ export default function AddClaimPage() {
                           onChange={handleCheckboxChange}
                           className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] cursor-pointer"
                         />
-                        <span className="ml-2 text-sm text-gray-700">Parent's name on file</span>
+                        <span className="ml-2 text-sm text-gray-700">
+                          Parent's name on file
+                        </span>
                       </label>
                       <label className="flex items-center cursor-pointer">
                         <input
@@ -564,14 +575,16 @@ export default function AddClaimPage() {
                           onChange={handleCheckboxChange}
                           className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] cursor-pointer"
                         />
-                        <span className="ml-2 text-sm text-gray-700">Parent's band number updated</span>
+                        <span className="ml-2 text-sm text-gray-700">
+                          Parent's band number updated
+                        </span>
                       </label>
                     </div>
                   </div>
                 )}
 
                 {/* Date of Refill */}
-                <div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                     Date of Refill <span className="text-red-500">*</span>
                   </label>
@@ -607,38 +620,6 @@ export default function AddClaimPage() {
                     </button>
                   </div>
                 </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                    Status <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="claimStatus"
-                      value={formData.claimStatus}
-                      onChange={handleInputChange}
-                      className="w-full px-4 text-[14px] py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none appearance-none bg-white text-gray-900"
-                    >
-                      <option value="new">New</option>
-                      <option value="sent">Sent</option>
-                      <option value="payment-received">Payment Received</option>
-                    </select>
-                    <svg
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -658,7 +639,9 @@ export default function AddClaimPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                    {category === "appeals" ? "Medication Name" : "Product Name"}{" "}
+                    {category === "appeals"
+                      ? "Medication Name"
+                      : "Product Name"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -675,142 +658,8 @@ export default function AddClaimPage() {
                   />
                 </div>
 
-              {category === "appeals" ? (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      DIN/#Item
-                    </label>
-                    <input
-                      type="text"
-                      name="dinItem"
-                      value={formData.dinItem}
-                      onChange={handleInputChange}
-                      placeholder="DIN-XXXXXXX"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Prescriber Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="prescriberName"
-                      value={formData.prescriberName}
-                      onChange={handleInputChange}
-                      placeholder="eg. Dr. A. Johnson"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Prescriber License <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="prescriberLicense"
-                      value={formData.prescriberLicense}
-                      onChange={handleInputChange}
-                      placeholder="eg. CPSO #87921"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Prescriber Fax
-                    </label>
-                    <input
-                      type="tel"
-                      name="prescriberFax"
-                      value={formData.prescriberFax}
-                      onChange={(e) =>
-                        handlePhoneChange(e.target.name, e.target.value)
-                      }
-                      placeholder="(XXX) XXX-XXXX"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Prescriber Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="prescriberName"
-                      value={formData.prescriberName}
-                      onChange={handleInputChange}
-                      placeholder="eg. Dr. A. Johnson"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Prescriber License <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="prescriberLicense"
-                      value={formData.prescriberLicense}
-                      onChange={handleInputChange}
-                      placeholder="eg. CPSO #87921"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Prescriber Fax
-                    </label>
-                    <input
-                      type="tel"
-                      name="prescriberFax"
-                      value={formData.prescriberFax}
-                      onChange={(e) =>
-                        handlePhoneChange(e.target.name, e.target.value)
-                      }
-                      placeholder="(XXX) XXX-XXXX"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
-
-                  {category === "diapers-pads" ? (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                          DIN
-                        </label>
-                        <input
-                          type="text"
-                          name="din"
-                          value={formData.din}
-                          onChange={handleInputChange}
-                          placeholder="DIN-XXXXXXX"
-                          className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                          Item#
-                        </label>
-                        <input
-                          type="text"
-                          name="itemNumber"
-                          value={formData.itemNumber}
-                          onChange={handleInputChange}
-                          placeholder="Item Number"
-                          className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                        />
-                      </div>
-                    </>
-                  ) : (
+                {category === "appeals" ? (
+                  <>
                     <div>
                       <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                         DIN/#Item
@@ -824,153 +673,358 @@ export default function AddClaimPage() {
                         className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                       />
                     </div>
-                  )}
-                </>
-              )}
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Date of Prescription <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="dateOfPrescription"
-                    value={formatDateForDisplay(formData.dateOfPrescription)}
-                    onChange={handleInputChange}
-                    onClick={() => openDatePicker("dateOfPrescription")}
-                    placeholder="mm/dd/yyyy"
-                    className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                    readOnly
-                  />
-                  <button
-                    type="button"
-                    onClick={() => openDatePicker("dateOfPrescription")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {category !== "appeals" && (
-                <div>
-                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                    Type <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="type"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      className="w-full px-4 text-[14px] py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none appearance-none bg-white text-gray-900"
-                    >
-                      <option value="new">New</option>
-                      <option value="renewal">Renewal</option>
-                    </select>
-                    <svg
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                </div>
-              )}
-
-              {shouldShowCaseNumber() && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                    Case Number
-                  </label>
-                  <input
-                    type="text"
-                    name="caseNumber"
-                    value={formData.caseNumber}
-                    onChange={handleInputChange}
-                    placeholder="12345678"
-                    maxLength={8}
-                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                  />
-                </div>
-              )}
-
-              {shouldShowAuthorization() && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      Authorization Start Date
-                    </label>
-                    <div className="relative">
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Prescriber Name <span className="text-red-500">*</span>
+                      </label>
                       <input
                         type="text"
-                        name="authorizationStartDate"
-                        value={formatDateForDisplay(
-                          formData.authorizationStartDate
-                        )}
+                        name="prescriberName"
+                        value={formData.prescriberName}
                         onChange={handleInputChange}
-                        onClick={() => openDatePicker("authorizationStartDate")}
-                        placeholder="mm/dd/yyyy"
-                        className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                        readOnly
+                        placeholder="eg. Dr. A. Johnson"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                       />
-                      <button
-                        type="button"
-                        onClick={() => openDatePicker("authorizationStartDate")}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </button>
                     </div>
-                  </div>
 
-                  {category === "appeals" ? (
-                    <>
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Prescriber License{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="prescriberLicense"
+                        value={formData.prescriberLicense}
+                        onChange={handleInputChange}
+                        placeholder="eg. CPSO #87921"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Prescriber Fax
+                      </label>
+                      <input
+                        type="tel"
+                        name="prescriberFax"
+                        value={formData.prescriberFax}
+                        onChange={(e) =>
+                          handlePhoneChange(e.target.name, e.target.value)
+                        }
+                        placeholder="(XXX) XXX-XXXX"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Prescriber Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="prescriberName"
+                        value={formData.prescriberName}
+                        onChange={handleInputChange}
+                        placeholder="eg. Dr. A. Johnson"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Prescriber License{" "}
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="prescriberLicense"
+                        value={formData.prescriberLicense}
+                        onChange={handleInputChange}
+                        placeholder="eg. CPSO #87921"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Prescriber Fax
+                      </label>
+                      <input
+                        type="tel"
+                        name="prescriberFax"
+                        value={formData.prescriberFax}
+                        onChange={(e) =>
+                          handlePhoneChange(e.target.name, e.target.value)
+                        }
+                        placeholder="(XXX) XXX-XXXX"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                      />
+                    </div>
+
+                    {category === "diapers-pads" ? (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                            DIN
+                          </label>
+                          <input
+                            type="text"
+                            name="din"
+                            value={formData.din}
+                            onChange={handleInputChange}
+                            placeholder="DIN-XXXXXXX"
+                            className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                            Item#
+                          </label>
+                          <input
+                            type="text"
+                            name="itemNumber"
+                            value={formData.itemNumber}
+                            onChange={handleInputChange}
+                            placeholder="Item Number"
+                            className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                          />
+                        </div>
+                      </>
+                    ) : (
                       <div>
                         <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                          Authorization Number
+                          DIN/#Item
                         </label>
                         <input
                           type="text"
-                          name="authorizationNumber"
-                          value={formData.authorizationNumber}
+                          name="dinItem"
+                          value={formData.dinItem}
                           onChange={handleInputChange}
-                          placeholder="E1234567"
+                          placeholder="DIN-XXXXXXX"
                           className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                         />
                       </div>
+                    )}
+                  </>
+                )}
 
+                <div className={category === "appeals" ? "md:col-span-2" : ""}>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Date of Prescription <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="dateOfPrescription"
+                      value={formatDateForDisplay(formData.dateOfPrescription)}
+                      onChange={handleInputChange}
+                      onClick={() => openDatePicker("dateOfPrescription")}
+                      placeholder="mm/dd/yyyy"
+                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                      readOnly
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openDatePicker("dateOfPrescription")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {category !== "appeals" && (
+                  <div>
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Type <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        name="type"
+                        value={formData.type}
+                        onChange={handleInputChange}
+                        className="w-full px-4 text-[14px] py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none appearance-none bg-white text-gray-900"
+                      >
+                        <option value="new">New</option>
+                        <option value="renewal">Renewal</option>
+                      </select>
+                      <svg
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+
+                {shouldShowCaseNumber() && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                      Case Number
+                    </label>
+                    <input
+                      type="text"
+                      name="caseNumber"
+                      value={formData.caseNumber}
+                      onChange={handleInputChange}
+                      placeholder="12345678"
+                      maxLength={8}
+                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                    />
+                  </div>
+                )}
+
+                {shouldShowAuthorization() && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        Authorization Start Date
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="authorizationStartDate"
+                          value={formatDateForDisplay(
+                            formData.authorizationStartDate
+                          )}
+                          onChange={handleInputChange}
+                          onClick={() =>
+                            openDatePicker("authorizationStartDate")
+                          }
+                          placeholder="mm/dd/yyyy"
+                          className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                          readOnly
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openDatePicker("authorizationStartDate")
+                          }
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    {category === "appeals" ? (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                            Authorization Number
+                          </label>
+                          <input
+                            type="text"
+                            name="authorizationNumber"
+                            value={formData.authorizationNumber}
+                            onChange={handleInputChange}
+                            placeholder="E1234567"
+                            className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                            Authorization End Date
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              name="authorizationEndDate"
+                              value={formatDateForDisplay(
+                                formData.authorizationEndDate
+                              )}
+                              onChange={handleInputChange}
+                              onClick={() =>
+                                openDatePicker("authorizationEndDate")
+                              }
+                              placeholder="mm/dd/yyyy"
+                              className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                              readOnly
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                openDatePicker("authorizationEndDate")
+                              }
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Patient Signed Letter Checkbox for Appeals */}
+                        <div className="md:col-span-2">
+                          <label className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="patientSignedLetter"
+                              checked={formData.patientSignedLetter}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  patientSignedLetter: e.target.checked,
+                                }))
+                              }
+                              className="w-5 h-5 text-[#0A438C] border-gray-300 rounded focus:ring-2 focus:ring-[#0A438C] focus:ring-offset-2 cursor-pointer"
+                            />
+                            <span className="text-sm font-medium text-[#6E6C70]">
+                              Patient Signed Letter
+                            </span>
+                          </label>
+                        </div>
+                      </>
+                    ) : (
                       <div>
                         <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                           Authorization End Date
@@ -1013,88 +1067,29 @@ export default function AddClaimPage() {
                           </button>
                         </div>
                       </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
-                      {/* Patient Signed Letter Checkbox for Appeals */}
-                      <div className="md:col-span-2">
-                        <label className="flex items-center space-x-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            name="patientSignedLetter"
-                            checked={formData.patientSignedLetter}
-                            onChange={(e) =>
-                              setFormData((prev) => ({
-                                ...prev,
-                                patientSignedLetter: e.target.checked,
-                              }))
-                            }
-                            className="w-5 h-5 text-[#0A438C] border-gray-300 rounded focus:ring-2 focus:ring-[#0A438C] focus:ring-offset-2 cursor-pointer"
-                          />
-                          <span className="text-sm font-medium text-[#6E6C70]">
-                            Patient Signed Letter
-                          </span>
-                        </label>
-                      </div>
-                    </>
-                  ) : (
-                    <div>
-                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                        Authorization End Date
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="authorizationEndDate"
-                          value={formatDateForDisplay(
-                            formData.authorizationEndDate
-                          )}
-                          onChange={handleInputChange}
-                          onClick={() => openDatePicker("authorizationEndDate")}
-                          placeholder="mm/dd/yyyy"
-                          className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                          readOnly
-                        />
-                        <button
-                          type="button"
-                          onClick={() => openDatePicker("authorizationEndDate")}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
+            {shouldShowAuthorization() &&
+              category !== "appeals" &&
+              category !== "manual-claims" && (
+                <div className="mb-8">
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Authorization Number
+                  </label>
+                  <input
+                    type="text"
+                    name="authorizationNumber"
+                    value={formData.authorizationNumber}
+                    onChange={handleInputChange}
+                    placeholder="E1234567"
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
               )}
-              </div>
-            )}
-
-            {shouldShowAuthorization() && category !== "appeals" && category !== "manual-claims" && (
-              <div className="mb-8">
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  Authorization Number
-                </label>
-                <input
-                  type="text"
-                  name="authorizationNumber"
-                  value={formData.authorizationNumber}
-                  onChange={handleInputChange}
-                  placeholder="E1234567"
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
-              </div>
-            )}
 
             {/* PDF Templates for Appeals */}
             {category === "appeals" && (
