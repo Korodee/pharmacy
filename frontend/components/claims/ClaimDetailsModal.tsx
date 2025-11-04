@@ -59,7 +59,17 @@ export default function ClaimDetailsModal({
   };
 
   const handleStatusUpdate = async (
-    newStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer"
+    newStatus:
+      | "new"
+      | "case-number-open"
+      | "authorized"
+      | "denied"
+      | "letter-sent-to-doctor"
+      | "letters-received"
+      | "letters-sent-to-nihb"
+      | "form-filled"
+      | "form-sent-to-doctor"
+      | "sent-to-nihb"
   ) => {
     try {
       const response = await fetch("/api/claims", {
@@ -208,8 +218,12 @@ export default function ClaimDetailsModal({
             <div className="grid grid-cols-3 items-center">
               <div />
               <div className="text-center">
-                <h2 className="text-2xl font-semibold text-gray-900">View Claim</h2>
-                <p className="text-xs text-gray-500 mt-1 whitespace-nowrap">Created • {formatDateTime(claim.createdAt)}</p>
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  View Claim
+                </h2>
+                <p className="text-xs text-gray-500 mt-1 whitespace-nowrap">
+                  Created • {formatDateTime(claim.createdAt)}
+                </p>
               </div>
               <div className="flex justify-end">
                 <button
@@ -217,8 +231,18 @@ export default function ClaimDetailsModal({
                   className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 shadow-sm"
                   aria-label="Close"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -246,66 +270,197 @@ export default function ClaimDetailsModal({
                 </span>
               </div>
 
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <span className="text-sm text-gray-600">Prescriber</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {claim.prescriberName}
-                </span>
-              </div>
+              {claim.category !== "manual-claims" && (
+                <>
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <span className="text-sm text-gray-600">Prescriber</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {claim.prescriberName}
+                    </span>
+                  </div>
 
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <span className="text-sm text-gray-600">Prescriber License</span>
-                <span className="text-sm font-medium text-gray-900">{claim.prescriberLicense}</span>
-              </div>
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <span className="text-sm text-gray-600">
+                      Prescriber License
+                    </span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {claim.prescriberLicense}
+                    </span>
+                  </div>
 
-              {claim.prescriberFax && (
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Prescriber Fax</span>
-                  <span className="text-sm font-medium text-gray-900">{claim.prescriberFax}</span>
-                </div>
+                  {claim.prescriberFax && (
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <span className="text-sm text-gray-600">Prescriber Fax</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {claim.prescriberFax}
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
 
-              {claim.dinItem && (
-                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">DIN/#Item</span>
-                  <span className="text-sm font-medium text-gray-900">{claim.dinItem}</span>
-                </div>
+              {claim.category === "manual-claims" ? (
+                <>
+                  {claim.dinItem && (
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <span className="text-sm text-gray-600">DIN/#Item</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {claim.dinItem}
+                      </span>
+                    </div>
+                  )}
+                  {(claim as any).manualClaimType && (
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <span className="text-sm text-gray-600">Manual Claim Type</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {(claim as any).manualClaimType === "baby"
+                          ? "Baby Manual Claim"
+                          : "Old Claim"}
+                      </span>
+                    </div>
+                  )}
+                  {(claim as any).manualClaimType === "baby" && (
+                    <>
+                      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <span className="text-sm text-gray-600">
+                          Patient Reminder Checklist
+                        </span>
+                        <span className="text-sm font-medium text-gray-900"></span>
+                      </div>
+                      <div className="ml-4 space-y-2 mb-3">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                          <span className="text-sm text-gray-600">
+                            Parent's name on file
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {(claim as any).parentNameOnFile ? (
+                              <span className="text-[#007E2C] font-semibold">
+                                ✓ Yes
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">No</span>
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                          <span className="text-sm text-gray-600">
+                            Parent's band number updated
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {(claim as any).parentBandNumberUpdated ? (
+                              <span className="text-[#007E2C] font-semibold">
+                                ✓ Yes
+                              </span>
+                            ) : (
+                              <span className="text-gray-400">No</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {(claim as any).dateOfRefill && (
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <span className="text-sm text-gray-600">Date of Refill</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {formatDate((claim as any).dateOfRefill)}
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : claim.category === "diapers-pads" ? (
+                <>
+                  {claim.din && (
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <span className="text-sm text-gray-600">DIN</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {claim.din}
+                      </span>
+                    </div>
+                  )}
+                  {claim.itemNumber && (
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <span className="text-sm text-gray-600">Item#</span>
+                      <span className="text-sm font-medium text-gray-900">
+                        {claim.itemNumber}
+                      </span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                claim.dinItem && (
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <span className="text-sm text-gray-600">DIN/#Item</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {claim.dinItem}
+                    </span>
+                  </div>
+                )
               )}
 
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <span className="text-sm text-gray-600">Prescription Date</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {formatDate(claim.dateOfPrescription)}
-                </span>
-              </div>
-
-              {claim.category !== "appeals" && (
+              {claim.category !== "manual-claims" && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Prescription Type</span>
+                  <span className="text-sm text-gray-600">Prescription Date</span>
                   <span className="text-sm font-medium text-gray-900">
-                    <TypeBadge type={claim.type} size="sm" />
+                    {formatDate(claim.dateOfPrescription)}
                   </span>
                 </div>
               )}
+
+              {claim.category !== "appeals" &&
+                claim.category !== "diapers-pads" && (
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <span className="text-sm text-gray-600">
+                      Prescription Type
+                    </span>
+                    <span className="text-sm font-medium text-gray-900">
+                      <TypeBadge type={claim.type} size="sm" />
+                    </span>
+                  </div>
+                )}
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <span className="text-sm text-gray-600">Status</span>
                 <span className="text-sm font-medium text-gray-900">
-                  <StatusBadge status={claim.claimStatus} size="sm" category={claim.category} />
+                  <StatusBadge
+                    status={claim.claimStatus}
+                    size="sm"
+                    category={claim.category}
+                  />
                 </span>
               </div>
 
-              {(claim as any).caseNumber && (
+              {claim.category === "appeals" && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Case Number</span>
+                  <span className="text-sm text-gray-600">
+                    Patient Signed Letter
+                  </span>
                   <span className="text-sm font-medium text-gray-900">
-                    {(claim as any).caseNumber}
+                    {claim.patientSignedLetter ? (
+                      <span className="text-[#007E2C] font-semibold">
+                        ✓ Yes
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">No</span>
+                    )}
                   </span>
                 </div>
               )}
 
+              {(claim as any).caseNumber &&
+                claim.category !== "diapers-pads" && (
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <span className="text-sm text-gray-600">Case Number</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {(claim as any).caseNumber}
+                    </span>
+                  </div>
+                )}
+
               {(claim as any).authorizationStartDate && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Authorization Start</span>
+                  <span className="text-sm text-gray-600">
+                    Authorization Start
+                  </span>
                   <span className="text-sm font-medium text-gray-900">
                     {formatDate((claim as any).authorizationStartDate)}
                   </span>
@@ -314,7 +469,9 @@ export default function ClaimDetailsModal({
 
               {(claim as any).authorizationEndDate && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Authorization End</span>
+                  <span className="text-sm text-gray-600">
+                    Authorization End
+                  </span>
                   <span className="text-sm font-medium text-gray-900">
                     {formatDate((claim as any).authorizationEndDate)}
                   </span>
@@ -323,7 +480,9 @@ export default function ClaimDetailsModal({
 
               {(claim as any).authorizationNumber && (
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                  <span className="text-sm text-gray-600">Authorization Number</span>
+                  <span className="text-sm text-gray-600">
+                    Authorization Number
+                  </span>
                   <span className="text-sm font-medium text-gray-900">
                     {(claim as any).authorizationNumber}
                   </span>
@@ -331,13 +490,75 @@ export default function ClaimDetailsModal({
               )}
             </div>
 
+            {/* Status History */}
+            {claim.statusHistory && claim.statusHistory.length > 0 && (
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">
+                  Status History
+                </h3>
+                <div className="space-y-3">
+                  {[...claim.statusHistory]
+                    .reverse()
+                    .map((historyItem, index) => {
+                      const getStatusLabel = (status: string) => {
+                        if (status === "initial") return "Initial";
+                        const statusMap: Record<string, string> = {
+                          new: "New",
+                          "case-number-open": "Case Number Open",
+                          authorized: "Authorized",
+                          denied: "Denied",
+                          "letter-sent-to-doctor": "Letter Sent to Doctor",
+                          "letters-received": "Letters Received",
+                          "letters-sent-to-nihb": "Letters Sent to NIHB",
+                          "form-filled": "Form Filled",
+                          "form-sent-to-doctor": "Form Sent to Doctor",
+                          "sent-to-nihb": "Sent to NIHB",
+                          sent: "Sent",
+                          "payment-received": "Payment Received",
+                        };
+                        return statusMap[status] || status;
+                      };
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                          <div className="flex-shrink-0 w-2 h-2 rounded-full bg-[#0A438C] mt-2"></div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium text-gray-900">
+                                {historyItem.fromStatus === "initial"
+                                  ? `Status set to ${getStatusLabel(
+                                      historyItem.toStatus
+                                    )}`
+                                  : `Changed from ${getStatusLabel(
+                                      historyItem.fromStatus
+                                    )} to ${getStatusLabel(
+                                      historyItem.toStatus
+                                    )}`}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>
+                                {formatDateTime(historyItem.changedAt)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
             {/* Documents link */}
             <div className="flex items-center justify-between pt-2">
               <span className="text-sm text-gray-600">Documents</span>
               {claim.documents && (claim.documents as any).length > 0 ? (
                 <a
                   href={(claim.documents as any)[0].filePath}
-                  download={(claim.documents as any)[0].filename || ''}
+                  download={(claim.documents as any)[0].filename || ""}
                   className="flex items-center text-sm text-[#0A438C] hover:underline"
                 >
                   <svg
@@ -435,8 +656,18 @@ export default function ClaimDetailsModal({
                     className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 shadow-sm"
                     aria-label="Close"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -444,7 +675,10 @@ export default function ClaimDetailsModal({
             </div>
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto" style={{ maxHeight: "calc(80vh - 180px)" }}>
+            <div
+              className="p-6 overflow-y-auto"
+              style={{ maxHeight: "calc(80vh - 180px)" }}
+            >
               {/* Add Note Input */}
               {showAddNoteInput && (
                 <div className="mb-6 bg-gray-50 rounded-lg p-4 border border-gray-200">

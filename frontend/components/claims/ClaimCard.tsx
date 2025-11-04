@@ -17,11 +17,31 @@ interface ClaimDocument {
   dinItem?: string;
   dateOfPrescription: string;
   type: "new" | "renewal" | "prior-authorization";
-  claimStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer";
+  claimStatus:
+    | "new"
+    | "case-number-open"
+    | "authorized"
+    | "denied"
+    | "letter-sent-to-doctor"
+    | "letters-received"
+    | "letters-sent-to-nihb"
+    | "form-filled"
+    | "form-sent-to-doctor"
+    | "sent-to-nihb"
+    | "sent"
+    | "payment-received";
+  patientSignedLetter?: boolean;
+  din?: string;
+  itemNumber?: string;
   caseNumber?: string;
   authorizationNumber?: string;
   authorizationStartDate?: string;
   authorizationEndDate?: string;
+  // Manual claims specific fields
+  manualClaimType?: "baby" | "old";
+  parentNameOnFile?: boolean;
+  parentBandNumberUpdated?: boolean;
+  dateOfRefill?: string;
   documents: Array<{
     filename: string;
     filePath: string;
@@ -33,6 +53,12 @@ interface ClaimDocument {
     text: string;
     staffUsername: string;
     timestamp: string;
+  }>;
+  statusHistory?: Array<{
+    fromStatus: string;
+    toStatus: string;
+    changedAt: string;
+    changedBy?: string;
   }>;
   priority: boolean;
   createdAt: string;
@@ -86,8 +112,14 @@ export default function ClaimCard({
                   </svg>
                 </span>
               )}
-              <StatusBadge status={claim.claimStatus} size="sm" category={claim.category} />
-              {claim.category !== "appeals" && <TypeBadge type={claim.type} size="sm" />}
+              <StatusBadge
+                status={claim.claimStatus}
+                size="sm"
+                category={claim.category}
+              />
+              {claim.category !== "appeals" && (
+                <TypeBadge type={claim.type} size="sm" />
+              )}
             </div>
             <p className="text-sm font-medium text-gray-900 mb-1">
               {claim.productName}

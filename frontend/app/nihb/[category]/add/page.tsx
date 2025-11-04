@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+  useSearchParams,
+  usePathname,
+} from "next/navigation";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/ToastProvider";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -15,7 +20,8 @@ export default function AddClaimPage() {
   const searchParams = useSearchParams();
   const category = params?.category as string;
   const pathname = usePathname();
-  const baseNIHBPath = pathname && pathname.includes('/admin/nihb') ? '/admin/nihb' : '/nihb';
+  const baseNIHBPath =
+    pathname && pathname.includes("/admin/nihb") ? "/admin/nihb" : "/nihb";
   const { showSuccess, showError } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -30,15 +36,35 @@ export default function AddClaimPage() {
     prescriberLicense: "",
     prescriberFax: "",
     dinItem: "",
+    din: "",
+    itemNumber: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal",
-    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer",
+    claimStatus: "new" as
+      | "new"
+      | "case-number-open"
+      | "authorized"
+      | "denied"
+      | "letter-sent-to-doctor"
+      | "letters-received"
+      | "letters-sent-to-nihb"
+      | "form-filled"
+      | "form-sent-to-doctor"
+      | "sent-to-nihb"
+      | "sent"
+      | "payment-received",
+    patientSignedLetter: false,
     caseNumber: "",
     authorizationNumber: "",
     authorizationStartDate: "",
     authorizationEndDate: "",
     priority: false,
     note: "",
+    // Manual claims specific fields
+    manualClaimType: "" as "" | "baby" | "old",
+    parentNameOnFile: false,
+    parentBandNumberUpdated: false,
+    dateOfRefill: "",
   });
 
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
@@ -62,15 +88,22 @@ export default function AddClaimPage() {
             prescriberLicense: c.prescriberLicense || "",
             prescriberFax: c.prescriberFax || "",
             dinItem: c.dinItem || "",
-            dateOfPrescription: c.dateOfPrescription || "",
+            din: c.din || "",
+            itemNumber: c.itemNumber || "",
+            dateOfPrescription: c.dateOfPrescription || c.dateOfRefill || "",
             type: c.type || "new",
             claimStatus: c.claimStatus || "new",
+            patientSignedLetter: Boolean(c.patientSignedLetter),
             caseNumber: c.caseNumber || "",
             authorizationNumber: c.authorizationNumber || "",
             authorizationStartDate: c.authorizationStartDate || "",
             authorizationEndDate: c.authorizationEndDate || "",
             priority: Boolean(c.priority),
             note: "",
+            manualClaimType: c.manualClaimType || "",
+            parentNameOnFile: Boolean(c.parentNameOnFile),
+            parentBandNumberUpdated: Boolean(c.parentBandNumberUpdated),
+            dateOfRefill: c.dateOfRefill || "",
           });
           setUploadedFiles(c.documents || []);
         } else {
@@ -86,15 +119,22 @@ export default function AddClaimPage() {
               prescriberLicense: c.prescriberLicense || "",
               prescriberFax: c.prescriberFax || "",
               dinItem: c.dinItem || "",
-              dateOfPrescription: c.dateOfPrescription || "",
+              din: c.din || "",
+              itemNumber: c.itemNumber || "",
+              dateOfPrescription: c.dateOfPrescription || c.dateOfRefill || "",
               type: c.type || "new",
               claimStatus: c.claimStatus || "new",
+              patientSignedLetter: Boolean(c.patientSignedLetter),
               caseNumber: c.caseNumber || "",
               authorizationNumber: c.authorizationNumber || "",
               authorizationStartDate: c.authorizationStartDate || "",
               authorizationEndDate: c.authorizationEndDate || "",
               priority: Boolean(c.priority),
               note: "",
+              manualClaimType: c.manualClaimType || "",
+              parentNameOnFile: Boolean(c.parentNameOnFile),
+              parentBandNumberUpdated: Boolean(c.parentBandNumberUpdated),
+              dateOfRefill: c.dateOfRefill || "",
             });
             setUploadedFiles(c.documents || []);
           }
@@ -107,7 +147,9 @@ export default function AddClaimPage() {
   }, [claimId, category]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     // For caseNumber, only allow digits
@@ -156,6 +198,9 @@ export default function AddClaimPage() {
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
 
+    // For prescription date and refill date, allow past dates. For authorization dates, restrict past dates.
+    const allowPastDates = currentDateField === "dateOfPrescription" || currentDateField === "dateOfRefill";
+
     const days = [];
     const currentDate = new Date(startDate);
 
@@ -164,7 +209,8 @@ export default function AddClaimPage() {
       const isToday = currentDate.toDateString() === today.toDateString();
       const isPast = currentDate < todayStart;
       const isSunday = currentDate.getDay() === 0;
-      const isAvailable = !isPast && !isSunday;
+      // Allow past dates for prescription date, but restrict for authorization dates
+      const isAvailable = (allowPastDates || !isPast) && !isSunday;
 
       days.push({
         date: new Date(currentDate),
@@ -205,10 +251,17 @@ export default function AddClaimPage() {
     const dayNum = String(date.getDate()).padStart(2, "0");
     const dateString = `${year}-${month}-${dayNum}`;
 
-    setFormData((prev) => ({
-      ...prev,
-      [currentDateField]: dateString,
-    }));
+    if (currentDateField === "dateOfRefill") {
+      setFormData((prev) => ({
+        ...prev,
+        dateOfRefill: dateString,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [currentDateField]: dateString,
+      }));
+    }
     setShowDatePicker(false);
   };
 
@@ -230,7 +283,7 @@ export default function AddClaimPage() {
     if (!value) return "";
     // Accept both MM/DD/YYYY and YYYY-MM-DD and always return YYYY-MM-DD
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
-      const [mm, dd, yyyy] = value.split('/');
+      const [mm, dd, yyyy] = value.split("/");
       return `${yyyy}-${mm}-${dd}`;
     }
     return value; // assume already YYYY-MM-DD
@@ -241,10 +294,35 @@ export default function AddClaimPage() {
   };
 
   const shouldShowCaseNumber = () => {
-    return formData.claimStatus === "case-number-open";
+    return (
+      formData.claimStatus === "case-number-open" && category !== "diapers-pads"
+    );
   };
 
   const validateForm = (): boolean => {
+    if (category === "manual-claims") {
+      if (
+        !formData.rxNumber ||
+        !formData.productName ||
+        !formData.dinItem ||
+        !formData.manualClaimType ||
+        !formData.dateOfRefill ||
+        !formData.claimStatus
+      ) {
+        showError("Please fill in all required fields");
+        return false;
+      }
+      // If baby is selected, check the checklist items
+      if (formData.manualClaimType === "baby") {
+        if (!formData.parentNameOnFile || !formData.parentBandNumberUpdated) {
+          showError(
+            "Please confirm both checklist items for Baby manual claim"
+          );
+          return false;
+        }
+      }
+      return true;
+    }
     if (
       !formData.rxNumber ||
       !formData.productName ||
@@ -256,8 +334,12 @@ export default function AddClaimPage() {
       showError("Please fill in all required fields");
       return false;
     }
-    // Type is only required for non-appeals categories
-    if (category !== "appeals" && !formData.type) {
+    // Type is only required for non-appeals and non-diapers-pads categories
+    if (
+      category !== "appeals" &&
+      category !== "diapers-pads" &&
+      !formData.type
+    ) {
       showError("Please fill in all required fields");
       return false;
     }
@@ -273,21 +355,35 @@ export default function AddClaimPage() {
       const payload = {
         ...formData,
         // Ensure date fields are saved in canonical YYYY-MM-DD
-        dateOfPrescription: normalizeForStorage(formData.dateOfPrescription),
-        authorizationStartDate: normalizeForStorage(formData.authorizationStartDate),
-        authorizationEndDate: normalizeForStorage(formData.authorizationEndDate),
+        dateOfPrescription:
+          category === "manual-claims"
+            ? ""
+            : normalizeForStorage(formData.dateOfPrescription),
+        dateOfRefill:
+          category === "manual-claims"
+            ? normalizeForStorage(formData.dateOfRefill)
+            : "",
+        authorizationStartDate: normalizeForStorage(
+          formData.authorizationStartDate
+        ),
+        authorizationEndDate: normalizeForStorage(
+          formData.authorizationEndDate
+        ),
         category,
         documents: uploadedFiles,
         ...(claimId ? { id: claimId } : {}),
       };
 
-      const response = await fetch(claimId ? `/api/claims?id=${claimId}` : "/api/claims", {
-        method: claimId ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        claimId ? `/api/claims?id=${claimId}` : "/api/claims",
+        {
+          method: claimId ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await response.json();
 
@@ -307,7 +403,9 @@ export default function AddClaimPage() {
           });
         }
 
-        showSuccess(claimId ? "Claim updated successfully" : "Claim successfully added");
+        showSuccess(
+          claimId ? "Claim updated successfully" : "Claim successfully added"
+        );
         setShowSuccessModal(true);
       } else {
         showError(data.error || "Failed to save claim");
@@ -366,34 +464,216 @@ export default function AddClaimPage() {
             className=""
           >
             {/* Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  RX Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="rxNumber"
-                  value={formData.rxNumber}
-                  onChange={handleInputChange}
-                  placeholder="e.g RX-10427"
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
-              </div>
+            {category === "manual-claims" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    RX Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="rxNumber"
+                    value={formData.rxNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g RX-10427"
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                  {category === "appeals" ? "Medication Name" : "Product Name"} <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="productName"
-                  value={formData.productName}
-                  onChange={handleInputChange}
-                  placeholder={category === "appeals" ? "e.g Ozempic 0.5mg Pen" : "e.g Amoxicillin"}
-                  className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Name of Medication <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="productName"
+                    value={formData.productName}
+                    onChange={handleInputChange}
+                    placeholder="e.g Amoxicillin"
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    DIN/#Item <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="dinItem"
+                    value={formData.dinItem}
+                    onChange={handleInputChange}
+                    placeholder="DIN-XXXXXXX"
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
+
+                {/* Manual Claim Type Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Manual Claim Type <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="manualClaimType"
+                        value="baby"
+                        checked={formData.manualClaimType === "baby"}
+                        onChange={handleInputChange}
+                        className="w-4 h-4 text-[#0A438C] border-gray-300 focus:ring-[#0A438C] cursor-pointer"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Baby Manual Claim</span>
+                    </label>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="radio"
+                        name="manualClaimType"
+                        value="old"
+                        checked={formData.manualClaimType === "old"}
+                        onChange={handleInputChange}
+                        className="w-4 h-4 text-[#0A438C] border-gray-300 focus:ring-[#0A438C] cursor-pointer"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Old Claim</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Baby Checklist - Only show if Baby is selected */}
+                {formData.manualClaimType === "baby" && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-[#6E6C70] mb-3">
+                      Patient Reminder Checklist <span className="text-red-500">*</span>
+                    </label>
+                    <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="parentNameOnFile"
+                          checked={formData.parentNameOnFile}
+                          onChange={handleCheckboxChange}
+                          className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] cursor-pointer"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Parent's name on file</span>
+                      </label>
+                      <label className="flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="parentBandNumberUpdated"
+                          checked={formData.parentBandNumberUpdated}
+                          onChange={handleCheckboxChange}
+                          className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] cursor-pointer"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Parent's band number updated</span>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Date of Refill */}
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Date of Refill <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="dateOfRefill"
+                      value={formatDateForDisplay(formData.dateOfRefill)}
+                      onChange={handleInputChange}
+                      onClick={() => openDatePicker("dateOfRefill")}
+                      placeholder="mm/dd/yyyy"
+                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                      readOnly
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openDatePicker("dateOfRefill")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    Status <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      name="claimStatus"
+                      value={formData.claimStatus}
+                      onChange={handleInputChange}
+                      className="w-full px-4 text-[14px] py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none appearance-none bg-white text-gray-900"
+                    >
+                      <option value="new">New</option>
+                      <option value="sent">Sent</option>
+                      <option value="payment-received">Payment Received</option>
+                    </select>
+                    <svg
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
               </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    RX Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="rxNumber"
+                    value={formData.rxNumber}
+                    onChange={handleInputChange}
+                    placeholder="e.g RX-10427"
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                    {category === "appeals" ? "Medication Name" : "Product Name"}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="productName"
+                    value={formData.productName}
+                    onChange={handleInputChange}
+                    placeholder={
+                      category === "appeals"
+                        ? "e.g Ozempic 0.5mg Pen"
+                        : "e.g Amoxicillin"
+                    }
+                    className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                  />
+                </div>
 
               {category === "appeals" ? (
                 <>
@@ -501,19 +781,50 @@ export default function AddClaimPage() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                      DIN/#Item
-                    </label>
-                    <input
-                      type="text"
-                      name="dinItem"
-                      value={formData.dinItem}
-                      onChange={handleInputChange}
-                      placeholder="DIN-XXXXXXX"
-                      className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
-                    />
-                  </div>
+                  {category === "diapers-pads" ? (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                          DIN
+                        </label>
+                        <input
+                          type="text"
+                          name="din"
+                          value={formData.din}
+                          onChange={handleInputChange}
+                          placeholder="DIN-XXXXXXX"
+                          className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                          Item#
+                        </label>
+                        <input
+                          type="text"
+                          name="itemNumber"
+                          value={formData.itemNumber}
+                          onChange={handleInputChange}
+                          placeholder="Item Number"
+                          className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                        DIN/#Item
+                      </label>
+                      <input
+                        type="text"
+                        name="dinItem"
+                        value={formData.dinItem}
+                        onChange={handleInputChange}
+                        placeholder="DIN-XXXXXXX"
+                        className="w-full px-4 text-[14px] py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                      />
+                    </div>
+                  )}
                 </>
               )}
 
@@ -672,14 +983,18 @@ export default function AddClaimPage() {
                               formData.authorizationEndDate
                             )}
                             onChange={handleInputChange}
-                            onClick={() => openDatePicker("authorizationEndDate")}
+                            onClick={() =>
+                              openDatePicker("authorizationEndDate")
+                            }
                             placeholder="mm/dd/yyyy"
                             className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
                             readOnly
                           />
                           <button
                             type="button"
-                            onClick={() => openDatePicker("authorizationEndDate")}
+                            onClick={() =>
+                              openDatePicker("authorizationEndDate")
+                            }
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                           >
                             <svg
@@ -697,6 +1012,27 @@ export default function AddClaimPage() {
                             </svg>
                           </button>
                         </div>
+                      </div>
+
+                      {/* Patient Signed Letter Checkbox for Appeals */}
+                      <div className="md:col-span-2">
+                        <label className="flex items-center space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="patientSignedLetter"
+                            checked={formData.patientSignedLetter}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                patientSignedLetter: e.target.checked,
+                              }))
+                            }
+                            className="w-5 h-5 text-[#0A438C] border-gray-300 rounded focus:ring-2 focus:ring-[#0A438C] focus:ring-offset-2 cursor-pointer"
+                          />
+                          <span className="text-sm font-medium text-[#6E6C70]">
+                            Patient Signed Letter
+                          </span>
+                        </label>
                       </div>
                     </>
                   ) : (
@@ -741,9 +1077,10 @@ export default function AddClaimPage() {
                   )}
                 </>
               )}
-            </div>
+              </div>
+            )}
 
-            {shouldShowAuthorization() && category !== "appeals" && (
+            {shouldShowAuthorization() && category !== "appeals" && category !== "manual-claims" && (
               <div className="mb-8">
                 <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                   Authorization Number
@@ -791,7 +1128,9 @@ export default function AddClaimPage() {
                         <p className="text-sm font-medium text-gray-900">
                           Patient Letter Template
                         </p>
-                        <p className="text-xs text-gray-500">Standard letter for the patient</p>
+                        <p className="text-xs text-gray-500">
+                          Standard letter for the patient
+                        </p>
                       </div>
                     </div>
                     <svg
@@ -834,7 +1173,9 @@ export default function AddClaimPage() {
                         <p className="text-sm font-medium text-gray-900">
                           Doctor Letter Template
                         </p>
-                        <p className="text-xs text-gray-500">Letter for the doctor</p>
+                        <p className="text-xs text-gray-500">
+                          Letter for the doctor
+                        </p>
                       </div>
                     </div>
                     <svg
@@ -897,10 +1238,10 @@ export default function AddClaimPage() {
                 {isSubmitting ? (
                   <>
                     <LoadingSpinner size="sm" className="text-white" />
-            <span>Saving...</span>
+                    <span>Saving...</span>
                   </>
                 ) : (
-          <span>{isEditMode ? "Save Changes" : "Add Claim"}</span>
+                  <span>{isEditMode ? "Save Changes" : "Add Claim"}</span>
                 )}
               </button>
             </div>
@@ -1051,7 +1392,7 @@ export default function AddClaimPage() {
             <button
               onClick={() => {
                 setShowSuccessModal(false);
-            router.push(`${baseNIHBPath}/${category}`);
+                router.push(`${baseNIHBPath}/${category}`);
               }}
               className="w-full bg-[#0A438C] hover:bg-[#0A438C]/90 text-white rounded-lg py-2.5 text-sm font-medium"
             >

@@ -82,11 +82,13 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
                 {/* Parent item */}
                 <button
                   onClick={() => setIsNIHBCollapsed(!isNIHBCollapsed)}
-                  className={`flex items-center justify-between py-3 px-4 rounded-lg mb-2 w-full transition-all ${
-                    isNIHBPage ? "bg-[#0A438C] text-white" : "bg-transparent text-[#0A438C]"
+                  className={`flex items-center justify-between py-4 px-4 rounded-lg mb-2 w-full transition-all ${
+                    isNIHBPage
+                      ? "bg-[#0A438C] text-white"
+                      : "bg-transparent text-[#0A438C]"
                   }`}
                 >
-                  <span className="text-sm font-medium">{item.title}</span>
+                  <span className="text-md font-semibold">{item.title}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${
                       isNIHBCollapsed ? "rotate-180" : ""
@@ -110,26 +112,30 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
                     {item.children.map((child, childIndex) => (
                       <Link key={childIndex} href={child.path as any}>
                         <div
-                          className={`flex items-center space-x-3 py-2.5 px-4 rounded-lg mb-1 transition-colors relative ${
+                          className={`flex items-center space-x-4 py-3.5 px-4 rounded-lg mb-2 transition-colors relative ${
                             child.active
                               ? "bg-[#EBF2FF] text-[#3A79C9]"
-                              : "text-[#888888] hover:bg-gray-50"
+                              : "text-[#6E6C70] hover:bg-gray-100 hover:text-[#888888]"
                           }`}
                         >
                           {/* Vertical line indicator - blue and thick for active, gray and thin for inactive */}
                           <div
                             className={`absolute left-0 top-0 bottom-0 ${
                               child.active
-                                ? "w-0.5 bg-[#3A79C9]"
-                                : "w-px bg-[#888888]"
+                                ? "w-1 bg-[#3A79C9]"
+                                : "w-0.5 bg-gray-300"
                             }`}
                           ></div>
                           {typeof child.icon === "string" ? (
-                            <span className="text-xl">{child.icon}</span>
+                            <span className="text-2xl">{child.icon}</span>
                           ) : (
-                            <child.icon className="w-5 h-5" />
+                            <child.icon className="w-6 h-6" />
                           )}
-                          <span className="text-sm font-medium">
+                          <span
+                            className={`text-base ${
+                              child.active ? "font-semibold" : "font-medium"
+                            }`}
+                          >
                             {child.title}
                           </span>
                         </div>
@@ -141,13 +147,19 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
             ) : (
               <Link href={item.path as any}>
                 <div
-                  className={`flex items-center space-x-3 py-3 px-4 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-3 py-4 px-4 rounded-lg transition-colors ${
                     item.active
                       ? "bg-[#0A438C] text-white"
-                      : "text-[#6E6C70] hover:bg-gray-50"
+                      : "text-[#6E6C70] hover:bg-gray-100"
                   }`}
                 >
-                  <span className="text-sm font-normal">{item.title}</span>
+                  <span
+                    className={`text-base ${
+                      item.active ? "font-semibold" : "font-medium"
+                    }`}
+                  >
+                    {item.title}
+                  </span>
                 </div>
               </Link>
             )}
@@ -158,15 +170,35 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
       {/* Deleted Claims Link */}
       <div className="border-t border-gray-200 p-2">
         <Link href="/admin/deleted-claims">
-          <div className={`flex items-center space-x-3 py-3 px-4 rounded-lg transition-colors ${
-            pathname?.includes("/admin/deleted-claims")
-              ? "bg-[#0A438C] text-white"
-              : "text-[#6E6C70] hover:bg-gray-50"
-          }`}>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <div
+            className={`flex items-center space-x-3 py-3.5 px-4 rounded-lg transition-colors ${
+              pathname?.includes("/admin/deleted-claims")
+                ? "bg-[#0A438C] text-white"
+                : "text-[#6E6C70] hover:bg-gray-100"
+            }`}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
             </svg>
-            <span className="text-sm font-medium">Deleted Claims</span>
+            <span
+              className={`text-base ${
+                pathname?.includes("/admin/deleted-claims")
+                  ? "font-semibold"
+                  : "font-medium"
+              }`}
+            >
+              Deleted Claims
+            </span>
           </div>
         </Link>
       </div>
@@ -177,7 +209,7 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
           onClick={onSignOut}
           className="flex items-center space-x-3 w-full text-[#DC3545] hover:text-red-700 transition-colors"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" />
             <path
               fill="white"
@@ -187,7 +219,7 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
               strokeWidth={2}
             />
           </svg>
-          <span className="text-sm font-medium">Sign Out</span>
+          <span className="text-base font-medium">Sign Out</span>
         </button>
       </div>
     </div>

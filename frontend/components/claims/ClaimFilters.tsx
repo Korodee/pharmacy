@@ -34,11 +34,28 @@ export default function ClaimFilters({
       return [
         { value: "all", label: "Status" },
         { value: "new", label: "New" },
-        { value: "patient-signed-letter", label: "Patient Signed Letter" },
         { value: "letter-sent-to-doctor", label: "Letter Sent to Doctor" },
-        { value: "awaiting-answer", label: "Awaiting Answer" },
+        { value: "letters-received", label: "Letters Received" },
+        { value: "letters-sent-to-nihb", label: "Letters Sent to NIHB" },
         { value: "authorized", label: "Authorized" },
         { value: "denied", label: "Denied" },
+      ];
+    } else if (category === "diapers-pads") {
+      return [
+        { value: "all", label: "Status" },
+        { value: "new", label: "New" },
+        { value: "form-filled", label: "Form Filled" },
+        { value: "form-sent-to-doctor", label: "Form Sent to Doctor" },
+        { value: "sent-to-nihb", label: "Sent to NIHB" },
+        { value: "authorized", label: "Authorized" },
+        { value: "denied", label: "Denied" },
+      ];
+    } else if (category === "manual-claims") {
+      return [
+        { value: "all", label: "Status" },
+        { value: "new", label: "New" },
+        { value: "sent", label: "Sent" },
+        { value: "payment-received", label: "Payment Received" },
       ];
     } else {
       return [
@@ -54,11 +71,11 @@ export default function ClaimFilters({
   const statusOptions = getStatusOptions();
 
   const dateOptions = [
-    { value: "all", label: "Date" },
-    { value: "today", label: "Today" },
-    { value: "week", label: "This Week" },
-    { value: "month", label: "This Month" },
-    { value: "year", label: "This Year" },
+    { value: "all", label: "Expiry Date" },
+    { value: "today", label: "Expiring Today" },
+    { value: "week", label: "Expiring This Week" },
+    { value: "month", label: "Expiring This Month" },
+    { value: "year", label: "Expiring This Year" },
   ];
 
   return (
@@ -107,7 +124,7 @@ export default function ClaimFilters({
           options={dateOptions}
           value={dateFilter}
           onChange={onDateChange}
-          placeholder="Date"
+          placeholder="Expiry Date"
           className="w-48"
         />
       </div>

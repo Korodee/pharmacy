@@ -17,7 +17,8 @@ export default function NIHBCategoryPage() {
   const router = useRouter();
   const category = params?.category as string;
   const pathname = usePathname();
-  const baseNIHBPath = pathname && pathname.includes('/admin/nihb') ? '/admin/nihb' : '/nihb';
+  const baseNIHBPath =
+    pathname && pathname.includes("/admin/nihb") ? "/admin/nihb" : "/nihb";
   const { showSuccess, showError } = useToast();
   const [claims, setClaims] = useState<ClaimDocument[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,14 +73,21 @@ export default function NIHBCategoryPage() {
     router.push(`${baseNIHBPath}/${category}/add?id=${claim.id}` as any);
   };
 
-  const handleDelete = async (claim: ClaimDocument, deletionNote?: string, deletedBy?: string) => {
+  const handleDelete = async (
+    claim: ClaimDocument,
+    deletionNote?: string,
+    deletedBy?: string
+  ) => {
     try {
       const response = await fetch(`/api/claims?id=${claim.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ deletionNote: deletionNote || '', deletedBy: deletedBy || '' }),
+        body: JSON.stringify({
+          deletionNote: deletionNote || "",
+          deletedBy: deletedBy || "",
+        }),
       });
 
       const data = await response.json();
@@ -96,7 +104,22 @@ export default function NIHBCategoryPage() {
     }
   };
 
-  const handleStatusChange = async (claimId: string, newStatus: 'new' | 'case-number-open' | 'authorized' | 'denied' | 'patient-signed-letter' | 'letter-sent-to-doctor' | 'awaiting-answer') => {
+  const handleStatusChange = async (
+    claimId: string,
+    newStatus:
+      | "new"
+      | "case-number-open"
+      | "authorized"
+      | "denied"
+      | "letter-sent-to-doctor"
+      | "letters-received"
+      | "letters-sent-to-nihb"
+      | "form-filled"
+      | "form-sent-to-doctor"
+      | "sent-to-nihb"
+      | "sent"
+      | "payment-received"
+  ) => {
     try {
       const response = await fetch(`/api/claims?id=${claimId}`, {
         method: "PUT",
@@ -107,12 +130,18 @@ export default function NIHBCategoryPage() {
       const data = await response.json();
 
       if (data.success) {
-        if (newStatus === 'authorized') {
-          showSuccess("Status updated successfully. Please update authorization start and end dates.", 8000);
+        if (newStatus === "authorized") {
+          showSuccess(
+            "Status updated successfully. Please update authorization start and end dates.",
+            8000
+          );
           router.push(`${baseNIHBPath}/${category}/add?id=${claimId}` as any);
           return;
-        } else if (newStatus === 'case-number-open') {
-          showSuccess("Status updated successfully. Please add the case number.", 8000);
+        } else if (newStatus === "case-number-open") {
+          showSuccess(
+            "Status updated successfully. Please add the case number.",
+            8000
+          );
           router.push(`${baseNIHBPath}/${category}/add?id=${claimId}` as any);
           return;
         } else {
@@ -124,6 +153,37 @@ export default function NIHBCategoryPage() {
       }
     } catch (error) {
       console.error("Error updating status:", error);
+      showError("Network error. Please try again.");
+    }
+  };
+
+  const handlePatientSignedLetterToggle = async (
+    claimId: string,
+    currentValue: boolean
+  ) => {
+    try {
+      const response = await fetch(`/api/claims?id=${claimId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ patientSignedLetter: !currentValue }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showSuccess(
+          `Patient Signed Letter ${
+            !currentValue ? "marked" : "unmarked"
+          } successfully.`
+        );
+        fetchClaims();
+      } else {
+        showError(
+          data.error || "Failed to update patient signed letter status"
+        );
+      }
+    } catch (error) {
+      console.error("Error updating patient signed letter:", error);
       showError("Network error. Please try again.");
     }
   };
@@ -159,20 +219,31 @@ export default function NIHBCategoryPage() {
 
     const matchesDate = () => {
       if (dateFilter === "all") return true;
-      const claimDate = new Date(claim.dateOfPrescription);
+
+      // Filter by authorization end date (expiry date) instead of prescription date
+      if (!claim.authorizationEndDate || claim.authorizationEndDate === "") {
+        // If no authorization end date exists, exclude from date-based filters
+        return false;
+      }
+
+      const expiryDate = new Date(claim.authorizationEndDate);
       const now = new Date();
-      const diffTime = now.getTime() - claimDate.getTime();
+      const diffTime = expiryDate.getTime() - now.getTime();
       const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
       switch (dateFilter) {
         case "today":
-          return diffDays < 1;
+          // Show claims expiring today (within 24 hours)
+          return diffDays >= 0 && diffDays < 1;
         case "week":
-          return diffDays < 7;
+          // Show claims expiring within the next week
+          return diffDays >= 0 && diffDays < 7;
         case "month":
-          return diffDays < 30;
+          // Show claims expiring within the next month
+          return diffDays >= 0 && diffDays < 30;
         case "year":
-          return diffDays < 365;
+          // Show claims expiring within the next year
+          return diffDays >= 0 && diffDays < 365;
         default:
           return true;
       }
@@ -232,7 +303,9 @@ export default function NIHBCategoryPage() {
         {/* Add Claim Button */}
         <div className="flex justify-end mb-4">
           <button
-            onClick={() => router.push(`${baseNIHBPath}/${category}/add` as any)}
+            onClick={() =>
+              router.push(`${baseNIHBPath}/${category}/add` as any)
+            }
             className="flex items-center space-x-2 bg-[#0A438C] text-white px-4 py-2 rounded-lg hover:bg-[#003366] transition-colors shadow-md"
           >
             <svg
@@ -251,7 +324,7 @@ export default function NIHBCategoryPage() {
             <span className="font-medium text-sm">Add Claim</span>
           </button>
         </div>
-        
+
         {/* Summary Cards */}
         <DashboardSummary
           total={stats.total}
@@ -261,6 +334,7 @@ export default function NIHBCategoryPage() {
           denied={stats.denied}
           category={category}
           onAddClaim={() => {}}
+          onStatusClick={setStatusFilter}
         />
         {/* Claims Section */}
         <div className="mt-6">
@@ -281,7 +355,7 @@ export default function NIHBCategoryPage() {
             onProductChange={setProductFilter}
             category={category}
           />
-          
+
           {/* Table Container */}
           <div className="mt-1 bg-white rounded-lg border-[.5px] border-[#85CEE8]">
             {/* Claims Table */}
@@ -291,7 +365,10 @@ export default function NIHBCategoryPage() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onStatusChange={handleStatusChange}
-              onAddNew={() => router.push(`${baseNIHBPath}/${category}/add` as any)}
+              onPatientSignedLetterToggle={handlePatientSignedLetterToggle}
+              onAddNew={() =>
+                router.push(`${baseNIHBPath}/${category}/add` as any)
+              }
               category={category}
             />
 
@@ -323,7 +400,8 @@ export default function NIHBCategoryPage() {
             const id = selectedClaim?.id;
             setIsDetailsModalOpen(false);
             setSelectedClaim(null);
-            if (id) router.push(`${baseNIHBPath}/${category}/add?id=${id}` as any);
+            if (id)
+              router.push(`${baseNIHBPath}/${category}/add?id=${id}` as any);
           }}
           onUpdate={async () => {
             await fetchClaims();

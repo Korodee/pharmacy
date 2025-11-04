@@ -11,10 +11,30 @@ interface ClaimsTableProps {
   claims: ClaimDocument[];
   onClaimClick: (claim: ClaimDocument) => void;
   onEdit: (claim: ClaimDocument) => void;
-  onDelete: (claim: ClaimDocument, deletionNote?: string, deletedBy?: string) => void;
+  onDelete: (
+    claim: ClaimDocument,
+    deletionNote?: string,
+    deletedBy?: string
+  ) => void;
   onStatusChange?: (
     claimId: string,
-    newStatus: "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer"
+    newStatus:
+      | "new"
+      | "case-number-open"
+      | "authorized"
+      | "denied"
+      | "letter-sent-to-doctor"
+      | "letters-received"
+      | "letters-sent-to-nihb"
+      | "form-filled"
+      | "form-sent-to-doctor"
+      | "sent-to-nihb"
+      | "sent"
+      | "payment-received"
+  ) => void;
+  onPatientSignedLetterToggle?: (
+    claimId: string,
+    currentValue: boolean
   ) => void;
   onAddNew?: () => void;
   category?: string;
@@ -26,14 +46,22 @@ export default function ClaimsTable({
   onEdit,
   onDelete,
   onStatusChange,
+  onPatientSignedLetterToggle,
   onAddNew,
   category,
 }: ClaimsTableProps) {
-  const isAppeals = category === 'appeals';
+  const isAppeals = category === "appeals";
+  const isDiapersPads = category === "diapers-pads";
+  const isManualClaims = category === "manual-claims";
   const [showMenu, setShowMenu] = useState<string | null>(null);
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [claimToDelete, setClaimToDelete] = useState<ClaimDocument | null>(null);
+  const [claimToDelete, setClaimToDelete] = useState<ClaimDocument | null>(
+    null
+  );
   const [deleteNote, setDeleteNote] = useState("");
   const [deletedBy, setDeletedBy] = useState("");
 
@@ -74,13 +102,15 @@ export default function ClaimsTable({
               <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
                 Product Name
               </th>
+              {!isManualClaims && (
+                <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
+                  Prescriber
+                </th>
+              )}
               <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
-                Prescriber
+                {isManualClaims ? "Date of Refill" : "Prescription Date"}
               </th>
-              <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
-                Prescription Date
-              </th>
-              {!isAppeals && (
+              {!isAppeals && !isDiapersPads && !isManualClaims && (
                 <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
                   Type
                 </th>
@@ -88,6 +118,11 @@ export default function ClaimsTable({
               <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
                 Status
               </th>
+              {isAppeals && (
+                <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
+                  Patient Signed
+                </th>
+              )}
               <th className="px-4 py-3 text-left text-[13px] font-medium text-[#888292] tracking-wider whitespace-nowrap">
                 Authorization Expiry
               </th>
@@ -96,9 +131,12 @@ export default function ClaimsTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-                {claims.length === 0 ? (
+            {claims.length === 0 ? (
               <tr>
-                <td colSpan={isAppeals ? 8 : 9} className="px-4 py-12 text-center">
+                <td
+                  colSpan={isManualClaims ? 8 : isAppeals || isDiapersPads ? 9 : 10}
+                  className="px-4 py-12 text-center"
+                >
                   <div className="text-[#888888] text-sm mb-4">No Feedback</div>
                   <button
                     onClick={(e) => {
@@ -107,8 +145,18 @@ export default function ClaimsTable({
                     }}
                     className="inline-flex items-center space-x-2 bg-[#0A438C] text-white px-4 py-2 rounded-lg hover:bg-[#003366] transition-colors shadow"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
                     </svg>
                     <span className="font-medium text-sm">Add New</span>
                   </button>
@@ -118,8 +166,8 @@ export default function ClaimsTable({
               claims.map((claim) => (
                 <tr
                   key={claim.id}
-                      className="hover:bg-gray-50 transition-colors cursor-default select-none"
-                      onDoubleClick={() => onClaimClick(claim)}
+                  className="hover:bg-gray-50 transition-colors cursor-default select-none"
+                  onDoubleClick={() => onClaimClick(claim)}
                 >
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                     {claim.rxNumber}
@@ -127,13 +175,17 @@ export default function ClaimsTable({
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                     {claim.productName}
                   </td>
+                  {!isManualClaims && (
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                      {claim.prescriberName}
+                    </td>
+                  )}
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {claim.prescriberName}
+                    {isManualClaims && (claim as any).dateOfRefill
+                      ? formatDate((claim as any).dateOfRefill)
+                      : formatDate(claim.dateOfPrescription)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {formatDate(claim.dateOfPrescription)}
-                  </td>
-                  {!isAppeals && (
+                  {!isAppeals && !isDiapersPads && !isManualClaims && (
                     <td className="px-4 py-3 whitespace-nowrap">
                       <TypeBadge type={claim.type} size="sm" />
                     </td>
@@ -148,6 +200,50 @@ export default function ClaimsTable({
                       }
                     />
                   </td>
+                  {isAppeals && (
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                      {claim.patientSignedLetter ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onPatientSignedLetterToggle?.(
+                              claim.id,
+                              claim.patientSignedLetter || false
+                            );
+                          }}
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 transition-colors cursor-pointer"
+                          title="Click to toggle"
+                        >
+                          <svg
+                            className="w-3 h-3 mr-1"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Yes
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onPatientSignedLetterToggle?.(
+                              claim.id,
+                              claim.patientSignedLetter || false
+                            );
+                          }}
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+                          title="Click to toggle"
+                        >
+                          No
+                        </button>
+                      )}
+                    </td>
+                  )}
                   <td className="px-4 py-3 whitespace-nowrap">
                     {claim.authorizationEndDate ? (
                       <ExpiryBadge
@@ -162,7 +258,7 @@ export default function ClaimsTable({
                     {claim.documents && (claim.documents as any).length > 0 ? (
                       <a
                         href={(claim.documents as any)[0].filePath}
-                        download={(claim.documents as any)[0].filename || ''}
+                        download={(claim.documents as any)[0].filename || ""}
                         onClick={(e) => e.stopPropagation()}
                         className="text-[#0A438C] hover:text-[#003366] transition-colors inline-flex items-center justify-center"
                       >
@@ -185,17 +281,22 @@ export default function ClaimsTable({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          const rect = (
+                            e.currentTarget as HTMLElement
+                          ).getBoundingClientRect();
                           const viewportHeight = window.innerHeight;
                           const menuHeight = 100;
                           const spaceBelow = viewportHeight - rect.bottom;
                           const spaceAbove = rect.top;
-                          
-                          const showAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
-                          
+
+                          const showAbove =
+                            spaceBelow < menuHeight && spaceAbove > spaceBelow;
+
                           setMenuPosition({
                             x: rect.right - 160,
-                            y: showAbove ? rect.top - menuHeight + 6 : rect.bottom + 4,
+                            y: showAbove
+                              ? rect.top - menuHeight + 6
+                              : rect.bottom + 4,
                           });
                           setShowMenu(showMenu === claim.id ? null : claim.id);
                         }}
@@ -238,7 +339,7 @@ export default function ClaimsTable({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                const claim = claims.find(c => c.id === showMenu);
+                const claim = claims.find((c) => c.id === showMenu);
                 if (claim) onEdit(claim);
                 setShowMenu(null);
                 setMenuPosition(null);
@@ -251,7 +352,7 @@ export default function ClaimsTable({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                const claim = claims.find(c => c.id === showMenu);
+                const claim = claims.find((c) => c.id === showMenu);
                 if (claim) onClaimClick(claim);
                 setShowMenu(null);
                 setMenuPosition(null);
@@ -264,7 +365,7 @@ export default function ClaimsTable({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                const claim = claims.find(c => c.id === showMenu);
+                const claim = claims.find((c) => c.id === showMenu);
                 if (claim) handleDeleteClick(claim);
               }}
               className="w-full text-left px-4 py-3 text-sm text-red-600 font-[300] hover:bg-gray-50"
@@ -302,7 +403,8 @@ export default function ClaimsTable({
                 Delete Claim
               </h3>
               <p className="text-sm text-gray-600 mb-4">
-                Are you sure you want to delete this claim? This action cannot be undone.
+                Are you sure you want to delete this claim? This action cannot
+                be undone.
               </p>
               {claimToDelete && (
                 <div className="bg-gray-50 rounded-lg p-3 mb-4">

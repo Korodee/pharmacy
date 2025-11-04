@@ -33,9 +33,24 @@ export default function AddClaimModal({
     prescriberLicense: "",
     prescriberFax: "",
     dinItem: "",
+    din: "",
+    itemNumber: "",
     dateOfPrescription: "",
     type: "new" as "new" | "renewal" | "prior-authorization",
-    claimStatus: "new" as "new" | "case-number-open" | "authorized" | "denied" | "patient-signed-letter" | "letter-sent-to-doctor" | "awaiting-answer",
+    claimStatus: "new" as
+      | "new"
+      | "case-number-open"
+      | "authorized"
+      | "denied"
+      | "letter-sent-to-doctor"
+      | "letters-received"
+      | "letters-sent-to-nihb"
+      | "form-filled"
+      | "form-sent-to-doctor"
+      | "sent-to-nihb"
+      | "sent"
+      | "payment-received",
+    patientSignedLetter: false,
     authorizationNumber: "",
     authorizationStartDate: "",
     authorizationEndDate: "",
@@ -53,9 +68,12 @@ export default function AddClaimModal({
         prescriberLicense: existingClaim.prescriberLicense,
         prescriberFax: existingClaim.prescriberFax || "",
         dinItem: existingClaim.dinItem || "",
+        din: existingClaim.din || "",
+        itemNumber: existingClaim.itemNumber || "",
         dateOfPrescription: existingClaim.dateOfPrescription,
         type: existingClaim.type,
         claimStatus: existingClaim.claimStatus,
+        patientSignedLetter: Boolean(existingClaim.patientSignedLetter),
         authorizationNumber: existingClaim.authorizationNumber || "",
         authorizationStartDate: existingClaim.authorizationStartDate || "",
         authorizationEndDate: existingClaim.authorizationEndDate || "",
@@ -71,9 +89,12 @@ export default function AddClaimModal({
         prescriberLicense: "",
         prescriberFax: "",
         dinItem: "",
+        din: "",
+        itemNumber: "",
         dateOfPrescription: "",
         type: "new",
         claimStatus: "new",
+        patientSignedLetter: false,
         authorizationNumber: "",
         authorizationStartDate: "",
         authorizationEndDate: "",
@@ -389,12 +410,67 @@ export default function AddClaimModal({
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   >
-                    <option value="new">New</option>
-                    <option value="case-number-open">Case Number Open</option>
-                    <option value="authorized">Authorized</option>
-                    <option value="denied">Denied</option>
+                    {category === "appeals" ? (
+                      <>
+                        <option value="new">New</option>
+                        <option value="letter-sent-to-doctor">
+                          Letter Sent to Doctor
+                        </option>
+                        <option value="letters-received">
+                          Letters Received
+                        </option>
+                        <option value="letters-sent-to-nihb">
+                          Letters Sent to NIHB
+                        </option>
+                        <option value="authorized">Authorized</option>
+                        <option value="denied">Denied</option>
+                      </>
+                    ) : category === "diapers-pads" ? (
+                      <>
+                        <option value="new">New</option>
+                        <option value="form-filled">Form Filled</option>
+                        <option value="form-sent-to-doctor">
+                          Form Sent to Doctor
+                        </option>
+                        <option value="sent-to-nihb">Sent to NIHB</option>
+                        <option value="authorized">Authorized</option>
+                        <option value="denied">Denied</option>
+                      </>
+                    ) : category === "manual-claims" ? (
+                      <>
+                        <option value="new">New</option>
+                        <option value="sent">Sent</option>
+                        <option value="payment-received">Payment Received</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="new">New</option>
+                        <option value="case-number-open">
+                          Case Number Open
+                        </option>
+                        <option value="authorized">Authorized</option>
+                        <option value="denied">Denied</option>
+                      </>
+                    )}
                   </select>
                 </div>
+
+                {category === "appeals" && (
+                  <div>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        name="patientSignedLetter"
+                        checked={formData.patientSignedLetter}
+                        onChange={handleCheckboxChange}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        Patient Signed Letter
+                      </span>
+                    </label>
+                  </div>
+                )}
 
                 <div className="md:col-span-2">
                   <label className="flex items-center space-x-2">
