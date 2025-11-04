@@ -813,42 +813,42 @@ export default function AddClaimPage() {
                   </>
                 )}
 
-                <div className={category === "appeals" ? "md:col-span-2" : ""}>
-                  <label className="block text-sm font-medium text-[#6E6C70] mb-2">
-                    Date of Prescription <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      name="dateOfPrescription"
-                      value={formatDateForDisplay(formData.dateOfPrescription)}
-                      onChange={handleInputChange}
-                      onClick={() => openDatePicker("dateOfPrescription")}
-                      placeholder="mm/dd/yyyy"
-                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                      readOnly
-                    />
-                    <button
-                      type="button"
-                      onClick={() => openDatePicker("dateOfPrescription")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              <div className={category === "appeals" && formData.claimStatus !== "authorized" ? "md:col-span-2" : ""}>
+                <label className="block text-sm font-medium text-[#6E6C70] mb-2">
+                  Date of Prescription <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="dateOfPrescription"
+                    value={formatDateForDisplay(formData.dateOfPrescription)}
+                    onChange={handleInputChange}
+                    onClick={() => openDatePicker("dateOfPrescription")}
+                    placeholder="mm/dd/yyyy"
+                    className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
+                    readOnly
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openDatePicker("dateOfPrescription")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
                     >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
                 </div>
+              </div>
 
                 {category !== "appeals" && (
                   <div>
