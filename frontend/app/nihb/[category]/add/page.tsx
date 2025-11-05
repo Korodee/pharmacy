@@ -649,7 +649,7 @@ export default function AddClaimPage() {
                 {/* Manual Claim Form - open to fill and print */}
                 <div className="md:col-span-2">
                   <a
-                    href={process.env.NEXT_PUBLIC_MANUAL_CLAIM_FORM_URL || "https://nihb-ssna.express-scripts.ca/e013d864-7cc0-4b27-b5d7-15127b675684"}
+                    href={process.env.NEXT_PUBLIC_MANUAL_CLAIM_FORM_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
