@@ -34,8 +34,8 @@ export default function LoginPage() {
 
       if (data.success) {
         showSuccess('Login successful! Welcome to the admin dashboard.');
-        router.push('/admin');
-        router.refresh();
+        // Use hard navigation so middleware reads the new cookie immediately
+        window.location.href = '/admin';
       } else {
         setError(data.error || 'Login failed');
         showError(data.error || 'Login failed');

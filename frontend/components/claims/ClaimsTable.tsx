@@ -90,6 +90,57 @@ export default function ClaimsTable({
     }
   };
 
+  // Determine if a claim has incomplete required fields (per category rules)
+  const isClaimIncomplete = (claim: ClaimDocument): boolean => {
+    // Shared requirements across categories
+    const hasAtLeastOneNote = Array.isArray(claim.notes) && claim.notes.length > 0;
+
+    if (claim.category === "manual-claims") {
+      const hasBasics = Boolean(
+        claim.rxNumber &&
+          claim.productName &&
+          (claim as any).dinItem &&
+          (claim as any).manualClaimType &&
+          (claim as any).dateOfRefill
+      );
+      if (!hasBasics) return true;
+      if ((claim as any).manualClaimType === "baby") {
+        if (!((claim as any).parentNameOnFile && (claim as any).parentBandNumberUpdated)) return true;
+      }
+      // Additional requested requirements (documents no longer required)
+      if (!hasAtLeastOneNote) return true;
+      return false;
+    }
+
+    // Non-manual claims
+    const hasCore = Boolean(
+      claim.rxNumber &&
+        claim.productName &&
+        claim.prescriberName &&
+        claim.prescriberLicense &&
+        claim.dateOfPrescription &&
+        claim.prescriberFax
+    );
+    if (!hasCore) return true;
+
+    // DIN requirements per category
+    if (claim.category === "diapers-pads") {
+      if (!(claim.din && claim.itemNumber)) return true;
+    } else {
+      if (!(claim.dinItem)) return true;
+    }
+
+    // Type required for categories other than appeals and diapers-pads
+    if (claim.category !== "appeals" && claim.category !== "diapers-pads") {
+      if (!claim.type) return true;
+    }
+
+    // Additional requested requirements (documents no longer required)
+    if (!hasAtLeastOneNote) return true;
+
+    return false;
+  };
+
   return (
     <div className="bg-white rounded-lg overflow-hidden">
       <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -170,7 +221,20 @@ export default function ClaimsTable({
                   onDoubleClick={() => onClaimClick(claim)}
                 >
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {claim.rxNumber}
+                    <span className="inline-flex items-center">
+                      {isClaimIncomplete(claim) && (
+                        <span className="mr-2 inline-flex items-center justify-center rounded-full bg-orange-100 text-orange-600" title="Incomplete fields" aria-label="Incomplete fields">
+                          <svg
+                            className="w-4 h-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.59c.75 1.334-.213 2.991-1.742 2.991H3.48c-1.53 0-2.492-1.657-1.742-2.99L8.257 3.1zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V7a1 1 0 112 0v4a1 1 0 01-1 1z" clipRule="evenodd" />
+                          </svg>
+                        </span>
+                      )}
+                      {claim.rxNumber}
+                    </span>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
                     {claim.productName}

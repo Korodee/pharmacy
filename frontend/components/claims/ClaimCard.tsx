@@ -88,6 +88,51 @@ export default function ClaimCard({
     });
   };
 
+  // Mirror table logic: determine if claim is incomplete per category
+  const isClaimIncomplete = (c: ClaimDocument): boolean => {
+    const hasAtLeastOneNote = Array.isArray(c.notes) && c.notes.length > 0;
+
+    if (c.category === "manual-claims") {
+      const hasBasics = Boolean(
+        c.rxNumber &&
+          c.productName &&
+          (c as any).dinItem &&
+          (c as any).manualClaimType &&
+          (c as any).dateOfRefill
+      );
+      if (!hasBasics) return true;
+      if ((c as any).manualClaimType === "baby") {
+        if (!((c as any).parentNameOnFile && (c as any).parentBandNumberUpdated)) return true;
+      }
+      if (!hasAtLeastOneNote) return true;
+      return false;
+    }
+
+    const hasCore = Boolean(
+      c.rxNumber &&
+        c.productName &&
+        c.prescriberName &&
+        c.prescriberLicense &&
+        c.dateOfPrescription &&
+        c.prescriberFax
+    );
+    if (!hasCore) return true;
+
+    if (c.category === "diapers-pads") {
+      if (!(c.din && c.itemNumber)) return true;
+    } else {
+      if (!(c.dinItem)) return true;
+    }
+
+    if (c.category !== "appeals" && c.category !== "diapers-pads") {
+      if (!c.type) return true;
+    }
+
+    if (!hasAtLeastOneNote) return true;
+
+    return false;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -98,7 +143,22 @@ export default function ClaimCard({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center space-x-3 mb-2">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                {isClaimIncomplete(claim) && (
+                  <span
+                    className="mr-2 inline-flex items-center justify-center rounded-full bg-orange-100 text-orange-600"
+                    title="Incomplete fields"
+                    aria-label="Incomplete fields"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.72-1.36 3.485 0l6.518 11.59c.75 1.334-.213 2.991-1.742 2.991H3.48c-1.53 0-2.492-1.657-1.742-2.99L8.257 3.1zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V7a1 1 0 112 0v4a1 1 0 01-1 1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                )}
                 {claim.rxNumber}
               </h3>
               {claim.priority && (
