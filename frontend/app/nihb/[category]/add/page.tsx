@@ -639,6 +639,31 @@ export default function AddClaimPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Manual Claim Form - open to fill and print */}
+                <div className="md:col-span-2">
+                  <a
+                    href="https://nihb-ssna.express-scripts.ca/e013d864-7cc0-4b27-b5d7-15127b675684"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                        <svg className="w-6 h-6 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Open Manual Claim Form</p>
+                        <p className="text-xs text-gray-500">Fill and print the NIHB manual claim form</p>
+                      </div>
+                    </div>
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h6m0 0v6m0-6L10 16" />
+                    </svg>
+                  </a>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

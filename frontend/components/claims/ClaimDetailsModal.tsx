@@ -372,6 +372,19 @@ export default function ClaimDetailsModal({
                         </span>
                       </div>
                     )}
+
+                {/* Manual Claim Form link */}
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <span className="text-sm text-gray-600">Manual Claim Form</span>
+                  <a
+                    href="https://nihb-ssna.express-scripts.ca/e013d864-7cc0-4b27-b5d7-15127b675684"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-medium text-[#0A438C] hover:underline"
+                  >
+                    Open to Fill & Print
+                  </a>
+                </div>
                   </>
                 ) : claim.category === "diapers-pads" ? (
                   <>
