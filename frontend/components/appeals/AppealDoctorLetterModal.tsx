@@ -100,7 +100,7 @@ export default function AppealDoctorLetterModal({
         .label{font-weight:700}
         .sectionTitle{font-weight:700;text-align:center;margin:18px 0}
         .box{min-height:0;border:1px solid #E5E7EB;border-radius:10px;padding:12px;margin-top:8px;background:#ffffff}
-        .handwrite{min-height:80px;height:80px;border:none;background:transparent;padding:0;margin:0}
+        .handwrite{min-height:60px;height:60px;border:none;background:transparent;padding:0;margin:0}
         /* Tailwind-like utilities used in preview */
         .grid { display: grid; }
         .grid-cols-2 { grid-template-columns: 1fr 1fr; }
@@ -109,6 +109,11 @@ export default function AppealDoctorLetterModal({
         .text-gray-900 { color: #111827; }
         .prewrap { white-space: pre-wrap; }
         .mt-8 { margin-top: 2rem; }
+        .mt-16 { margin-top: 4rem; }
+        .pt-8 { padding-top: 2rem; }
+        .text-sm { font-size: 0.875rem; }
+        .italic { font-style: italic; }
+        .font-bold { font-weight: 700; }
       </style>
     </head><body><div class="container">${printRef.current.innerHTML}</div></body></html>`;
     win.document.open();
@@ -367,10 +372,16 @@ export default function AppealDoctorLetterModal({
                   </div>
 
                   <div className="mt-8">
-                    <div>Doctor’s signature:</div>
+                    <div>Doctor's signature:</div>
                     <div style={{ marginTop: "32px" }}>
                       _______________________
                     </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-16 pt-8 text-sm italic font-bold text-gray-900">
+                    <div>***Please return filled form and appeal answer to Familiprix F.Chamoun & S.Marinis</div>
+                    <div>Phone: (450)638-5760, Fax: (450) 635-8249, 10 River road, Kahnawake, J0L 1B0, Qc, Canada</div>
                   </div>
                 </div>
               </div>

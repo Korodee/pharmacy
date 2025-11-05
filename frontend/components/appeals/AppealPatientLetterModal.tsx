@@ -99,11 +99,18 @@ export default function AppealPatientLetterModal({
         /* Tailwind-like spacing utilities used in preview */
         .space-y-1 > * + * { margin-top: 0.25rem; }
         .mt-6 { margin-top: 1.5rem; }
+        .mt-4 { margin-top: 2rem; }
         .pt-12 { padding-top: 3rem; }
         .pt-2 { padding-top: 0.5rem; }
         .pt-1 { padding-top: 0.25rem; }
         .underline { text-decoration: underline; }
         .underline-offset-4 { text-underline-offset: 4px; }
+        .mt-16 { margin-top: 4rem; }
+        .pt-8 { padding-top: 2rem; }
+        .text-sm { font-size: 0.875rem; }
+        .italic { font-style: italic; }
+        .font-bold { font-weight: 700; }
+        .text-gray-900 { color: #111827; }
       </style>
     </head><body><div class="container">${printRef.current.innerHTML}</div></body></html>`;
     win.document.open();
@@ -358,7 +365,7 @@ export default function AppealPatientLetterModal({
                   <div className="letter-closing mt-6">
                     Trusting to receive a favorable response, I remain,
                   </div>
-                  <div className="mt-2">Yours truly,</div>
+                  <div className="mt-4">Yours truly,</div>
                   <div className="pt-12">
                     <div
                       style={{ borderTop: "1px solid #D1D5DB", width: "280px" }}
@@ -366,6 +373,12 @@ export default function AppealPatientLetterModal({
                     <div className="pt-2 font-medium">
                       {form.nameAndSignature}
                     </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-16 pt-8 text-sm italic font-bold text-gray-900">
+                    <div>***Please return filled form and appeal answer to Familiprix F.Chamoun & S.Marinis</div>
+                    <div>Phone: (450)638-5760, Fax: (450) 635-8249, 10 River road, Kahnawake, J0L 1B0, Qc, Canada</div>
                   </div>
                 </div>
               </div>
