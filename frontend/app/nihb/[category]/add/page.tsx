@@ -32,6 +32,8 @@ export default function AddClaimPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showPatientLetter, setShowPatientLetter] = useState(false);
   const [showDoctorLetter, setShowDoctorLetter] = useState(false);
+  const [patientLetterDone, setPatientLetterDone] = useState(false);
+  const [doctorLetterDone, setDoctorLetterDone] = useState(false);
 
   const [formData, setFormData] = useState({
     rxNumber: "",
@@ -1283,7 +1285,9 @@ export default function AddClaimPage() {
             {/* Appeal Letters (client-side fillable) */}
             {category === "appeals" && (
               <div className="mb-8">
-                <h3 className="block text-sm font-medium text-[#6E6C70] mb-4">Generate Appeal Letters</h3>
+                <h3 className="block text-sm font-medium text-[#6E6C70] mb-4">
+                  Generate Appeal Letters
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <button
                     type="button"
@@ -1292,14 +1296,47 @@ export default function AddClaimPage() {
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <svg
+                          className="w-6 h-6 text-blue-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-start text-gray-900">Patient Letter</p>
-                        <p className="text-xs text-start text-gray-500">Fill in and print/download</p>
+                        <p className="text-sm font-medium text-start text-gray-900">
+                          Patient Letter
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Fill in and print/download
+                        </p>
                       </div>
+                      {patientLetterDone && (
+                        <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          Done
+                        </span>
+                      )}
                     </div>
-                    <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
                   </button>
 
                   <button
@@ -1308,15 +1345,48 @@ export default function AddClaimPage() {
                     className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                        <svg
+                          className="w-6 h-6 text-green-600"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-start text-gray-900">Doctor Letter</p>
-                        <p className="text-xs text-gray-500">Fill in and print/download</p>
+                        <p className="text-sm font-medium text-start text-gray-900">
+                          Doctor Letter
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Fill in and print/download
+                        </p>
                       </div>
+                      {doctorLetterDone && (
+                        <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          Done
+                        </span>
+                      )}
                     </div>
-                    <svg className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
                   </button>
                 </div>
               </div>
@@ -1529,8 +1599,16 @@ export default function AddClaimPage() {
       )}
 
       {/* Appeal Letter Modals (client-side only; no persistence) */}
-      <AppealPatientLetterModal isOpen={showPatientLetter} onClose={() => setShowPatientLetter(false)} />
-      <AppealDoctorLetterModal isOpen={showDoctorLetter} onClose={() => setShowDoctorLetter(false)} />
+      <AppealPatientLetterModal
+        isOpen={showPatientLetter}
+        onClose={() => setShowPatientLetter(false)}
+        onPrinted={() => setPatientLetterDone(true)}
+      />
+      <AppealDoctorLetterModal
+        isOpen={showDoctorLetter}
+        onClose={() => setShowDoctorLetter(false)}
+        onPrinted={() => setDoctorLetterDone(true)}
+      />
     </>
   );
 }

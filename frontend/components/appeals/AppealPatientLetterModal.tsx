@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 interface AppealPatientLetterModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPrinted?: () => void;
 }
 
 export default function AppealPatientLetterModal({
   isOpen,
   onClose,
+  onPrinted,
 }: AppealPatientLetterModalProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
@@ -108,7 +110,21 @@ export default function AppealPatientLetterModal({
     win.document.write(html);
     win.document.close();
     win.focus();
+    try {
+      // notify when printing finishes
+      (win as any).onafterprint = () => {
+        try { win.close(); } catch {}
+        if (onPrinted) onPrinted();
+        onClose(); // close modal and return to add page
+      };
+    } catch {}
     win.print();
+    // Fallback notify in case onafterprint isn't supported
+    setTimeout(() => { 
+      try { win.close(); } catch {}
+      if (onPrinted) onPrinted(); 
+      onClose();
+    }, 1500);
   };
 
   if (!isOpen) return null;

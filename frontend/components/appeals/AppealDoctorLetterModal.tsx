@@ -6,11 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 interface AppealDoctorLetterModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onPrinted?: () => void;
 }
 
 export default function AppealDoctorLetterModal({
   isOpen,
   onClose,
+  onPrinted,
 }: AppealDoctorLetterModalProps) {
   const printRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState({
@@ -98,7 +100,7 @@ export default function AppealDoctorLetterModal({
         .label{font-weight:700}
         .sectionTitle{font-weight:700;text-align:center;margin:18px 0}
         .box{min-height:0;border:1px solid #E5E7EB;border-radius:10px;padding:12px;margin-top:8px;background:#ffffff}
-        .handwrite{min-height:60px;height:60px}
+        .handwrite{min-height:80px;height:80px;border:none;background:transparent;padding:0;margin:0}
         /* Tailwind-like utilities used in preview */
         .grid { display: grid; }
         .grid-cols-2 { grid-template-columns: 1fr 1fr; }
@@ -113,7 +115,19 @@ export default function AppealDoctorLetterModal({
     win.document.write(html);
     win.document.close();
     win.focus();
+    try {
+      (win as any).onafterprint = () => {
+        try { win.close(); } catch {}
+        if (onPrinted) onPrinted();
+        onClose(); // close modal and return to add page
+      };
+    } catch {}
     win.print();
+    setTimeout(() => { 
+      try { win.close(); } catch {}
+      if (onPrinted) onPrinted(); 
+      onClose();
+    }, 1500);
   };
 
   if (!isOpen) return null;
@@ -290,8 +304,9 @@ export default function AppealDoctorLetterModal({
               ))}
 
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-xs text-gray-600">
-                The sections below (Condition, Diagnosis & Prognosis, Test Results, and Justification)
-                will be completed by the prescribing doctor on the printed form.
+                The sections below (Condition, Diagnosis & Prognosis, Test
+                Results, and Justification) will be completed by the prescribing
+                doctor on the printed form.
               </div>
             </div>
 
@@ -299,7 +314,9 @@ export default function AppealDoctorLetterModal({
             <div className="bg-gray-50 rounded-xl border border-gray-200 p-6">
               <div ref={printRef}>
                 <div className="text-[15px] leading-7 text-gray-900 space-y-6">
-                  <div className="title text-gray-900 text-center">Appeal Process</div>
+                  <div className="title text-gray-900 text-center">
+                    Appeal Process
+                  </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col text-gray-900">
@@ -329,23 +346,23 @@ export default function AppealDoctorLetterModal({
                   <div className="space-y-5">
                     <div>
                       <div className="label text-gray-900">Condition:</div>
-                      <div className="box handwrite bg-white shadow-sm border border-gray-200 rounded-lg min-h-28"></div>
+                      <div className="handwrite min-h-28"></div>
                     </div>
                     <div>
                       <div className="label text-gray-900">
                         Diagnosis & Prognosis (other drugs tried)
                       </div>
-                      <div className="box handwrite bg-white shadow-sm border border-gray-200 rounded-lg min-h-28"></div>
+                      <div className="handwrite min-h-28"></div>
                     </div>
                     <div>
                       <div className="label text-gray-900">Test Results:</div>
-                      <div className="box handwrite bg-white shadow-sm border border-gray-200 rounded-lg min-h-28"></div>
+                      <div className="handwrite min-h-28"></div>
                     </div>
                     <div>
                       <div className="label text-gray-900">
                         Justification for the proposed drug & other information
                       </div>
-                      <div className="box handwrite bg-white shadow-sm border border-gray-200 rounded-lg min-h-28"></div>
+                      <div className="handwrite min-h-28"></div>
                     </div>
                   </div>
 
