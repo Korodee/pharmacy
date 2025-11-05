@@ -13,6 +13,7 @@ interface StatusBadgeProps {
     | "letters-sent-to-nihb"
     | "form-filled"
     | "form-sent-to-doctor"
+    | "received-form-from-doctor"
     | "sent-to-nihb"
     | "sent"
     | "payment-received";
@@ -28,6 +29,7 @@ interface StatusBadgeProps {
       | "letters-sent-to-nihb"
       | "form-filled"
       | "form-sent-to-doctor"
+      | "received-form-from-doctor"
       | "sent-to-nihb"
       | "sent"
       | "payment-received"
@@ -104,6 +106,12 @@ export default function StatusBadge({
           dotColor: "bg-[#0A438C]",
           badgeClass: "bg-[#E0F2F7] text-[#0A438C] border-[#0A438C]",
         };
+      case "received-form-from-doctor":
+        return {
+          label: "Received Form from Doctor",
+          dotColor: "bg-purple-600",
+          badgeClass: "bg-purple-50 text-purple-600 border-purple-600",
+        };
       case "sent-to-nihb":
         return {
           label: "Sent to NIHB",
@@ -176,6 +184,11 @@ export default function StatusBadge({
           value: "form-sent-to-doctor",
           label: "Form Sent to Doctor",
           dotColor: "bg-[#0A438C]",
+        },
+        {
+          value: "received-form-from-doctor",
+          label: "Received Form from Doctor",
+          dotColor: "bg-purple-600",
         },
         {
           value: "sent-to-nihb",
@@ -275,7 +288,7 @@ export default function StatusBadge({
       {isOpen && menuPosition && (
         <>
           <div
-            className="fixed w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-[9999]"
+            className="fixed w-58 bg-white rounded-lg shadow-lg border border-gray-200 z-[9999]"
             style={{
               left: `${menuPosition.x}px`,
               top: `${menuPosition.y}px`,

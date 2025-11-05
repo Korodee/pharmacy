@@ -28,6 +28,7 @@ interface ClaimsTableProps {
       | "letters-sent-to-nihb"
       | "form-filled"
       | "form-sent-to-doctor"
+      | "received-form-from-doctor"
       | "sent-to-nihb"
       | "sent"
       | "payment-received"

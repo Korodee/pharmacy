@@ -47,6 +47,7 @@ export default function AddClaimModal({
       | "letters-sent-to-nihb"
       | "form-filled"
       | "form-sent-to-doctor"
+      | "received-form-from-doctor"
       | "sent-to-nihb"
       | "sent"
       | "payment-received",
@@ -431,6 +432,9 @@ export default function AddClaimModal({
                         <option value="form-filled">Form Filled</option>
                         <option value="form-sent-to-doctor">
                           Form Sent to Doctor
+                        </option>
+                        <option value="received-form-from-doctor">
+                          Received Form from Doctor
                         </option>
                         <option value="sent-to-nihb">Sent to NIHB</option>
                         <option value="authorized">Authorized</option>

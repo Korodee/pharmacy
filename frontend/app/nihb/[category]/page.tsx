@@ -19,7 +19,7 @@ export default function NIHBCategoryPage() {
   const pathname = usePathname();
   const baseNIHBPath =
     pathname && pathname.includes("/admin/nihb") ? "/admin/nihb" : "/nihb";
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError, showInfo } = useToast();
   const [claims, setClaims] = useState<ClaimDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedClaim, setSelectedClaim] = useState<ClaimDocument | null>(
@@ -38,6 +38,8 @@ export default function NIHBCategoryPage() {
   const [authEndDate, setAuthEndDate] = useState("");
   const [authIndefinite, setAuthIndefinite] = useState(false);
   const [caseNumber, setCaseNumber] = useState("");
+  const [showFormDownloadModal, setShowFormDownloadModal] = useState(false);
+  const [pendingFormDownloadClaimId, setPendingFormDownloadClaimId] = useState<string | null>(null);
 
   // Date picker state for modal (reuse UX)
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -220,6 +222,7 @@ export default function NIHBCategoryPage() {
       | "letters-sent-to-nihb"
       | "form-filled"
       | "form-sent-to-doctor"
+      | "received-form-from-doctor"
       | "sent-to-nihb"
       | "sent"
       | "payment-received"
@@ -237,6 +240,9 @@ export default function NIHBCategoryPage() {
       return;
     }
 
+    // Find the claim to get its category for contextual messages
+    const claim = claims.find(c => c.id === claimId);
+
     try {
       const response = await fetch(`/api/claims?id=${claimId}`, {
         method: "PUT",
@@ -247,7 +253,81 @@ export default function NIHBCategoryPage() {
       const data = await response.json();
 
       if (data.success) {
-        showSuccess("Status updated successfully.", 6000);
+        // Show contextual notifications based on status and category
+        let statusMessage = "Status updated successfully.";
+        let infoMessage = "";
+
+        if (claim?.category === "diapers-pads") {
+          switch (newStatus) {
+            case "new":
+              statusMessage = "Claim created. You can now download the Doctor's Form.";
+              infoMessage = "Go to the claim edit page to download the Doctor's Form with presentation page.";
+              break;
+            case "form-filled":
+              statusMessage = "Status updated. Doctor's Form is available for download.";
+              infoMessage = "You can download the Doctor's Form with presentation page from the edit page.";
+              break;
+            case "form-sent-to-doctor":
+              statusMessage = "Status updated. Waiting for doctor's response.";
+              infoMessage = "Once you receive the filled form from the doctor, mark it as 'Received Form from Doctor'.";
+              break;
+            case "received-form-from-doctor":
+              // Show modal for form download
+              setPendingFormDownloadClaimId(claimId);
+              setShowFormDownloadModal(true);
+              statusMessage = "Great! You can now download the Medical Supplies Form.";
+              infoMessage = "";
+              break;
+            case "sent-to-nihb":
+              statusMessage = "Status updated. Forms have been sent to NIHB.";
+              infoMessage = "Waiting for authorization response from NIHB.";
+              break;
+            case "denied":
+              statusMessage = "Claim status updated to denied.";
+              break;
+            default:
+              statusMessage = "Status updated successfully.";
+          }
+        } else if (claim?.category === "appeals") {
+          switch (newStatus) {
+            case "letter-sent-to-doctor":
+              statusMessage = "Letter sent to doctor. Waiting for response.";
+              infoMessage = "Once you receive the letters, mark it as 'Letters Received'.";
+              break;
+            case "letters-received":
+              statusMessage = "Letters received. Ready to send to NIHB.";
+              infoMessage = "You can now mark it as 'Letters Sent to NIHB' when submitted.";
+              break;
+            case "letters-sent-to-nihb":
+              statusMessage = "Letters sent to NIHB. Waiting for response.";
+              infoMessage = "Waiting for authorization or denial response from NIHB.";
+              break;
+            case "denied":
+              statusMessage = "Appeal status updated to denied.";
+              break;
+            default:
+              statusMessage = "Status updated successfully.";
+          }
+        } else if (claim?.category === "manual-claims") {
+          switch (newStatus) {
+            case "sent":
+              statusMessage = "Manual claim sent. Waiting for payment.";
+              infoMessage = "Once payment is received, mark it as 'Payment Received'.";
+              break;
+            case "payment-received":
+              statusMessage = "Payment received for manual claim!";
+              break;
+            default:
+              statusMessage = "Status updated successfully.";
+          }
+        }
+
+        showSuccess(statusMessage, 8000);
+        if (infoMessage) {
+          setTimeout(() => {
+            showInfo(infoMessage, 10000);
+          }, 500);
+        }
         fetchClaims();
       } else {
         showError(data.error || "Failed to update status");
@@ -755,6 +835,115 @@ export default function NIHBCategoryPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Form Download Modal for Diapers & Pads */}
+      {showFormDownloadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Download Medical Supplies Forms
+              </h3>
+              <p className="text-sm text-gray-600 mt-1">
+                Download the Medical Supplies Form and NIHB presentation page to send to NIHB.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Medical Supplies Form */}
+              <button
+                onClick={async () => {
+                  try {
+                    const formResponse = await fetch('/medical-supplies-form.pdf');
+                    const formBlob = await formResponse.blob();
+                    const formUrl = window.URL.createObjectURL(formBlob);
+                    const formLink = document.createElement('a');
+                    formLink.href = formUrl;
+                    formLink.download = 'medical-supplies-form.pdf';
+                    document.body.appendChild(formLink);
+                    formLink.click();
+                    document.body.removeChild(formLink);
+                    window.URL.revokeObjectURL(formUrl);
+
+                    // Download NIHB Presentation Page (with a small delay)
+                    setTimeout(async () => {
+                      try {
+                        const presResponse = await fetch('/nihb-presentation-page-medical-supplies.pdf');
+                        const presBlob = await presResponse.blob();
+                        const presUrl = window.URL.createObjectURL(presBlob);
+                        const presLink = document.createElement('a');
+                        presLink.href = presUrl;
+                        presLink.download = 'nihb-presentation-page-medical-supplies.pdf';
+                        document.body.appendChild(presLink);
+                        presLink.click();
+                        document.body.removeChild(presLink);
+                        window.URL.revokeObjectURL(presUrl);
+                      } catch (error) {
+                        console.error('Failed to download presentation page:', error);
+                        showError('Failed to download presentation page. Please try again.');
+                      }
+                    }, 300);
+                  } catch (error) {
+                    showError('Failed to download form. Please try again.');
+                  }
+                }}
+                className="w-full flex items-center justify-between p-4 border-2 border-green-300 rounded-lg hover:bg-green-50 transition-colors group"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                    <svg
+                      className="w-6 h-6 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-gray-900">
+                      Medical Supplies Form
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Includes form and NIHB presentation page
+                    </p>
+                  </div>
+                </div>
+                <svg
+                  className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                onClick={() => {
+                  setShowFormDownloadModal(false);
+                  setPendingFormDownloadClaimId(null);
+                }}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

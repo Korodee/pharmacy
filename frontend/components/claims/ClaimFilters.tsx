@@ -49,6 +49,7 @@ export default function ClaimFilters({
         { value: "new", label: "New" },
         { value: "form-filled", label: "Form Filled" },
         { value: "form-sent-to-doctor", label: "Form Sent to Doctor" },
+        { value: "received-form-from-doctor", label: "Received Form from Doctor" },
         { value: "sent-to-nihb", label: "Sent to NIHB" },
         { value: "authorized", label: "Authorized" },
         { value: "denied", label: "Denied" },

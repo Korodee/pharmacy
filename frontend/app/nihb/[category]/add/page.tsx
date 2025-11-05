@@ -56,6 +56,7 @@ export default function AddClaimPage() {
       | "letters-sent-to-nihb"
       | "form-filled"
       | "form-sent-to-doctor"
+      | "received-form-from-doctor"
       | "sent-to-nihb"
       | "sent"
       | "payment-received",
@@ -1402,6 +1403,243 @@ export default function AddClaimPage() {
                       />
                     </svg>
                   </button>
+                </div>
+              </div>
+            )}
+
+            {/* Diapers & Pads Forms Section */}
+            {category === "diapers-pads" && (
+              <div className="mb-8">
+                <h3 className="block text-sm font-medium text-[#6E6C70] mb-4">
+                  Forms & Documents
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Doctor's Form */}
+                  <button
+                    type="button"
+                    disabled={
+                      formData.claimStatus !== "new" &&
+                      formData.claimStatus !== "form-filled" &&
+                      formData.claimStatus !== "form-sent-to-doctor"
+                    }
+                    onClick={async () => {
+                      try {
+                        // Download Doctor's Form
+                        const formResponse = await fetch('/doctors-form-diapers-pads.pdf');
+                        const formBlob = await formResponse.blob();
+                        const formUrl = window.URL.createObjectURL(formBlob);
+                        const formLink = document.createElement('a');
+                        formLink.href = formUrl;
+                        formLink.download = 'doctors-form-diapers-pads.pdf';
+                        document.body.appendChild(formLink);
+                        formLink.click();
+                        document.body.removeChild(formLink);
+                        window.URL.revokeObjectURL(formUrl);
+
+                        // Download Presentation Page (with a small delay)
+                        setTimeout(async () => {
+                          try {
+                            const presResponse = await fetch('/nihb-presentation-page-doctor.pdf');
+                            const presBlob = await presResponse.blob();
+                            const presUrl = window.URL.createObjectURL(presBlob);
+                            const presLink = document.createElement('a');
+                            presLink.href = presUrl;
+                            presLink.download = 'nihb-presentation-page-doctor.pdf';
+                            document.body.appendChild(presLink);
+                            presLink.click();
+                            document.body.removeChild(presLink);
+                            window.URL.revokeObjectURL(presUrl);
+                          } catch (error) {
+                            console.error('Failed to download presentation page:', error);
+                          }
+                        }, 300);
+                      } catch (error) {
+                        showError('Failed to download form. Please try again.');
+                      }
+                    }}
+                    className={`flex items-center justify-between p-4 border border-gray-300 rounded-lg transition-colors group ${
+                      formData.claimStatus !== "new" &&
+                      formData.claimStatus !== "form-filled" &&
+                      formData.claimStatus !== "form-sent-to-doctor"
+                        ? "opacity-50 cursor-not-allowed bg-gray-100"
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                        formData.claimStatus !== "new" &&
+                        formData.claimStatus !== "form-filled" &&
+                        formData.claimStatus !== "form-sent-to-doctor"
+                          ? "bg-gray-200"
+                          : "bg-blue-100 group-hover:bg-blue-200"
+                      }`}>
+                        <svg
+                          className={`w-6 h-6 ${
+                            formData.claimStatus !== "new" &&
+                            formData.claimStatus !== "form-filled" &&
+                            formData.claimStatus !== "form-sent-to-doctor"
+                              ? "text-gray-400"
+                              : "text-blue-600"
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-start text-gray-900">
+                          Doctor's Form
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Download and send to doctor
+                        </p>
+                      </div>
+                    </div>
+                    <svg
+                      className={`w-5 h-5 transition-colors ${
+                        formData.claimStatus !== "new" &&
+                        formData.claimStatus !== "form-filled" &&
+                        formData.claimStatus !== "form-sent-to-doctor"
+                          ? "text-gray-400"
+                          : "text-gray-400 group-hover:text-blue-600"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Medical Supplies Form */}
+                  <button
+                    type="button"
+                    disabled={
+                      formData.claimStatus !== "received-form-from-doctor" &&
+                      formData.claimStatus !== "sent-to-nihb" &&
+                      formData.claimStatus !== "authorized" &&
+                      formData.claimStatus !== "denied"
+                    }
+                    onClick={async () => {
+                      try {
+                        // Download Medical Supplies Form
+                        const formResponse = await fetch('/medical-supplies-form.pdf');
+                        const formBlob = await formResponse.blob();
+                        const formUrl = window.URL.createObjectURL(formBlob);
+                        const formLink = document.createElement('a');
+                        formLink.href = formUrl;
+                        formLink.download = 'medical-supplies-form.pdf';
+                        document.body.appendChild(formLink);
+                        formLink.click();
+                        document.body.removeChild(formLink);
+                        window.URL.revokeObjectURL(formUrl);
+
+                        // Download NIHB Presentation Page (with a small delay)
+                        setTimeout(async () => {
+                          try {
+                            const presResponse = await fetch('/nihb-presentation-page-medical-supplies.pdf');
+                            const presBlob = await presResponse.blob();
+                            const presUrl = window.URL.createObjectURL(presBlob);
+                            const presLink = document.createElement('a');
+                            presLink.href = presUrl;
+                            presLink.download = 'nihb-presentation-page-medical-supplies.pdf';
+                            document.body.appendChild(presLink);
+                            presLink.click();
+                            document.body.removeChild(presLink);
+                            window.URL.revokeObjectURL(presUrl);
+                          } catch (error) {
+                            console.error('Failed to download presentation page:', error);
+                          }
+                        }, 300);
+                      } catch (error) {
+                        showError('Failed to download form. Please try again.');
+                      }
+                    }}
+                    className={`flex items-center justify-between p-4 border border-gray-300 rounded-lg transition-colors group ${
+                      formData.claimStatus !== "received-form-from-doctor" &&
+                      formData.claimStatus !== "sent-to-nihb" &&
+                      formData.claimStatus !== "authorized" &&
+                      formData.claimStatus !== "denied"
+                        ? "opacity-50 cursor-not-allowed bg-gray-100"
+                        : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
+                        formData.claimStatus !== "received-form-from-doctor" &&
+                        formData.claimStatus !== "sent-to-nihb" &&
+                        formData.claimStatus !== "authorized" &&
+                        formData.claimStatus !== "denied"
+                          ? "bg-gray-200"
+                          : "bg-green-100 group-hover:bg-green-200"
+                      }`}>
+                        <svg
+                          className={`w-6 h-6 ${
+                            formData.claimStatus !== "received-form-from-doctor" &&
+                            formData.claimStatus !== "sent-to-nihb" &&
+                            formData.claimStatus !== "authorized" &&
+                            formData.claimStatus !== "denied"
+                              ? "text-gray-400"
+                              : "text-green-600"
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-start text-gray-900">
+                          Medical Supplies Form
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Download after receiving doctor's form
+                        </p>
+                      </div>
+                    </div>
+                    <svg
+                      className={`w-5 h-5 transition-colors ${
+                        formData.claimStatus !== "received-form-from-doctor" &&
+                        formData.claimStatus !== "sent-to-nihb" &&
+                        formData.claimStatus !== "authorized" &&
+                        formData.claimStatus !== "denied"
+                          ? "text-gray-400"
+                          : "text-gray-400 group-hover:text-green-600"
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <div className="mt-3 text-xs text-gray-500">
+                  <p>• Doctor's Form: Available when status is "New", "Form Filled", or "Form Sent to Doctor" (includes presentation page)</p>
+                  <p>• Medical Supplies Form: Available only after marking status as "Received Form from Doctor" (includes NIHB presentation page)</p>
                 </div>
               </div>
             )}
