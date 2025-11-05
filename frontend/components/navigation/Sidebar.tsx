@@ -112,7 +112,7 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
                     {item.children.map((child, childIndex) => (
                       <Link key={childIndex} href={child.path as any}>
                         <div
-                          className={`flex items-center space-x-4 py-3.5 px-4 rounded-lg mb-2 transition-colors relative ${
+                          className={`flex items-center space-x-2 py-3.5 px-4 rounded-lg mb-2 transition-colors relative ${
                             child.active
                               ? "bg-[#EBF2FF] text-[#3A79C9]"
                               : "text-[#6E6C70] hover:bg-gray-100 hover:text-[#888888]"
