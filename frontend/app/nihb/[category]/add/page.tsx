@@ -99,7 +99,9 @@ export default function AddClaimPage() {
             authorizationNumber: c.authorizationNumber || "",
             authorizationStartDate: c.authorizationStartDate || "",
             authorizationEndDate: c.authorizationEndDate || "",
-            authorizationIndefinite: Boolean((c as any).authorizationIndefinite),
+            authorizationIndefinite: Boolean(
+              (c as any).authorizationIndefinite
+            ),
             priority: Boolean(c.priority),
             note: "",
             manualClaimType: c.manualClaimType || "",
@@ -131,7 +133,9 @@ export default function AddClaimPage() {
               authorizationNumber: c.authorizationNumber || "",
               authorizationStartDate: c.authorizationStartDate || "",
               authorizationEndDate: c.authorizationEndDate || "",
-              authorizationIndefinite: Boolean((c as any).authorizationIndefinite),
+              authorizationIndefinite: Boolean(
+                (c as any).authorizationIndefinite
+              ),
               priority: Boolean(c.priority),
               note: "",
               manualClaimType: c.manualClaimType || "",
@@ -172,7 +176,9 @@ export default function AddClaimPage() {
         formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
       }
       if (digits.length > 6) {
-        formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+        formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(
+          6
+        )}`;
       }
       setFormData((prev) => ({ ...prev, [name]: formatted }));
     } else {
@@ -643,24 +649,48 @@ export default function AddClaimPage() {
                 {/* Manual Claim Form - open to fill and print */}
                 <div className="md:col-span-2">
                   <a
-                    href="https://nihb-ssna.express-scripts.ca/e013d864-7cc0-4b27-b5d7-15127b675684"
+                    href={process.env.NEXT_PUBLIC_MANUAL_CLAIM_FORM_URL || "https://nihb-ssna.express-scripts.ca/e013d864-7cc0-4b27-b5d7-15127b675684"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
-                        <svg className="w-6 h-6 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <svg
+                          className="w-6 h-6 text-indigo-700"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Open Manual Claim Form</p>
-                        <p className="text-xs text-gray-500">Fill and print the NIHB manual claim form</p>
+                        <p className="text-sm font-medium text-gray-900">
+                          Open Manual Claim Form
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Fill and print the NIHB manual claim form
+                        </p>
                       </div>
                     </div>
-                    <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h6m0 0v6m0-6L10 16" />
+                    <svg
+                      className="w-5 h-5 text-gray-400 group-hover:text-indigo-700 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7h6m0 0v6m0-6L10 16"
+                      />
                     </svg>
                   </a>
                 </div>
@@ -1021,14 +1051,22 @@ export default function AddClaimPage() {
                               inputMode="numeric"
                               pattern="\\d{4}-\\d{2}-\\d{2}"
                               disabled={formData.authorizationIndefinite}
-                              className={`w-full px-4 text-[14px] py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${formData.authorizationIndefinite ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
+                              className={`w-full px-4 text-[14px] py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${
+                                formData.authorizationIndefinite
+                                  ? "bg-gray-100 border-gray-200 cursor-not-allowed"
+                                  : "border-gray-300"
+                              }`}
                             />
                             <button
                               type="button"
                               onClick={() =>
                                 openDatePicker("authorizationEndDate")
                               }
-                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${formData.authorizationIndefinite ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'}`}
+                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                                formData.authorizationIndefinite
+                                  ? "text-gray-300 cursor-not-allowed"
+                                  : "text-gray-400 hover:text-gray-600"
+                              }`}
                               disabled={formData.authorizationIndefinite}
                             >
                               <svg
@@ -1055,12 +1093,16 @@ export default function AddClaimPage() {
                                 setFormData((prev) => ({
                                   ...prev,
                                   authorizationIndefinite: e.target.checked,
-                                  authorizationEndDate: e.target.checked ? "" : prev.authorizationEndDate,
+                                  authorizationEndDate: e.target.checked
+                                    ? ""
+                                    : prev.authorizationEndDate,
                                 }))
                               }
                               className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] ml-[2px]"
                             />
-                            <span className="ml-2 text-sm text-gray-700">Indefinitely authorized</span>
+                            <span className="ml-2 text-sm text-gray-700">
+                              Indefinitely authorized
+                            </span>
                           </label>
                         </div>
 
@@ -1088,7 +1130,7 @@ export default function AddClaimPage() {
                     ) : (
                       <>
                         {category !== "diapers-pads" && (
-                      <div>
+                          <div>
                             <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                               Authorization End Date
                             </label>
@@ -1096,12 +1138,12 @@ export default function AddClaimPage() {
                               <input
                                 type="text"
                                 name="authorizationEndDate"
-                            value={formData.authorizationEndDate}
-                            onChange={handleInputChange}
-                            placeholder="yyyy-mm-dd"
-                            inputMode="numeric"
-                            pattern="\\d{4}-\\d{2}-\\d{2}"
-                            className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
+                                value={formData.authorizationEndDate}
+                                onChange={handleInputChange}
+                                placeholder="yyyy-mm-dd"
+                                inputMode="numeric"
+                                pattern="\\d{4}-\\d{2}-\\d{2}"
+                                className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                               />
                               <button
                                 type="button"
@@ -1162,17 +1204,23 @@ export default function AddClaimPage() {
                         name="authorizationEndDate"
                         value={formData.authorizationEndDate}
                         onChange={handleInputChange}
-                        onClick={() =>
-                          openDatePicker("authorizationEndDate")
-                        }
+                        onClick={() => openDatePicker("authorizationEndDate")}
                         placeholder="mm/dd/yyyy"
                         disabled={formData.authorizationIndefinite}
-                        className={`w-full px-4 text-[14px] py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${formData.authorizationIndefinite ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
+                        className={`w-full px-4 text-[14px] py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${
+                          formData.authorizationIndefinite
+                            ? "bg-gray-100 border-gray-200 cursor-not-allowed"
+                            : "border-gray-300"
+                        }`}
                       />
                       <button
                         type="button"
                         onClick={() => openDatePicker("authorizationEndDate")}
-                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${formData.authorizationIndefinite ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                          formData.authorizationIndefinite
+                            ? "text-gray-300 cursor-not-allowed"
+                            : "text-gray-400 hover:text-gray-600"
+                        }`}
                         disabled={formData.authorizationIndefinite}
                       >
                         <svg
@@ -1199,12 +1247,16 @@ export default function AddClaimPage() {
                           setFormData((prev) => ({
                             ...prev,
                             authorizationIndefinite: e.target.checked,
-                            authorizationEndDate: e.target.checked ? "" : prev.authorizationEndDate,
+                            authorizationEndDate: e.target.checked
+                              ? ""
+                              : prev.authorizationEndDate,
                           }))
                         }
                         className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] ml-[2px]"
                       />
-                      <span className="ml-2 text-sm text-gray-700">Indefinitely authorized</span>
+                      <span className="ml-2 text-sm text-gray-700">
+                        Indefinitely authorized
+                      </span>
                     </label>
                   </div>
                 </div>
