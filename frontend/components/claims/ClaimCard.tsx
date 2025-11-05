@@ -37,6 +37,7 @@ interface ClaimDocument {
   authorizationNumber?: string;
   authorizationStartDate?: string;
   authorizationEndDate?: string;
+  authorizationIndefinite?: boolean;
   // Manual claims specific fields
   manualClaimType?: "baby" | "old";
   parentNameOnFile?: boolean;
@@ -81,11 +82,14 @@ export default function ClaimCard({
   const [showMenu, setShowMenu] = useState(false);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    if (!dateString) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${da}`;
   };
 
   // Mirror table logic: determine if claim is incomplete per category
@@ -256,12 +260,12 @@ export default function ClaimCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 text-sm text-gray-500">
             <span>📅 {formatDate(claim.dateOfPrescription)}</span>
-            {claim.authorizationEndDate && (
+            {(claim as any).authorizationIndefinite || claim.authorizationEndDate ? (
               <div className="flex items-center space-x-2">
                 <span>Expires:</span>
-                <ExpiryBadge endDate={claim.authorizationEndDate} size="sm" />
+                <ExpiryBadge endDate={claim.authorizationEndDate || ''} size="sm" indefinite={(claim as any).authorizationIndefinite} />
               </div>
-            )}
+            ) : null}
           </div>
 
           {claim.documents && claim.documents.length > 0 && (

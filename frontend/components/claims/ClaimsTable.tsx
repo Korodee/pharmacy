@@ -66,11 +66,15 @@ export default function ClaimsTable({
   const [deletedBy, setDeletedBy] = useState("");
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    if (!dateString) return "";
+    // If already yyyy-mm-dd, return as-is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const da = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${da}`;
   };
 
   const handleDeleteClick = (claim: ClaimDocument) => {
@@ -309,11 +313,10 @@ export default function ClaimsTable({
                     </td>
                   )}
                   <td className="px-4 py-3 whitespace-nowrap">
-                    {claim.authorizationEndDate ? (
-                      <ExpiryBadge
-                        endDate={claim.authorizationEndDate}
-                        size="sm"
-                      />
+                    {(claim as any).authorizationIndefinite ? (
+                      <ExpiryBadge endDate="" size="sm" indefinite />
+                    ) : claim.authorizationEndDate ? (
+                      <ExpiryBadge endDate={claim.authorizationEndDate} size="sm" />
                     ) : (
                       <span className="text-sm text-gray-500">-</span>
                     )}

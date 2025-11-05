@@ -36,6 +36,7 @@ export default function NIHBCategoryPage() {
   const [authNumber, setAuthNumber] = useState("");
   const [authStartDate, setAuthStartDate] = useState("");
   const [authEndDate, setAuthEndDate] = useState("");
+  const [authIndefinite, setAuthIndefinite] = useState(false);
   const [caseNumber, setCaseNumber] = useState("");
 
   // Date picker state for modal (reuse UX)
@@ -133,7 +134,9 @@ export default function NIHBCategoryPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [prescriberFilter, setPrescriberFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("all");
+  const [dateMode, setDateMode] = useState<'none' | 'prescription' | 'expiry'>('none');
+  const [dateStart, setDateStart] = useState("");
+  const [dateEnd, setDateEnd] = useState("");
   const [productFilter, setProductFilter] = useState("");
 
   // Pagination
@@ -228,6 +231,7 @@ export default function NIHBCategoryPage() {
       setAuthNumber("");
       setAuthStartDate("");
       setAuthEndDate("");
+      setAuthIndefinite(false);
       setCaseNumber("");
       setShowMetaModal(true);
       return;
@@ -315,35 +319,20 @@ export default function NIHBCategoryPage() {
       claim.productName.toLowerCase().includes(productFilter.toLowerCase());
 
     const matchesDate = () => {
-      if (dateFilter === "all") return true;
-
-      // Filter by authorization end date (expiry date) instead of prescription date
-      if (!claim.authorizationEndDate || claim.authorizationEndDate === "") {
-        // If no authorization end date exists, exclude from date-based filters
-        return false;
+      if (dateMode === 'none') return true;
+      const start = dateStart && /^\d{4}-\d{2}-\d{2}$/.test(dateStart) ? new Date(dateStart) : null;
+      const end = dateEnd && /^\d{4}-\d{2}-\d{2}$/.test(dateEnd) ? new Date(dateEnd) : null;
+      const valueStr = dateMode === 'prescription' ? claim.dateOfPrescription : claim.authorizationEndDate;
+      if (!valueStr) return false;
+      const value = new Date(valueStr);
+      if (isNaN(value.getTime())) return false;
+      if (start && value < start) return false;
+      if (end) {
+        const endOfDay = new Date(end);
+        endOfDay.setHours(23,59,59,999);
+        if (value > endOfDay) return false;
       }
-
-      const expiryDate = new Date(claim.authorizationEndDate);
-      const now = new Date();
-      const diffTime = expiryDate.getTime() - now.getTime();
-      const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-      switch (dateFilter) {
-        case "today":
-          // Show claims expiring today (within 24 hours)
-          return diffDays >= 0 && diffDays < 1;
-        case "week":
-          // Show claims expiring within the next week
-          return diffDays >= 0 && diffDays < 7;
-        case "month":
-          // Show claims expiring within the next month
-          return diffDays >= 0 && diffDays < 30;
-        case "year":
-          // Show claims expiring within the next year
-          return diffDays >= 0 && diffDays < 365;
-        default:
-          return true;
-      }
+      return true;
     };
 
     return (
@@ -442,14 +431,12 @@ export default function NIHBCategoryPage() {
             onSearchChange={setSearchTerm}
             statusFilter={statusFilter}
             onStatusChange={setStatusFilter}
-            typeFilter={typeFilter}
-            onTypeChange={setTypeFilter}
-            prescriberFilter={prescriberFilter}
-            onPrescriberChange={setPrescriberFilter}
-            dateFilter={dateFilter}
-            onDateChange={setDateFilter}
-            productFilter={productFilter}
-            onProductChange={setProductFilter}
+            dateMode={dateMode}
+            onDateModeChange={setDateMode}
+            dateStart={dateStart}
+            onDateStartChange={setDateStart}
+            dateEnd={dateEnd}
+            onDateEndChange={setDateEnd}
             category={category}
           />
 
@@ -543,23 +530,52 @@ export default function NIHBCategoryPage() {
                       placeholder="e.g. 123456"
                     />
                   </div>
+                  <label className="mt-2 inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={authIndefinite}
+                      onChange={(e) => {
+                        setAuthIndefinite(e.target.checked);
+                        if (e.target.checked) {
+                          setAuthStartDate("");
+                          setAuthEndDate("");
+                        }
+                      }}
+                      className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C]"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Indefinitely authorized</span>
+                  </label>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Authorization Start Date <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        readOnly
-                        value={formatDateForDisplay(authStartDate)}
-                        onClick={() => openDatePicker("authorizationStartDate")}
-                        placeholder="mm/dd/yyyy"
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                      />
+                    <input
+                      type="text"
+                      value={authStartDate}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const digits = val.replace(/\D/g, "").slice(0, 8);
+                        let formatted = digits;
+                        if (digits.length > 4) {
+                          formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+                        }
+                        if (digits.length > 6) {
+                          formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+                        }
+                        setAuthStartDate(formatted);
+                      }}
+                      placeholder="yyyy-mm-dd"
+                      inputMode="numeric"
+                      pattern="\\d{4}-\\d{2}-\\d{2}"
+                      disabled={authIndefinite}
+                      className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${authIndefinite ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
+                    />
                       <button
                         type="button"
                         onClick={() => openDatePicker("authorizationStartDate")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        disabled={authIndefinite}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${authIndefinite ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'}`}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -572,18 +588,32 @@ export default function NIHBCategoryPage() {
                       Authorization End Date <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
-                      <input
-                        type="text"
-                        readOnly
-                        value={formatDateForDisplay(authEndDate)}
-                        onClick={() => openDatePicker("authorizationEndDate")}
-                        placeholder="mm/dd/yyyy"
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                      />
+                    <input
+                      type="text"
+                      value={authEndDate}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const digits = val.replace(/\D/g, "").slice(0, 8);
+                        let formatted = digits;
+                        if (digits.length > 4) {
+                          formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+                        }
+                        if (digits.length > 6) {
+                          formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+                        }
+                        setAuthEndDate(formatted);
+                      }}
+                      placeholder="yyyy-mm-dd"
+                      inputMode="numeric"
+                      pattern="\\d{4}-\\d{2}-\\d{2}"
+                      disabled={authIndefinite}
+                      className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${authIndefinite ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
+                    />
                       <button
                         type="button"
                         onClick={() => openDatePicker("authorizationEndDate")}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        disabled={authIndefinite}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 ${authIndefinite ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'}`}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -625,7 +655,7 @@ export default function NIHBCategoryPage() {
                 onClick={async () => {
                   if (!pendingClaimId || !pendingStatus) return;
                   if (
-                    (pendingStatus === "authorized" && (!authNumber.trim() || !authStartDate || !authEndDate)) ||
+                    (pendingStatus === "authorized" && (!authNumber.trim() || (!authIndefinite && (!authStartDate || !authEndDate)))) ||
                     (pendingStatus === "case-number-open" && !caseNumber.trim())
                   ) {
                     showError("Please fill in the required fields.");
@@ -635,8 +665,9 @@ export default function NIHBCategoryPage() {
                     const body: Record<string, any> = { claimStatus: pendingStatus };
                     if (pendingStatus === "authorized") {
                       body.authorizationNumber = authNumber.trim();
-                      body.authorizationStartDate = authStartDate; // yyyy-mm-dd
-                      body.authorizationEndDate = authEndDate; // yyyy-mm-dd
+                      body.authorizationStartDate = authIndefinite ? "" : authStartDate; // yyyy-mm-dd
+                      body.authorizationEndDate = authIndefinite ? "" : authEndDate; // yyyy-mm-dd
+                      body.authorizationIndefinite = authIndefinite;
                     } else if (pendingStatus === "case-number-open") {
                       body.caseNumber = caseNumber.trim();
                     }

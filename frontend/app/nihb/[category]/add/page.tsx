@@ -58,6 +58,7 @@ export default function AddClaimPage() {
     authorizationNumber: "",
     authorizationStartDate: "",
     authorizationEndDate: "",
+    authorizationIndefinite: false,
     priority: false,
     note: "",
     // Manual claims specific fields
@@ -98,6 +99,7 @@ export default function AddClaimPage() {
             authorizationNumber: c.authorizationNumber || "",
             authorizationStartDate: c.authorizationStartDate || "",
             authorizationEndDate: c.authorizationEndDate || "",
+            authorizationIndefinite: Boolean((c as any).authorizationIndefinite),
             priority: Boolean(c.priority),
             note: "",
             manualClaimType: c.manualClaimType || "",
@@ -129,6 +131,7 @@ export default function AddClaimPage() {
               authorizationNumber: c.authorizationNumber || "",
               authorizationStartDate: c.authorizationStartDate || "",
               authorizationEndDate: c.authorizationEndDate || "",
+              authorizationIndefinite: Boolean((c as any).authorizationIndefinite),
               priority: Boolean(c.priority),
               note: "",
               manualClaimType: c.manualClaimType || "",
@@ -156,6 +159,22 @@ export default function AddClaimPage() {
     if (name === "caseNumber") {
       const digitsOnly = value.replace(/\D/g, "");
       setFormData((prev) => ({ ...prev, [name]: digitsOnly }));
+    } else if (
+      name === "dateOfPrescription" ||
+      name === "dateOfRefill" ||
+      name === "authorizationStartDate" ||
+      name === "authorizationEndDate"
+    ) {
+      // Live-format date as yyyy-mm-dd while typing
+      const digits = value.replace(/\D/g, "").slice(0, 8);
+      let formatted = digits;
+      if (digits.length > 4) {
+        formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+      }
+      if (digits.length > 6) {
+        formatted = `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
+      }
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -592,12 +611,12 @@ export default function AddClaimPage() {
                     <input
                       type="text"
                       name="dateOfRefill"
-                      value={formatDateForDisplay(formData.dateOfRefill)}
+                      value={formData.dateOfRefill}
                       onChange={handleInputChange}
-                      onClick={() => openDatePicker("dateOfRefill")}
-                      placeholder="mm/dd/yyyy"
-                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                      readOnly
+                      placeholder="yyyy-mm-dd"
+                      inputMode="numeric"
+                      pattern="\\d{4}-\\d{2}-\\d{2}"
+                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                     />
                     <button
                       type="button"
@@ -828,12 +847,12 @@ export default function AddClaimPage() {
                     <input
                       type="text"
                       name="dateOfPrescription"
-                      value={formatDateForDisplay(formData.dateOfPrescription)}
+                      value={formData.dateOfPrescription}
                       onChange={handleInputChange}
-                      onClick={() => openDatePicker("dateOfPrescription")}
-                      placeholder="mm/dd/yyyy"
-                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                      readOnly
+                      placeholder="yyyy-mm-dd"
+                      inputMode="numeric"
+                      pattern="\\d{4}-\\d{2}-\\d{2}"
+                      className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                     />
                     <button
                       type="button"
@@ -916,16 +935,12 @@ export default function AddClaimPage() {
                         <input
                           type="text"
                           name="authorizationStartDate"
-                          value={formatDateForDisplay(
-                            formData.authorizationStartDate
-                          )}
+                          value={formData.authorizationStartDate}
                           onChange={handleInputChange}
-                          onClick={() =>
-                            openDatePicker("authorizationStartDate")
-                          }
-                          placeholder="mm/dd/yyyy"
-                          className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                          readOnly
+                          placeholder="yyyy-mm-dd"
+                          inputMode="numeric"
+                          pattern="\\d{4}-\\d{2}-\\d{2}"
+                          className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                         />
                         <button
                           type="button"
@@ -975,23 +990,21 @@ export default function AddClaimPage() {
                             <input
                               type="text"
                               name="authorizationEndDate"
-                              value={formatDateForDisplay(
-                                formData.authorizationEndDate
-                              )}
+                              value={formData.authorizationEndDate}
                               onChange={handleInputChange}
-                              onClick={() =>
-                                openDatePicker("authorizationEndDate")
-                              }
-                              placeholder="mm/dd/yyyy"
-                              className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                              readOnly
+                              placeholder="yyyy-mm-dd"
+                              inputMode="numeric"
+                              pattern="\\d{4}-\\d{2}-\\d{2}"
+                              disabled={formData.authorizationIndefinite}
+                              className={`w-full px-4 text-[14px] py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${formData.authorizationIndefinite ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
                             />
                             <button
                               type="button"
                               onClick={() =>
                                 openDatePicker("authorizationEndDate")
                               }
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${formData.authorizationIndefinite ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'}`}
+                              disabled={formData.authorizationIndefinite}
                             >
                               <svg
                                 className="w-5 h-5"
@@ -1008,6 +1021,22 @@ export default function AddClaimPage() {
                               </svg>
                             </button>
                           </div>
+                          <label className="mt-2 inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="authorizationIndefinite"
+                              checked={formData.authorizationIndefinite}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  authorizationIndefinite: e.target.checked,
+                                  authorizationEndDate: e.target.checked ? "" : prev.authorizationEndDate,
+                                }))
+                              }
+                              className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] ml-[2px]"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">Indefinitely authorized</span>
+                          </label>
                         </div>
 
                         {/* Patient Signed Letter Checkbox for Appeals */}
@@ -1034,7 +1063,7 @@ export default function AddClaimPage() {
                     ) : (
                       <>
                         {category !== "diapers-pads" && (
-                          <div>
+                      <div>
                             <label className="block text-sm font-medium text-[#6E6C70] mb-2">
                               Authorization End Date
                             </label>
@@ -1042,16 +1071,12 @@ export default function AddClaimPage() {
                               <input
                                 type="text"
                                 name="authorizationEndDate"
-                                value={formatDateForDisplay(
-                                  formData.authorizationEndDate
-                                )}
-                                onChange={handleInputChange}
-                                onClick={() =>
-                                  openDatePicker("authorizationEndDate")
-                                }
-                                placeholder="mm/dd/yyyy"
-                                className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                                readOnly
+                            value={formData.authorizationEndDate}
+                            onChange={handleInputChange}
+                            placeholder="yyyy-mm-dd"
+                            inputMode="numeric"
+                            pattern="\\d{4}-\\d{2}-\\d{2}"
+                            className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900"
                               />
                               <button
                                 type="button"
@@ -1110,21 +1135,20 @@ export default function AddClaimPage() {
                       <input
                         type="text"
                         name="authorizationEndDate"
-                        value={formatDateForDisplay(
-                          formData.authorizationEndDate
-                        )}
+                        value={formData.authorizationEndDate}
                         onChange={handleInputChange}
                         onClick={() =>
                           openDatePicker("authorizationEndDate")
                         }
                         placeholder="mm/dd/yyyy"
-                        className="w-full px-4 text-[14px] py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 cursor-pointer"
-                        readOnly
+                        disabled={formData.authorizationIndefinite}
+                        className={`w-full px-4 text-[14px] py-3 pr-10 border rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-transparent outline-none placeholder:text-gray-400 text-gray-900 ${formData.authorizationIndefinite ? 'bg-gray-100 border-gray-200 cursor-not-allowed' : 'border-gray-300'}`}
                       />
                       <button
                         type="button"
                         onClick={() => openDatePicker("authorizationEndDate")}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${formData.authorizationIndefinite ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'}`}
+                        disabled={formData.authorizationIndefinite}
                       >
                         <svg
                           className="w-5 h-5"
@@ -1141,6 +1165,22 @@ export default function AddClaimPage() {
                         </svg>
                       </button>
                     </div>
+                    <label className="mt-2 inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="authorizationIndefinite"
+                        checked={formData.authorizationIndefinite}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            authorizationIndefinite: e.target.checked,
+                            authorizationEndDate: e.target.checked ? "" : prev.authorizationEndDate,
+                          }))
+                        }
+                        className="w-4 h-4 text-[#0A438C] border-gray-300 rounded focus:ring-[#0A438C] ml-[2px]"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Indefinitely authorized</span>
+                    </label>
                   </div>
                 </div>
               ) : (

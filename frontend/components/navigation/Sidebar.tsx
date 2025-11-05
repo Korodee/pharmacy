@@ -168,7 +168,7 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
       </nav>
 
       {/* Deleted Claims Link */}
-      <div className="border-t border-gray-200 p-2">
+      <div className="border-t border-gray-200 py-2">
         <Link href="/admin/deleted-claims">
           <div
             className={`flex items-center space-x-3 py-3.5 px-4 rounded-lg transition-colors ${

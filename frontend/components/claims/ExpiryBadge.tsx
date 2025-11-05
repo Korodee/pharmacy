@@ -3,21 +3,32 @@
 interface ExpiryBadgeProps {
   endDate: string;
   size?: 'sm' | 'md' | 'lg';
+  indefinite?: boolean;
 }
 
-export default function ExpiryBadge({ endDate, size = 'md' }: ExpiryBadgeProps) {
+export default function ExpiryBadge({ endDate, size = 'md', indefinite = false }: ExpiryBadgeProps) {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    if (!dateString) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString;
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${da}`;
   };
 
   const getExpiryConfig = () => {
+    if (indefinite) {
+      return {
+        className: 'text-green-700',
+        label: 'Indefinite',
+      };
+    }
     if (!endDate) {
       return {
         className: 'text-gray-500',
+        label: '-',
       };
     }
 
@@ -40,11 +51,11 @@ export default function ExpiryBadge({ endDate, size = 'md' }: ExpiryBadgeProps) 
     }
   };
 
-  const { className } = getExpiryConfig();
+  const { className, label } = getExpiryConfig();
 
   return (
     <span className={`text-sm ${className}`}>
-      {endDate ? formatDate(endDate) : '-'}
+      {indefinite ? 'Indefinite' : endDate ? formatDate(endDate) : (label || '-')}
     </span>
   );
 }
