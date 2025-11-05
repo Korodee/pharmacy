@@ -11,6 +11,8 @@ import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/ToastProvider";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import FileUpload, { UploadedFile } from "@/components/claims/FileUpload";
+import AppealPatientLetterModal from "@/components/appeals/AppealPatientLetterModal";
+import AppealDoctorLetterModal from "@/components/appeals/AppealDoctorLetterModal";
 import { ClaimDocument } from "@/components/claims/ClaimCard";
 import PageHeader from "@/components/layout/PageHeader";
 
@@ -28,6 +30,8 @@ export default function AddClaimPage() {
   const [currentDateField, setCurrentDateField] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPatientLetter, setShowPatientLetter] = useState(false);
+  const [showDoctorLetter, setShowDoctorLetter] = useState(false);
 
   const [formData, setFormData] = useState({
     rxNumber: "",
@@ -1276,102 +1280,44 @@ export default function AddClaimPage() {
                 </div>
               ))}
 
-            {/* PDF Templates for Appeals */}
+            {/* Appeal Letters (client-side fillable) */}
             {category === "appeals" && (
               <div className="mb-8">
-                <h3 className="block text-sm font-medium text-[#6E6C70] mb-4">
-                  Download Letter Templates
-                </h3>
+                <h3 className="block text-sm font-medium text-[#6E6C70] mb-4">Generate Appeal Letters</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <a
-                    href="/appeals-patient-letter.pdf"
-                    download="Patient_Letter_Template.pdf"
+                  <button
+                    type="button"
+                    onClick={() => setShowPatientLetter(true)}
                     className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                        <svg
-                          className="w-6 h-6 text-blue-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          Patient Letter Template
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Standard letter for the patient
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">Patient Letter</p>
+                        <p className="text-xs text-gray-500">Fill in and print/download</p>
                       </div>
                     </div>
-                    <svg
-                      className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                  </a>
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                  </button>
 
-                  <a
-                    href="/appeals-doctor-letter.pdf"
-                    download="Doctor_Letter_Template.pdf"
+                  <button
+                    type="button"
+                    onClick={() => setShowDoctorLetter(true)}
                     className="flex items-center justify-between p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors group"
                   >
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                        <svg
-                          className="w-6 h-6 text-green-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
+                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          Doctor Letter Template
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Letter for the doctor
-                        </p>
+                        <p className="text-sm font-medium text-gray-900">Doctor Letter</p>
+                        <p className="text-xs text-gray-500">Fill in and print/download</p>
                       </div>
                     </div>
-                    <svg
-                      className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                      />
-                    </svg>
-                  </a>
+                    <svg className="w-5 h-5 text-gray-400 group-hover:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                  </button>
                 </div>
               </div>
             )}
@@ -1581,6 +1527,10 @@ export default function AddClaimPage() {
           </div>
         </div>
       )}
+
+      {/* Appeal Letter Modals (client-side only; no persistence) */}
+      <AppealPatientLetterModal isOpen={showPatientLetter} onClose={() => setShowPatientLetter(false)} />
+      <AppealDoctorLetterModal isOpen={showDoctorLetter} onClose={() => setShowDoctorLetter(false)} />
     </>
   );
 }
