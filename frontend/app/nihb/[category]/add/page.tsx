@@ -1523,7 +1523,7 @@ export default function AddClaimPage() {
                     </svg>
                   </button>
 
-                  {/* Medical Supplies Form */}
+                  {/* Prior Approval Form */}
                   <button
                     type="button"
                     disabled={
@@ -1534,7 +1534,7 @@ export default function AddClaimPage() {
                     }
                     onClick={async () => {
                       try {
-                        // Download Medical Supplies Form
+                        // Download Prior Approval Form
                         const formResponse = await fetch('/prior-approval-form-diapers.pdf');
                         const formBlob = await formResponse.blob();
                         const formUrl = window.URL.createObjectURL(formBlob);
@@ -1608,7 +1608,7 @@ export default function AddClaimPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-start text-gray-900">
-                          Medical Supplies Form
+                          Prior Approval Form
                         </p>
                         <p className="text-xs text-gray-500">
                           Download after receiving doctor's form
@@ -1639,7 +1639,7 @@ export default function AddClaimPage() {
                 </div>
                 <div className="mt-3 text-xs text-gray-500">
                   <p>• Doctor's Form: Available when status is "New", "Form Filled", or "Form Sent to Doctor" (includes presentation page)</p>
-                  <p>• Medical Supplies Form: Available only after marking status as "Received Form from Doctor" (includes NIHB presentation page)</p>
+                  <p>• Prior Approval Form: Available only after marking status as "Received Form from Doctor" (includes NIHB presentation page)</p>
                 </div>
               </div>
             )}

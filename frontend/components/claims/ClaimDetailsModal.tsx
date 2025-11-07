@@ -111,8 +111,8 @@ export default function ClaimDetailsModal({
               infoMessage = "Once you receive the filled form from the doctor, mark it as 'Received Form from Doctor'.";
               break;
             case "received-form-from-doctor":
-              statusMessage = "Great! You can now download the Medical Supplies Form.";
-              infoMessage = "Scroll down to download the Medical Supplies Form with NIHB presentation page.";
+              statusMessage = "Great! You can now download the Prior Approval Form.";
+              infoMessage = "Scroll down to download the Prior Approval Form with NIHB presentation page.";
               break;
             case "sent-to-nihb":
               statusMessage = "Status updated. Forms have been sent to NIHB.";

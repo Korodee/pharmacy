@@ -275,7 +275,7 @@ export default function NIHBCategoryPage() {
               // Show modal for form download
               setPendingFormDownloadClaimId(claimId);
               setShowFormDownloadModal(true);
-              statusMessage = "Great! You can now download the Medical Supplies Form.";
+              statusMessage = "Great! You can now download the Prior Approval Form.";
               infoMessage = "";
               break;
             case "sent-to-nihb":
@@ -845,15 +845,15 @@ export default function NIHBCategoryPage() {
           <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                Download Medical Supplies Forms
+                Download Prior Approval Forms
               </h3>
               <p className="text-sm text-gray-600 mt-1">
-                Download the Medical Supplies Form and NIHB presentation page to send to NIHB.
+                Download the Prior Approval Form and NIHB presentation page to send to NIHB.
               </p>
             </div>
 
             <div className="space-y-4">
-              {/* Medical Supplies Form */}
+              {/* Prior Approval Form */}
               <button
                 onClick={async () => {
                   try {
@@ -910,7 +910,7 @@ export default function NIHBCategoryPage() {
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900">
-                      Medical Supplies Form
+                      Prior Approval Form
                     </p>
                     <p className="text-xs text-gray-500">
                       Includes form and NIHB presentation page
