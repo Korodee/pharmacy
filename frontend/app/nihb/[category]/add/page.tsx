@@ -1535,12 +1535,12 @@ export default function AddClaimPage() {
                     onClick={async () => {
                       try {
                         // Download Medical Supplies Form
-                        const formResponse = await fetch('/medical-supplies-form.pdf');
+                        const formResponse = await fetch('/prior-approval-form-diapers.pdf');
                         const formBlob = await formResponse.blob();
                         const formUrl = window.URL.createObjectURL(formBlob);
                         const formLink = document.createElement('a');
                         formLink.href = formUrl;
-                        formLink.download = 'medical-supplies-form.pdf';
+                        formLink.download = 'prior-approval-form-diapers.pdf';
                         document.body.appendChild(formLink);
                         formLink.click();
                         document.body.removeChild(formLink);
