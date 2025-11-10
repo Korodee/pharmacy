@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email';
+import { sendFax, generateFaxDocument, formatFaxNumber } from '@/lib/fax';
 import { getCollection } from '@/lib/mongodb';
 import { verifyCaptcha } from '@/lib/captcha';
 
@@ -76,6 +77,36 @@ export async function POST(request: NextRequest) {
     } catch (emailError) {
       console.error('Failed to send email notification:', emailError);
       // Don't fail the request if email fails
+    }
+
+    // Send fax notification via Documo (if configured)
+    if (process.env.DOCUMO_API_KEY && process.env.PHARMACY_FAX_NUMBER) {
+      try {
+        const faxDocument = generateFaxDocument(newRequest);
+        const faxNumber = formatFaxNumber(process.env.PHARMACY_FAX_NUMBER);
+        
+        const faxResult = await sendFax({
+          recipientFax: faxNumber,
+          recipientName: process.env.PHARMACY_NAME || 'Kateri Pharmacy',
+          subject: `New ${type === 'refill' ? 'Refill' : 'Consultation'} Request - ${newRequest.id}`,
+          notes: `Please see attached document for request details. Request ID: ${newRequest.id}`,
+          files: [{
+            filename: `request-${newRequest.id}.txt`,
+            content: faxDocument,
+            contentType: 'text/plain',
+          }],
+        });
+
+        if (faxResult.success) {
+          console.log(`Fax sent successfully. Fax ID: ${faxResult.faxId}`);
+        } else {
+          console.error('Failed to send fax:', faxResult.error);
+          // Don't fail the request if fax fails
+        }
+      } catch (faxError) {
+        console.error('Failed to send fax notification:', faxError);
+        // Don't fail the request if fax fails
+      }
     }
 
     return NextResponse.json({ 

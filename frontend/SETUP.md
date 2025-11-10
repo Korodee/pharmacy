@@ -10,6 +10,11 @@ BREVO_API_KEY=your_brevo_api_key_here
 FROM_EMAIL=noreply@kateripharmacy.com
 ADMIN_EMAIL=admin@kateripharmacy.com
 
+# Documo Fax Configuration (Optional)
+DOCUMO_API_KEY=your_documo_api_key_here
+PHARMACY_FAX_NUMBER=4506358249
+PHARMACY_NAME=Kateri Pharmacy
+
 # Application Configuration
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
@@ -20,6 +25,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 2. Go to your account settings and generate an API key
 3. Add the API key to your `.env.local` file
 4. Configure your sender email address
+
 
 ## Features Implemented
 
@@ -33,11 +39,13 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 - **Request Details**: Click any request to see full details
 - **Status Updates**: Change request status (pending, in-progress, completed)
 - **Email Notifications**: Admin receives email when new requests are submitted
+- **Fax Notifications**: Admin receives fax when new requests are submitted 
 
 ### Backend API
 - **POST /api/requests**: Submit new requests
 - **GET /api/requests**: Fetch all requests for admin
 - **Email Integration**: Automatic email notifications via Brevo
+- **Fax Integration**: Automatic fax notifications via Documo 
 
 ## Usage
 
@@ -46,6 +54,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
    - Fills out the modal form
    - Submits the request
    - Admin receives email notification
+   - Admin receives fax notification 
 
 2. **Admin Flow**:
    - Visit `/admin` to see the admin dashboard
@@ -68,5 +77,6 @@ frontend/
 │   └── hero/
 │       └── Navigation.tsx        # Updated navbar
 └── lib/
-    └── email.ts                  # Brevo email service
+    ├── email.ts                  # Brevo email service
+    └── fax.ts                    # Documo fax service
 ```

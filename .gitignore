@@ -106,3 +106,7 @@ Thumbs.db
 # Backup files
 *.bak
 *.backup
+
+# Example/test PDF files
+example-*.pdf
+frontend/example-*.pdf

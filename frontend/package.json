@@ -11,13 +11,16 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/pdfkit": "^0.17.3",
     "axios": "^1.6.2",
+    "form-data": "^4.0.4",
     "framer-motion": "^12.23.24",
     "geist": "^1.5.1",
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.20.0",
     "next": "^15.0.0",
+    "pdfkit": "^0.17.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.12.0"
