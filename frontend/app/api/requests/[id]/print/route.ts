@@ -4,11 +4,11 @@ import { generateFaxPDF } from '@/lib/fax';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Handle both Promise and direct params (Next.js 13+ vs 14+)
-    const resolvedParams = params instanceof Promise ? await params : params;
+    // Next.js 15 requires params to be a Promise
+    const resolvedParams = await params;
     const requestId = resolvedParams.id;
 
     // Fetch the request from MongoDB
