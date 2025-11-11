@@ -55,6 +55,7 @@ export default function Pagination({
             onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
             className="px-3 py-1.5 pr-8 border border-[#E7E7E7] rounded-lg bg-[#F1F0F2] text-[#0A438C] font-medium text-sm focus:outline-none focus:ring-2 focus:ring-[#0A438C] appearance-none cursor-pointer"
           >
+            <option value={5}>5</option>
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>

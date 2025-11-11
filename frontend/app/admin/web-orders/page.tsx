@@ -9,6 +9,7 @@ import StatisticsCards from "../../../components/admin/StatisticsCards";
 import SearchAndFilter from "../../../components/admin/SearchAndFilter";
 import RequestCard from "../../../components/admin/RequestCard";
 import RequestDetailsModal from "../../../components/admin/RequestDetailsModal";
+import Pagination from "../../../components/claims/Pagination";
 
 export default function WebOrdersPage() {
   const { showError, showInfo } = useToast();
@@ -22,6 +23,10 @@ export default function WebOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [enableNotifications, setEnableNotifications] = useState(false);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   
   // Track which request IDs we've already seen for notifications
   const seenRequestIds = useRef<Set<string>>(new Set());
@@ -236,22 +241,28 @@ export default function WebOrdersPage() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / rowsPerPage));
+  const paginatedRequests = filteredRequests.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, typeFilter]);
+
   if (loading) {
     return (
-      <div className="flex-1 bg-white flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <LoadingSpinner size="lg" className="text-[#0A438C] mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Loading Dashboard
-            </h3>
-            <p className="text-gray-600">Fetching your requests...</p>
-          </div>
-        </motion.div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner size="lg" className="text-[#0A438C] mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Loading Dashboard
+          </h3>
+          <p className="text-gray-600">Fetching your requests...</p>
+        </div>
       </div>
     );
   }
@@ -330,24 +341,38 @@ export default function WebOrdersPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
-                <AnimatePresence>
-                  {filteredRequests.map((request, index) => (
-                    <motion.div
-                      key={request.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <RequestCard
-                        request={request}
-                        onClick={() => setSelectedRequest(request)}
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+              <>
+                <div className="space-y-4">
+                  <AnimatePresence>
+                    {paginatedRequests.map((request, index) => (
+                      <motion.div
+                        key={request.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <RequestCard
+                          request={request}
+                          onClick={() => setSelectedRequest(request)}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {/* Pagination */}
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  rowsPerPage={rowsPerPage}
+                  onPageChange={setCurrentPage}
+                  onRowsPerPageChange={(rows) => {
+                    setRowsPerPage(rows);
+                    setCurrentPage(1);
+                  }}
+                />
+              </>
             )}
           </div>
         </div>
