@@ -9,6 +9,7 @@ interface SearchAndFilterProps {
   setTypeFilter: (type: string) => void;
   deliveryFilter?: string;
   setDeliveryFilter?: (delivery: string) => void;
+  showCompleted?: boolean;
 }
 
 export default function SearchAndFilter({
@@ -20,9 +21,10 @@ export default function SearchAndFilter({
   setTypeFilter,
   deliveryFilter,
   setDeliveryFilter,
+  showCompleted = true,
 }: SearchAndFilterProps) {
   return (
-    <div className={`grid grid-cols-1 py-3 gap-3 ${deliveryFilter ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+    <div className={`grid grid-cols-1 py-3 gap-3 ${deliveryFilter && showCompleted ? 'md:grid-cols-4' : deliveryFilter || showCompleted ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
       <div>
         <input
           type="text"
@@ -33,17 +35,18 @@ export default function SearchAndFilter({
         />
       </div>
 
-      <div className="relative">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full px-3 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-[#0A438C] bg-white text-black appearance-none cursor-pointer hover:border-gray-400 transition-colors text-sm"
-        >
-          <option value="all">All Status</option>
-          <option value="pending">Pending</option>
-          <option value="in-progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
+      {showCompleted && (
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="w-full px-3 py-3 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-[#0A438C] bg-white text-black appearance-none cursor-pointer hover:border-gray-400 transition-colors text-sm"
+          >
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
         <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
           <svg
             className="w-4 h-4 text-gray-400"
@@ -59,7 +62,8 @@ export default function SearchAndFilter({
             />
           </svg>
         </div>
-      </div>
+        </div>
+      )}
 
       <div className="relative">
         <select

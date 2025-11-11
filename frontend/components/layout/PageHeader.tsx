@@ -47,12 +47,34 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
 
   // For Web Orders pages (supports both /web-orders and /admin/web-orders), match NIHB header style
   if (pathname && pathname.includes("/web-orders")) {
+    const isRequestsPage = pathname.includes("/requests") && !pathname.includes("/completed-requests");
+    const isCompletedPage = pathname.includes("/completed-requests");
+    
+    let displayText = "WEB ORDERS";
+    if (isRequestsPage) {
+      displayText = "WEB ORDERS / REQUESTS";
+    } else if (isCompletedPage) {
+      displayText = "WEB ORDERS / COMPLETED REQUESTS";
+    }
+    
     return (
       <div className="pl-4 pr-6 py-4">
         <div className="flex items-center">
           <MdArrowRight className="w-8 h-8 text-[#0A438C]" />
           <span className="text-sm font-medium ml-2">
             <span className="text-[#0A438C]">WEB ORDERS</span>
+            {isRequestsPage && (
+              <>
+                <span className="text-[#888888]"> / </span>
+                <span className="text-[#888888]">REQUESTS</span>
+              </>
+            )}
+            {isCompletedPage && (
+              <>
+                <span className="text-[#888888]"> / </span>
+                <span className="text-[#888888]">COMPLETED REQUESTS</span>
+              </>
+            )}
           </span>
         </div>
       </div>

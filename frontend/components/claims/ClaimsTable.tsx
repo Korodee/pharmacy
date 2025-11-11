@@ -97,9 +97,6 @@ export default function ClaimsTable({
 
   // Determine if a claim has incomplete required fields (per category rules)
   const isClaimIncomplete = (claim: ClaimDocument): boolean => {
-    // Shared requirements across categories
-    const hasAtLeastOneNote = Array.isArray(claim.notes) && claim.notes.length > 0;
-
     if (claim.category === "manual-claims") {
       const hasBasics = Boolean(
         claim.rxNumber &&
@@ -112,8 +109,6 @@ export default function ClaimsTable({
       if ((claim as any).manualClaimType === "baby") {
         if (!((claim as any).parentNameOnFile && (claim as any).parentBandNumberUpdated)) return true;
       }
-      // Additional requested requirements (documents no longer required)
-      if (!hasAtLeastOneNote) return true;
       return false;
     }
 
@@ -139,9 +134,6 @@ export default function ClaimsTable({
     if (claim.category !== "appeals" && claim.category !== "diapers-pads") {
       if (!claim.type) return true;
     }
-
-    // Additional requested requirements (documents no longer required)
-    if (!hasAtLeastOneNote) return true;
 
     return false;
   };

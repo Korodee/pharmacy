@@ -154,7 +154,6 @@ export default function WebOrdersPage() {
           totalRequests={stats.total}
           pendingRequests={stats.pending}
           inProgressRequests={stats.inProgress}
-          completedRequests={stats.completed}
         />
 
         {/* Requests Section */}

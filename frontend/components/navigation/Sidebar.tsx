@@ -8,6 +8,8 @@ import { IoDocumentText } from "react-icons/io5";
 import { TiFlowMerge } from "react-icons/ti";
 import { TbPackage } from "react-icons/tb";
 import { IoSettingsOutline } from "react-icons/io5";
+import { CiBookmarkCheck } from "react-icons/ci";
+import { IoMdDoneAll } from "react-icons/io";
 import Logo from "../hero/Logo";
 
 interface SidebarProps {
@@ -21,6 +23,7 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
   const isNIHBPage = pathname?.includes("/nihb");
   const isWebOrdersPage = pathname?.startsWith("/admin/web-orders");
   const isSettingsPage = pathname?.startsWith("/admin/settings");
+  const [isWebOrdersCollapsed, setIsWebOrdersCollapsed] = useState(false);
 
   // Auto-collapse when not on NIHB; expand when on NIHB
   useEffect(() => {
@@ -31,11 +34,32 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
     }
   }, [isNIHBPage]);
 
+  // Auto-collapse when not on Web Orders; expand when on Web Orders
+  useEffect(() => {
+    if (isWebOrdersPage) {
+      setIsWebOrdersCollapsed(false);
+    } else {
+      setIsWebOrdersCollapsed(true);
+    }
+  }, [isWebOrdersPage]);
+
   const menuItems = [
     {
       title: "Web Orders",
-      path: "/admin/web-orders",
-      active: isWebOrdersPage,
+      children: [
+        {
+          title: "Requests",
+          path: "/admin/web-orders/requests",
+          icon: CiBookmarkCheck,
+          active: pathname?.startsWith("/admin/web-orders/requests") || pathname === "/admin/web-orders",
+        },
+        {
+          title: "Completed",
+          path: "/admin/web-orders/completed-requests",
+          icon: IoMdDoneAll,
+          active: pathname?.startsWith("/admin/web-orders/completed-requests"),
+        },
+      ],
     },
     {
       title: "NIHB",
@@ -79,98 +103,78 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
       <nav className="flex-1 overflow-y-auto py-4">
         {menuItems.map((item, index) => (
           <div key={index} className="px-4">
-            {item.children ? (
-              <div>
-                {/* Parent item */}
-                <button
-                  onClick={() => setIsNIHBCollapsed(!isNIHBCollapsed)}
-                  className={`flex items-center justify-between py-4 px-4 rounded-lg mb-2 w-full transition-all ${
-                    isNIHBPage
-                      ? "bg-[#0A438C] text-white"
-                      : "bg-transparent text-[#0A438C]"
+            <div>
+              {/* Parent item */}
+              <button
+                onClick={() => {
+                  if (item.title === "NIHB") {
+                    setIsNIHBCollapsed(!isNIHBCollapsed);
+                  } else if (item.title === "Web Orders") {
+                    setIsWebOrdersCollapsed(!isWebOrdersCollapsed);
+                  }
+                }}
+                className={`flex items-center justify-between py-4 px-4 rounded-lg mb-2 w-full transition-all ${
+                  (item.title === "NIHB" && isNIHBPage) || (item.title === "Web Orders" && isWebOrdersPage)
+                    ? "bg-[#0A438C] text-white"
+                    : "bg-transparent text-[#0A438C]"
+                }`}
+              >
+                <span className="text-md font-semibold">{item.title}</span>
+                <svg
+                  className={`w-4 h-4 transition-transform ${
+                    (item.title === "NIHB" && isNIHBCollapsed) || (item.title === "Web Orders" && isWebOrdersCollapsed) ? "rotate-180" : ""
                   }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <span className="text-md font-semibold">{item.title}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      isNIHBCollapsed ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 15l7-7 7 7"
-                    />
-                  </svg>
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 15l7-7 7 7"
+                  />
+                </svg>
+              </button>
 
-                {/* Children items with vertical indicator */}
-                {!isNIHBCollapsed && (
-                  <div className="pl-4">
-                    {item.children.map((child, childIndex) => (
-                      <Link key={childIndex} href={child.path as any}>
+              {/* Children items with vertical indicator */}
+              {((item.title === "NIHB" && !isNIHBCollapsed) || (item.title === "Web Orders" && !isWebOrdersCollapsed)) && (
+                <div className="pl-4">
+                  {item.children.map((child, childIndex) => (
+                    <Link key={childIndex} href={child.path as any}>
+                      <div
+                        className={`flex items-center space-x-2 py-3.5 px-4 rounded-lg mb-2 transition-colors relative ${
+                          child.active
+                            ? "bg-[#EBF2FF] text-[#3A79C9]"
+                            : "text-[#6E6C70] hover:bg-gray-100 hover:text-[#888888]"
+                        }`}
+                      >
+                        {/* Vertical line indicator - blue and thick for active, gray and thin for inactive */}
                         <div
-                          className={`flex items-center space-x-2 py-3.5 px-4 rounded-lg mb-2 transition-colors relative ${
+                          className={`absolute left-0 top-0 bottom-0 ${
                             child.active
-                              ? "bg-[#EBF2FF] text-[#3A79C9]"
-                              : "text-[#6E6C70] hover:bg-gray-100 hover:text-[#888888]"
+                              ? "w-1 bg-[#3A79C9]"
+                              : "w-0.5 bg-gray-300"
+                          }`}
+                        ></div>
+                        {typeof child.icon === "string" ? (
+                          <span className="text-2xl">{child.icon}</span>
+                        ) : (
+                          <child.icon className="w-6 h-6" />
+                        )}
+                        <span
+                          className={`text-base ${
+                            child.active ? "font-semibold" : "font-medium"
                           }`}
                         >
-                          {/* Vertical line indicator - blue and thick for active, gray and thin for inactive */}
-                          <div
-                            className={`absolute left-0 top-0 bottom-0 ${
-                              child.active
-                                ? "w-1 bg-[#3A79C9]"
-                                : "w-0.5 bg-gray-300"
-                            }`}
-                          ></div>
-                          {typeof child.icon === "string" ? (
-                            <span className="text-2xl">{child.icon}</span>
-                          ) : (
-                            <child.icon className="w-6 h-6" />
-                          )}
-                          <span
-                            className={`text-base ${
-                              child.active ? "font-semibold" : "font-medium"
-                            }`}
-                          >
-                            {child.title}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link href={item.path as any}>
-                <div
-                  className={`flex items-center space-x-3 py-4 px-4 rounded-lg transition-colors ${
-                    item.active
-                      ? "bg-[#0A438C] text-white"
-                      : "text-[#6E6C70] hover:bg-gray-100"
-                  }`}
-                >
-                  {(() => {
-                    const menuItem = item as any;
-                    return menuItem.icon ? (
-                      <menuItem.icon className="w-6 h-6" />
-                    ) : null;
-                  })()}
-                  <span
-                    className={`text-base ${
-                      item.active ? "font-semibold" : "font-medium"
-                    }`}
-                  >
-                    {item.title}
-                  </span>
+                          {child.title}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
-            )}
+              )}
+            </div>
           </div>
         ))}
       </nav>

@@ -4,24 +4,21 @@ interface StatisticsCardsProps {
   totalRequests: number;
   pendingRequests: number;
   inProgressRequests: number;
-  completedRequests: number;
 }
 
 export default function StatisticsCards({
   totalRequests,
   pendingRequests,
   inProgressRequests,
-  completedRequests,
 }: StatisticsCardsProps) {
   const stats = [
     { label: "Total", value: totalRequests },
     { label: "Pending", value: pendingRequests },
     { label: "In Progress", value: inProgressRequests },
-    { label: "Completed", value: completedRequests },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
       {stats.map((stat) => (
         <div
           key={stat.label}
