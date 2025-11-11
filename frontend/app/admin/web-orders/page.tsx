@@ -22,6 +22,8 @@ export default function WebOrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [deliveryFilter, setDeliveryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"newest" | "urgent">("newest");
   const [enableNotifications, setEnableNotifications] = useState(false);
   
   // Pagination
@@ -216,11 +218,11 @@ export default function WebOrdersPage() {
   }, [enableNotifications, checkForNewRequests]);
 
   const updateRequestStatus = useCallback((requestId: string, status: string) => {
-    setRequests((prev) =>
-      prev.map((req) =>
-        req.id === requestId ? { ...req, status: status as any } : req
-      )
-    );
+      setRequests((prev) =>
+        prev.map((req) =>
+          req.id === requestId ? { ...req, status: status as any } : req
+        )
+      );
   }, []);
 
   const stats = {
@@ -230,6 +232,44 @@ export default function WebOrdersPage() {
     completed: requests.filter((r) => r.status === "completed").length,
   };
 
+  // Helper function to get urgency score for sorting
+  const getUrgencyScore = (request: RequestData): number => {
+    if (request.type !== "refill" || !request.estimatedTime) {
+      return 999; // Non-refill requests or requests without estimated time go to the end
+    }
+
+    const estimatedTime = (request as any).estimatedTime?.toLowerCase() || "";
+    const now = new Date();
+    const currentHour = now.getHours();
+
+    // Parse common time patterns
+    if (estimatedTime.includes("noon") || estimatedTime.includes("12")) {
+      // Noon deliveries: most urgent if it's before 12 PM
+      return currentHour < 12 ? 1 : 100;
+    }
+    if (estimatedTime.includes("morning") || estimatedTime.includes("am")) {
+      // Morning deliveries: urgent if it's still morning
+      return currentHour < 12 ? 2 : 101;
+    }
+    if (estimatedTime.includes("afternoon") || estimatedTime.includes("pm")) {
+      // Afternoon deliveries
+      return currentHour < 17 ? 3 : 102;
+    }
+    if (estimatedTime.includes("evening")) {
+      // Evening deliveries
+      return currentHour < 20 ? 4 : 103;
+    }
+    // Parse hour-based times (e.g., "2-3 hours", "1 hour")
+    const hourMatch = estimatedTime.match(/(\d+)\s*hour/);
+    if (hourMatch) {
+      const hours = parseInt(hourMatch[1]);
+      // Shorter time = more urgent
+      return hours;
+    }
+    // Default: less urgent
+    return 50;
+  };
+
   const filteredRequests = requests.filter((request) => {
     const matchesSearch =
       request.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -237,32 +277,52 @@ export default function WebOrdersPage() {
     const matchesStatus =
       statusFilter === "all" || request.status === statusFilter;
     const matchesType = typeFilter === "all" || request.type === typeFilter;
+    const matchesDelivery =
+      deliveryFilter === "all" ||
+      (request.type === "refill" && request.deliveryType === deliveryFilter);
 
-    return matchesSearch && matchesStatus && matchesType;
+    return matchesSearch && matchesStatus && matchesType && matchesDelivery;
+  });
+
+  // Sort requests based on sortBy option
+  const sortedRequests = [...filteredRequests].sort((a, b) => {
+    if (sortBy === "urgent") {
+      const urgencyA = getUrgencyScore(a);
+      const urgencyB = getUrgencyScore(b);
+      // Lower urgency score = more urgent (sort ascending)
+      if (urgencyA !== urgencyB) {
+        return urgencyA - urgencyB;
+      }
+      // If same urgency, sort by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else {
+      // Sort by newest first (default)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    }
   });
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / rowsPerPage));
-  const paginatedRequests = filteredRequests.slice(
+  const totalPages = Math.max(1, Math.ceil(sortedRequests.length / rowsPerPage));
+  const paginatedRequests = sortedRequests.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or sort change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, typeFilter]);
+  }, [searchTerm, statusFilter, typeFilter, deliveryFilter, sortBy]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner size="lg" className="text-[#0A438C] mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            Loading Dashboard
-          </h3>
-          <p className="text-gray-600">Fetching your requests...</p>
-        </div>
+            <LoadingSpinner size="lg" className="text-[#0A438C] mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Loading Dashboard
+            </h3>
+            <p className="text-gray-600">Fetching your requests...</p>
+          </div>
       </div>
     );
   }
@@ -309,11 +369,38 @@ export default function WebOrdersPage() {
         {/* Requests Section */}
         <div className="mt-6">
           {/* Section Header */}
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Requests</h2>
-            <p className="text-sm text-gray-600">
-              {filteredRequests.length} of {requests.length} requests
-            </p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Requests</h2>
+              <p className="text-sm text-gray-600">
+                {sortedRequests.length} of {requests.length} requests
+              </p>
+            </div>
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "newest" | "urgent")}
+                className="px-4 py-2 pr-8 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0A438C] focus:border-[#0A438C] bg-white text-black appearance-none cursor-pointer hover:border-gray-400 transition-colors text-sm font-medium"
+              >
+                <option value="newest">Sort: Newest First</option>
+                <option value="urgent">Sort: Most Urgent First</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
 
           {/* Search & Filter */}
@@ -324,11 +411,13 @@ export default function WebOrdersPage() {
             setStatusFilter={setStatusFilter}
             typeFilter={typeFilter}
             setTypeFilter={setTypeFilter}
+            deliveryFilter={deliveryFilter}
+            setDeliveryFilter={setDeliveryFilter}
           />
 
           {/* Requests List */}
           <div className="mt-4">
-            {filteredRequests.length === 0 ? (
+            {sortedRequests.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">📋</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -342,24 +431,24 @@ export default function WebOrdersPage() {
               </div>
             ) : (
               <>
-                <div className="space-y-4">
-                  <AnimatePresence>
+              <div className="space-y-4">
+                <AnimatePresence>
                     {paginatedRequests.map((request, index) => (
-                      <motion.div
-                        key={request.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <RequestCard
-                          request={request}
-                          onClick={() => setSelectedRequest(request)}
-                        />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
+                    <motion.div
+                      key={request.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <RequestCard
+                        request={request}
+                        onClick={() => setSelectedRequest(request)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
 
                 {/* Pagination */}
                 <Pagination

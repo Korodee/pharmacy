@@ -8,26 +8,26 @@ interface RequestCardProps {
 }
 
 function getTypeColor(type: string): string {
-  return type === 'refill' 
-    ? 'bg-blue-50 border-blue-200' 
-    : 'bg-purple-50 border-purple-200';
+  return type === "refill"
+    ? "bg-blue-50 border-blue-200"
+    : "bg-purple-50 border-purple-200";
 }
 
 function getStatusColor(status: string): string {
   switch (status) {
-    case 'pending':
-      return 'bg-amber-100 text-amber-800 border-amber-200';
-    case 'in-progress':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'completed':
-      return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    case "pending":
+      return "bg-amber-100 text-amber-800 border-amber-200";
+    case "in-progress":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "completed":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200";
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return "bg-gray-100 text-gray-800 border-gray-200";
   }
 }
 
 function getTypeIcon(type: string): string {
-  return type === 'refill' ? '💊' : '🩺';
+  return type === "refill" ? "💊" : "🩺";
 }
 
 function formatDate(date: Date | string): string {
@@ -37,19 +37,24 @@ function formatDate(date: Date | string): string {
 export default function RequestCard({ request, onClick }: RequestCardProps) {
   const formatPhoneNumber = (phone: string) => {
     // Remove all non-digits
-    const digits = phone.replace(/\D/g, '');
-    
+    const digits = phone.replace(/\D/g, "");
+
     // If it's a 10-digit number, format as (XXX) XXX-XXXX
     if (digits.length === 10) {
-      return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(
+        6
+      )}`;
     }
-    
+
     // If it already has country code, format accordingly
-    if (digits.length === 11 && digits.startsWith('1')) {
+    if (digits.length === 11 && digits.startsWith("1")) {
       const withoutCountryCode = digits.slice(1);
-      return `+1 (${withoutCountryCode.slice(0, 3)}) ${withoutCountryCode.slice(3, 6)}-${withoutCountryCode.slice(6)}`;
+      return `+1 (${withoutCountryCode.slice(0, 3)}) ${withoutCountryCode.slice(
+        3,
+        6
+      )}-${withoutCountryCode.slice(6)}`;
     }
-    
+
     // Return as is if it doesn't match expected formats
     return phone;
   };
@@ -58,15 +63,15 @@ export default function RequestCard({ request, onClick }: RequestCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className={`bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer ${getTypeColor(request.type)}`}
+      className={`bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer ${getTypeColor(
+        request.type
+      )}`}
       onClick={onClick}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="bg-white/80 p-3 rounded-xl shadow-sm">
-            <span className="text-2xl">
-              {getTypeIcon(request.type)}
-            </span>
+            <span className="text-2xl">{getTypeIcon(request.type)}</span>
           </div>
           <div>
             <div className="flex items-center space-x-3 mb-2">
@@ -74,7 +79,9 @@ export default function RequestCard({ request, onClick }: RequestCardProps) {
                 {request.type} Request
               </h3>
               <span
-                className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(request.status)}`}
+                className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(
+                  request.status
+                )}`}
               >
                 {request.status}
               </span>
@@ -93,13 +100,30 @@ export default function RequestCard({ request, onClick }: RequestCardProps) {
                 {request.id}
               </span>
             </div>
+            {/* Delivery/Pickup Information - Only for refill requests */}
+            {request.type === "refill" && request.deliveryType && (
+              <div className="mt-2 flex items-center space-x-3">
+                <span
+                  className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border ${
+                    request.deliveryType === "delivery"
+                      ? "bg-green-100 text-green-800 border-green-300"
+                      : "bg-orange-100 text-orange-800 border-orange-300"
+                  }`}
+                >
+                  {request.deliveryType === "delivery" ? "Delivery" : "Pickup"}
+                </span>
+                {request.estimatedTime && (
+                  <span className="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-300">
+                    ⏰ {request.estimatedTime}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center space-x-3">
           <div className="text-right">
-            <p className="text-sm text-gray-500">
-              Click to view details
-            </p>
+            <p className="text-sm text-gray-500">Click to view details</p>
           </div>
           <div className="bg-white/80 p-2 rounded-xl shadow-sm">
             <svg
