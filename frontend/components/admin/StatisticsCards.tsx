@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 interface StatisticsCardsProps {
   totalRequests: number;
   pendingRequests: number;
@@ -15,72 +13,26 @@ export default function StatisticsCards({
   inProgressRequests,
   completedRequests,
 }: StatisticsCardsProps) {
+  const stats = [
+    { label: "Total", value: totalRequests },
+    { label: "Pending", value: pendingRequests },
+    { label: "In Progress", value: inProgressRequests },
+    { label: "Completed", value: completedRequests },
+  ];
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 mb-6"
-    >
-      {/* Statistics Cards - Compact */}
-      <div className="p-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-md font-medium text-gray-600">Total</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {totalRequests}
-                </p>
-              </div>
-              {/* <div className="bg-blue-100 p-2 rounded-lg">
-                <span className="text-lg">📊</span>
-              </div> */}
-            </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {stats.map((stat) => (
+        <div
+          key={stat.label}
+          className="bg-[#F1FAFD] border-[.5px] border-[#85CEE8] rounded-lg p-4 hover:bg-[#E1F4F9] hover:border-[#0A438C] transition-all duration-200"
+        >
+          <div className="text-sm font-medium text-[#888292] mb-4">
+            {stat.label}
           </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-md font-medium text-gray-600">Pending</p>
-                <p className="text-xl font-bold text-amber-600">
-                  {pendingRequests}
-                </p>
-              </div>
-              {/* <div className="bg-amber-100 p-2 rounded-lg">
-                <span className="text-lg">⏳</span>
-              </div> */}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-md font-medium text-gray-600">In Progress</p>
-                <p className="text-xl font-bold text-blue-600">
-                  {inProgressRequests}
-                </p>
-              </div>
-              {/* <div className="bg-blue-100 p-2 rounded-lg">
-                <span className="text-lg">🔄</span>
-              </div> */}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-md font-medium text-gray-600">Completed</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  {completedRequests}
-                </p>
-              </div>
-              {/* <div className="bg-emerald-100 p-2 rounded-lg">
-                <span className="text-lg">✅</span>
-              </div> */}
-            </div>
-          </div>
+          <div className="text-4xl font-bold text-[#0A438C]">{stat.value}</div>
         </div>
-      </div>
-    </motion.div>
+      ))}
+    </div>
   );
 }

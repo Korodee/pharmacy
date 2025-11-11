@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RequestData } from "../../api/requests/route";
 import { useToast } from "../../../components/ui/ToastProvider";
@@ -11,29 +11,159 @@ import RequestCard from "../../../components/admin/RequestCard";
 import RequestDetailsModal from "../../../components/admin/RequestDetailsModal";
 
 export default function WebOrdersPage() {
-  const { showSuccess, showError } = useToast();
+  const { showError, showInfo } = useToast();
   const [requests, setRequests] = useState<RequestData[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<RequestData | null>(
     null
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-
-  useEffect(() => {
-    fetchRequests();
+  const [enableNotifications, setEnableNotifications] = useState(false);
+  
+  // Track which request IDs we've already seen for notifications
+  const seenRequestIds = useRef<Set<string>>(new Set());
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  
+  // Get or create audio context
+  const getAudioContext = useCallback(() => {
+    if (!audioContextRef.current) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        audioContextRef.current = new AudioContextClass();
+      }
+    }
+    return audioContextRef.current;
   }, []);
 
-  const fetchRequests = async () => {
+  const fetchNotificationSettings = useCallback(async () => {
+    try {
+      const response = await fetch("/api/settings");
+      const data = await response.json();
+      
+      if (data.success && data.settings) {
+        setEnableNotifications(data.settings.enableNotifications === true);
+      }
+    } catch (err) {
+      // Silently fail - notifications will be disabled if settings can't be fetched
+    }
+  }, []);
+
+  // Play notification sound
+  const playNotificationSound = useCallback(async () => {
+    try {
+      const audioContext = getAudioContext();
+      if (!audioContext) {
+        return;
+      }
+      
+      // Resume audio context if it's suspended (required by browser autoplay policies)
+      if (audioContext.state === 'suspended') {
+        try {
+          await audioContext.resume();
+        } catch {
+          // If resume fails, the user hasn't interacted with the page yet
+          return;
+        }
+      }
+      
+      // Create a pleasant notification sound (two-tone chime)
+      const playTone = (frequency: number, duration: number, startTime: number) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+        
+        // Fade in and out for a smoother sound
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.25, startTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+      };
+      
+      const now = audioContext.currentTime;
+      // Play two tones: a pleasant chime sound
+      playTone(800, 0.2, now);
+      playTone(1000, 0.2, now + 0.1);
+    } catch {
+      // Silently fail if audio context is not available or if autoplay is blocked
+    }
+  }, [getAudioContext]);
+
+  const checkForNewRequests = useCallback(async () => {
+    if (!enableNotifications) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/requests");
+      const data = await response.json();
+
+      if (data.success && data.requests) {
+        const newRequests = data.requests as RequestData[];
+        
+        // Find requests that we haven't seen before
+        const unseenRequests = newRequests.filter(
+          (req) => !seenRequestIds.current.has(req.id)
+        );
+
+        // Show notifications for new requests
+        if (unseenRequests.length > 0) {
+          // Play notification sound once for all new requests
+          playNotificationSound();
+          
+          unseenRequests.forEach((request) => {
+            // Mark as seen immediately to prevent duplicate notifications
+            seenRequestIds.current.add(request.id);
+            
+            const requestType = request.type === "refill" ? "Refill" : "Consultation";
+            const phone = request.phone.replace(/\D/g, '');
+            const formattedPhone = phone.length === 10 
+              ? `+1 (${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6)}`
+              : request.phone;
+            
+            showInfo(
+              `🔔 New ${requestType} Request Received! Phone: ${formattedPhone}`,
+              8000
+            );
+          });
+
+          // Update the requests list - prepend new requests at the top
+          setRequests((prevRequests) => {
+            const existingIds = new Set(prevRequests.map(r => r.id));
+            const newRequestsToAdd = unseenRequests.filter(r => !existingIds.has(r.id));
+            
+            return [...newRequestsToAdd, ...prevRequests];
+          });
+        }
+      }
+    } catch {
+      // Silently fail - polling will retry on next interval
+    }
+  }, [enableNotifications, playNotificationSound, showInfo]);
+
+  const fetchRequests = useCallback(async () => {
     try {
       const response = await fetch("/api/requests");
       const data = await response.json();
 
       if (data.success) {
-        setRequests(data.requests);
+        const fetchedRequests = data.requests as RequestData[];
+        setRequests(fetchedRequests);
+        
+        // Mark all current requests as seen
+        fetchedRequests.forEach((req) => {
+          seenRequestIds.current.add(req.id);
+        });
       } else {
         setError(data.error || "Failed to fetch requests");
         showError("Failed to fetch requests");
@@ -44,27 +174,55 @@ export default function WebOrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showError]);
 
-  const updateRequestStatus = async (requestId: string, status: string) => {
-    try {
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === requestId ? { ...req, status: status as any } : req
-        )
-      );
-    } catch (err) {
-      console.error("Failed to update status:", err);
+  useEffect(() => {
+    fetchRequests();
+    fetchNotificationSettings();
+    
+    // Cleanup on unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [fetchRequests, fetchNotificationSettings]);
+
+  // Set up polling when notifications are enabled
+  useEffect(() => {
+    if (enableNotifications) {
+      // Poll every 5 seconds for new requests
+      pollingIntervalRef.current = setInterval(() => {
+        checkForNewRequests();
+      }, 5000);
+    } else {
+      // Clear polling when notifications are disabled
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     }
-  };
+
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [enableNotifications, checkForNewRequests]);
+
+  const updateRequestStatus = useCallback((requestId: string, status: string) => {
+    setRequests((prev) =>
+      prev.map((req) =>
+        req.id === requestId ? { ...req, status: status as any } : req
+      )
+    );
+  }, []);
 
   const stats = {
     total: requests.length,
     pending: requests.filter((r) => r.status === "pending").length,
     inProgress: requests.filter((r) => r.status === "in-progress").length,
     completed: requests.filter((r) => r.status === "completed").length,
-    refills: requests.filter((r) => r.type === "refill").length,
-    consultations: requests.filter((r) => r.type === "consultation").length,
   };
 
   const filteredRequests = requests.filter((request) => {
@@ -124,12 +282,10 @@ export default function WebOrdersPage() {
     );
   }
 
+
   return (
     <>
-      <PageHeader
-        title="Web Orders"
-        description="Manage refill and consultation requests from customers"
-      />
+      <PageHeader title="Web Orders" />
 
       <div className="flex-1 overflow-auto pl-4 pr-6 py-6">
         <StatisticsCards
@@ -139,24 +295,17 @@ export default function WebOrdersPage() {
           completedRequests={stats.completed}
         />
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 mt-6"
-        >
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Requests</h2>
-                  <p className="text-sm text-gray-600">
-                    {filteredRequests.length} of {requests.length} requests
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* Requests Section */}
+        <div className="mt-6">
+          {/* Section Header */}
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">Requests</h2>
+            <p className="text-sm text-gray-600">
+              {filteredRequests.length} of {requests.length} requests
+            </p>
           </div>
+
+          {/* Search & Filter */}
           <SearchAndFilter
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -165,7 +314,9 @@ export default function WebOrdersPage() {
             typeFilter={typeFilter}
             setTypeFilter={setTypeFilter}
           />
-          <div className="px-6 py-3">
+
+          {/* Requests List */}
+          <div className="mt-4">
             {filteredRequests.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-6xl mb-4">📋</div>
@@ -199,7 +350,7 @@ export default function WebOrdersPage() {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -214,5 +365,4 @@ export default function WebOrdersPage() {
     </>
   );
 }
-
 

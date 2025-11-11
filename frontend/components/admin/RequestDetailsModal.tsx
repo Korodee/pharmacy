@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 interface RequestDetailsModalProps {
@@ -29,6 +29,23 @@ export default function RequestDetailsModal({
 }: RequestDetailsModalProps) {
   const isRefill = request.type === "refill";
   const [newStatus, setNewStatus] = useState(request.status);
+  const [enablePrinting, setEnablePrinting] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    // Fetch settings to check if printing is enabled
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.settings) {
+          setEnablePrinting(data.settings.enablePrinting !== false);
+        }
+      })
+      .catch(() => {
+        // Default to enabled if fetch fails
+        setEnablePrinting(true);
+      });
+  }, []);
 
   const formatPhoneNumber = (phone: string) => {
     // Remove all non-digits
@@ -52,6 +69,60 @@ export default function RequestDetailsModal({
   const handleUpdateStatus = () => {
     onUpdateStatus(request.id, newStatus);
     onClose();
+  };
+
+  const handlePrint = async () => {
+    setIsPrinting(true);
+    try {
+      // Fetch PDF from API
+      const response = await fetch(`/api/requests/${request.id}/print`);
+      
+      if (!response.ok) {
+        // Try to get error message from response
+        let errorMessage = "Failed to generate PDF";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // If response is not JSON, use default message
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Check if response is actually a PDF
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/pdf")) {
+        throw new Error("Invalid response format. Expected PDF.");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const printWindow = window.open(url, "_blank");
+      
+      if (printWindow) {
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print();
+            URL.revokeObjectURL(url);
+          }, 250);
+        };
+      } else {
+        // If popup blocked, create a download link
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `request-${request.id}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error("Failed to generate PDF for printing:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF for printing. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsPrinting(false);
+    }
   };
 
   return (
@@ -266,12 +337,51 @@ export default function RequestDetailsModal({
           <span className="text-sm text-gray-600">
             Created: {new Date(request.createdAt).toLocaleString()}
           </span>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 text-sm"
-          >
-            Close
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrint}
+              disabled={!enablePrinting || isPrinting}
+              className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-all ${
+                enablePrinting
+                  ? "text-white bg-[#0A438C] border border-[#0A438C] hover:bg-[#0A438C]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  : "text-gray-400 bg-gray-200 border border-gray-300 cursor-not-allowed"
+              }`}
+              title={!enablePrinting ? "Printing is disabled in settings" : ""}
+            >
+              {isPrinting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
+                  </svg>
+                  <span>Print</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </motion.div>
     </div>

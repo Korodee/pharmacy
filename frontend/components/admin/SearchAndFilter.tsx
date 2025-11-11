@@ -18,7 +18,7 @@ export default function SearchAndFilter({
   setTypeFilter,
 }: SearchAndFilterProps) {
   return (
-    <div className="grid grid-cols-1 px-6 py-3 md:grid-cols-3 gap-3">
+    <div className="grid grid-cols-1 py-3 md:grid-cols-3 gap-3">
       <div>
         <input
           type="text"

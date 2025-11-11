@@ -46,9 +46,9 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
   }
 
   // For Web Orders pages (supports both /web-orders and /admin/web-orders), match NIHB header style
-  if (pathname && pathname.includes('/web-orders')) {
+  if (pathname && pathname.includes("/web-orders")) {
     return (
-      <div className="bg-white pl-4 pr-6 py-4">
+      <div className="pl-4 pr-6 py-4">
         <div className="flex items-center">
           <MdArrowRight className="w-8 h-8 text-[#0A438C]" />
           <span className="text-sm font-medium ml-2">
@@ -60,13 +60,27 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
   }
 
   // For Deleted Claims pages, match NIHB header style
-  if (pathname && pathname.includes('/deleted-claims')) {
+  if (pathname && pathname.includes("/deleted-claims")) {
     return (
       <div className="bg-white pl-4 pr-6 py-4">
         <div className="flex items-center">
           <MdArrowRight className="w-8 h-8 text-[#0A438C]" />
           <span className="text-sm font-medium ml-2">
             <span className="text-[#0A438C]">DELETED CLAIMS</span>
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // For Settings pages, match NIHB header style
+  if (pathname && pathname.includes("/settings")) {
+    return (
+      <div className="bg-white pl-4 pr-6 py-4">
+        <div className="flex items-center">
+          <MdArrowRight className="w-8 h-8 text-[#0A438C]" />
+          <span className="text-sm font-medium ml-2">
+            <span className="text-[#0A438C]">ORDER SETTINGS</span>
           </span>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { FaPills } from "react-icons/fa";
 import { IoDocumentText } from "react-icons/io5";
 import { TiFlowMerge } from "react-icons/ti";
 import { TbPackage } from "react-icons/tb";
+import { IoSettingsOutline } from "react-icons/io5";
 import Logo from "../hero/Logo";
 
 interface SidebarProps {
@@ -19,6 +20,7 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
 
   const isNIHBPage = pathname?.includes("/nihb");
   const isWebOrdersPage = pathname?.startsWith("/admin/web-orders");
+  const isSettingsPage = pathname?.startsWith("/admin/settings");
 
   // Auto-collapse when not on NIHB; expand when on NIHB
   useEffect(() => {
@@ -153,6 +155,12 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
                       : "text-[#6E6C70] hover:bg-gray-100"
                   }`}
                 >
+                  {(() => {
+                    const menuItem = item as any;
+                    return menuItem.icon ? (
+                      <menuItem.icon className="w-6 h-6" />
+                    ) : null;
+                  })()}
                   <span
                     className={`text-base ${
                       item.active ? "font-semibold" : "font-medium"
@@ -166,61 +174,83 @@ export default function Sidebar({ onSignOut }: SidebarProps) {
           </div>
         ))}
       </nav>
-
-      {/* Deleted Claims Link */}
-      <div className="border-t border-gray-200 py-2">
-        <Link href="/admin/deleted-claims">
-          <div
-            className={`flex items-center space-x-3 py-3.5 px-4 rounded-lg transition-colors ${
-              pathname?.includes("/admin/deleted-claims")
-                ? "bg-[#0A438C] text-white"
-                : "text-[#6E6C70] hover:bg-gray-100"
-            }`}
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+      <div className="w-[90%] mx-auto">
+        {/* Deleted Claims Link */}
+        <div className="border-t border-gray-200 py-2">
+          <Link href="/admin/deleted-claims">
+            <div
+              className={`flex items-center space-x-3 py-3.5 px-4 rounded-lg transition-colors ${
+                pathname?.includes("/admin/deleted-claims")
+                  ? "bg-[#0A438C] text-white"
+                  : "text-[#6E6C70] hover:bg-gray-100"
+              }`}
             >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              <span
+                className={`text-base ${
+                  pathname?.includes("/admin/deleted-claims")
+                    ? "font-semibold"
+                    : "font-medium"
+                }`}
+              >
+                Deleted Claims
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Settings Link */}
+        <div className="border-t border-gray-200 py-2">
+          <Link href="/admin/settings">
+            <div
+              className={`flex items-center space-x-3 py-3.5 px-4 rounded-lg transition-colors ${
+                isSettingsPage
+                  ? "bg-[#0A438C] text-white"
+                  : "text-[#6E6C70] hover:bg-gray-100"
+              }`}
+            >
+              <IoSettingsOutline className="w-6 h-6" />
+              <span
+                className={`text-base ${
+                  isSettingsPage ? "font-semibold" : "font-medium"
+                }`}
+              >
+                Settings
+              </span>
+            </div>
+          </Link>
+        </div>
+        {/* Sign Out */}
+        <div className="border-t pt-4 border-gray-200 px-4 pb-4">
+          <button
+            onClick={onSignOut}
+            className="flex items-center space-x-3 w-full text-[#DC3545] hover:text-red-700 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
               <path
+                fill="white"
+                d="M9 11l3-3m0 0l3 3m-3-3v8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
               />
             </svg>
-            <span
-              className={`text-base ${
-                pathname?.includes("/admin/deleted-claims")
-                  ? "font-semibold"
-                  : "font-medium"
-              }`}
-            >
-              Deleted Claims
-            </span>
-          </div>
-        </Link>
-      </div>
-
-      {/* Sign Out */}
-      <div className="border-t pt-4 border-gray-200 px-4 pb-4">
-        <button
-          onClick={onSignOut}
-          className="flex items-center space-x-3 w-full text-[#DC3545] hover:text-red-700 transition-colors"
-        >
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path
-              fill="white"
-              d="M9 11l3-3m0 0l3 3m-3-3v8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-          </svg>
-          <span className="text-base font-medium">Sign Out</span>
-        </button>
+            <span className="text-base font-medium">Sign Out</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,36 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { sendEmail } from '@/lib/email';
-import { sendFax, generateFaxDocument, formatFaxNumber } from '@/lib/fax';
-import { getCollection } from '@/lib/mongodb';
-import { verifyCaptcha } from '@/lib/captcha';
+import { NextRequest, NextResponse } from "next/server";
+import { sendEmail } from "@/lib/email";
+import { sendFax, generateFaxPDF, formatFaxNumber } from "@/lib/fax";
+import { getCollection } from "@/lib/mongodb";
+import { verifyCaptcha } from "@/lib/captcha";
 
 export interface RefillRequest {
   id: string;
-  type: 'refill';
+  type: "refill";
   phone: string;
   prescriptions: string[];
   deliveryType: string;
   estimatedTime: string;
   comments: string;
-  status: 'pending' | 'in-progress' | 'completed';
+  status: "pending" | "in-progress" | "completed";
   createdAt: Date;
 }
 
 export interface ConsultationRequest {
   id: string;
-  type: 'consultation';
+  type: "consultation";
   phone: string;
   service: string;
   preferredDateTime: string;
   additionalNote: string;
-  status: 'pending' | 'in-progress' | 'completed';
+  status: "pending" | "in-progress" | "completed";
   createdAt: Date;
 }
 
 export type RequestData = RefillRequest | ConsultationRequest;
 
 // MongoDB collection name
-const COLLECTION_NAME = 'requests';
+const COLLECTION_NAME = "requests";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     if (process.env.RECAPTCHA_SECRET_KEY) {
       if (!captchaToken) {
         return NextResponse.json(
-          { success: false, error: 'CAPTCHA verification required' },
+          { success: false, error: "CAPTCHA verification required" },
           { status: 400 }
         );
       }
@@ -49,7 +49,10 @@ export async function POST(request: NextRequest) {
       const isValid = await verifyCaptcha(captchaToken);
       if (!isValid) {
         return NextResponse.json(
-          { success: false, error: 'CAPTCHA verification failed. Please try again.' },
+          {
+            success: false,
+            error: "CAPTCHA verification failed. Please try again.",
+          },
           { status: 400 }
         );
       }
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
       id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type,
       ...data,
-      status: 'pending',
+      status: "pending",
       createdAt: new Date(),
     };
 
@@ -70,54 +73,109 @@ export async function POST(request: NextRequest) {
     // Send email notification to admin
     try {
       await sendEmail({
-        to: process.env.ADMIN_EMAIL || 'admin@kateripharmacy.com',
-        subject: `New ${type === 'refill' ? 'Refill' : 'Consultation'} Request`,
+        to: process.env.ADMIN_EMAIL || "admin@kateripharmacy.com",
+        subject: `New ${type === "refill" ? "Refill" : "Consultation"} Request`,
         html: generateEmailTemplate(newRequest),
       });
     } catch (emailError) {
-      console.error('Failed to send email notification:', emailError);
+      console.error("Failed to send email notification:", emailError);
       // Don't fail the request if email fails
     }
 
-    // Send fax notification via Documo (if configured)
-    if (process.env.DOCUMO_API_KEY && process.env.PHARMACY_FAX_NUMBER) {
-      try {
-        const faxDocument = generateFaxDocument(newRequest);
-        const faxNumber = formatFaxNumber(process.env.PHARMACY_FAX_NUMBER);
-        
-        const faxResult = await sendFax({
-          recipientFax: faxNumber,
-          recipientName: process.env.PHARMACY_NAME || 'Kateri Pharmacy',
-          subject: `New ${type === 'refill' ? 'Refill' : 'Consultation'} Request - ${newRequest.id}`,
-          notes: `Please see attached document for request details. Request ID: ${newRequest.id}`,
-          files: [{
-            filename: `request-${newRequest.id}.txt`,
-            content: faxDocument,
-            contentType: 'text/plain',
-          }],
-        });
+    // Send fax notification via Documo (if configured and enabled in settings)
+    try {
+      const settingsCollection = await getCollection("settings");
+      const settings = await settingsCollection.findOne({
+        id: "order_settings",
+      });
 
-        if (faxResult.success) {
-          console.log(`Fax sent successfully. Fax ID: ${faxResult.faxId}`);
-        } else {
-          console.error('Failed to send fax:', faxResult.error);
+      // Check if send to fax by default is enabled
+      const sendToFaxByDefault = settings?.sendToFaxByDefault !== false; // Default to true if not set
+
+      // Send fax if send to fax by default is enabled
+      if (
+        sendToFaxByDefault &&
+        process.env.DOCUMO_API_KEY &&
+        process.env.PHARMACY_FAX_NUMBER
+      ) {
+        try {
+          // Generate PDF for fax (same format as print)
+          const faxPDF = await generateFaxPDF(newRequest);
+          const faxNumber = formatFaxNumber(process.env.PHARMACY_FAX_NUMBER);
+
+          const faxResult = await sendFax({
+            recipientFax: faxNumber,
+            recipientName: process.env.PHARMACY_NAME || "Kateri Pharmacy",
+            subject: `New ${
+              type === "refill" ? "Refill" : "Consultation"
+            } Request - ${newRequest.id}`,
+            notes: `Please see attached document for request details. Request ID: ${newRequest.id}`,
+            files: [
+              {
+                filename: `request-${newRequest.id}.pdf`,
+                content: faxPDF,
+                contentType: "application/pdf",
+              },
+            ],
+          });
+
+          if (faxResult.success) {
+            console.log(`Fax sent successfully. Fax ID: ${faxResult.faxId}`);
+          } else {
+            console.error("Failed to send fax:", faxResult.error);
+            // Don't fail the request if fax fails
+          }
+        } catch (faxError) {
+          console.error("Failed to send fax notification:", faxError);
           // Don't fail the request if fax fails
         }
-      } catch (faxError) {
-        console.error('Failed to send fax notification:', faxError);
-        // Don't fail the request if fax fails
+      }
+    } catch (settingsError) {
+      console.error(
+        "Failed to check settings, defaulting to send fax:",
+        settingsError
+      );
+      // If settings check fails, default to sending fax if configured (backward compatibility)
+      if (process.env.DOCUMO_API_KEY && process.env.PHARMACY_FAX_NUMBER) {
+        try {
+          // Generate PDF for fax (same format as print)
+          const faxPDF = await generateFaxPDF(newRequest);
+          const faxNumber = formatFaxNumber(process.env.PHARMACY_FAX_NUMBER);
+
+          const faxResult = await sendFax({
+            recipientFax: faxNumber,
+            recipientName: process.env.PHARMACY_NAME || "Kateri Pharmacy",
+            subject: `New ${
+              type === "refill" ? "Refill" : "Consultation"
+            } Request - ${newRequest.id}`,
+            notes: `Please see attached document for request details. Request ID: ${newRequest.id}`,
+            files: [
+              {
+                filename: `request-${newRequest.id}.pdf`,
+                content: faxPDF,
+                contentType: "application/pdf",
+              },
+            ],
+          });
+
+          if (faxResult.success) {
+            console.log(`Fax sent successfully. Fax ID: ${faxResult.faxId}`);
+          }
+        } catch (faxError) {
+          console.error("Failed to send fax notification:", faxError);
+        }
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       requestId: newRequest.id,
-      message: 'Request submitted successfully' 
+      message: "Request submitted successfully",
     });
   } catch (error) {
-    console.error('Error creating request:', error);
+    console.error("Error creating request:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create request' },
+      { success: false, error: "Failed to create request" },
       { status: 500 }
     );
   }
@@ -127,16 +185,19 @@ export async function GET() {
   try {
     // Fetch from MongoDB
     const collection = await getCollection(COLLECTION_NAME);
-    const requests = await collection.find({}).sort({ createdAt: -1 }).toArray();
-    
-    return NextResponse.json({ 
-      success: true, 
-      requests 
+    const requests = await collection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    return NextResponse.json({
+      success: true,
+      requests,
     });
   } catch (error) {
-    console.error('Error fetching requests:', error);
+    console.error("Error fetching requests:", error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch requests' },
+      { success: false, error: "Failed to fetch requests" },
       { status: 500 }
     );
   }
@@ -144,23 +205,29 @@ export async function GET() {
 
 // Helper function to format phone number for email display
 function formatPhoneForEmail(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  
+  const digits = phone.replace(/\D/g, "");
+
   // Format as North American: +1 (XXX) XXX-XXXX
   if (digits.length === 10) {
-    return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    return `+1 (${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(
+      6
+    )}`;
   }
-  
+
   return phone; // Return as-is if not 10 digits
 }
 
-
 function generateEmailTemplate(request: RequestData): string {
-  const isRefill = request.type === 'refill';
-  const title = isRefill ? 'Refill Request' : 'Consultation Request';
-  const icon = isRefill ? '💊' : '🩺';
-  const statusColor = request.status === 'pending' ? '#F59E0B' : request.status === 'in-progress' ? '#3B82F6' : '#10B981';
-  
+  const isRefill = request.type === "refill";
+  const title = isRefill ? "Refill Request" : "Consultation Request";
+  const icon = isRefill ? "💊" : "🩺";
+  const statusColor =
+    request.status === "pending"
+      ? "#F59E0B"
+      : request.status === "in-progress"
+      ? "#3B82F6"
+      : "#10B981";
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -197,15 +264,21 @@ function generateEmailTemplate(request: RequestData): string {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
               <div style="margin-bottom: 16px;">
                 <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Request ID</p>
-                <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500; font-family: 'Monaco', 'Menlo', monospace;">${request.id}</p>
+                <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500; font-family: 'Monaco', 'Menlo', monospace;">${
+                  request.id
+                }</p>
               </div>
               <div style="margin-bottom: 16px;">
                 <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Phone Number</p>
-                <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${formatPhoneForEmail(request.phone)}</p>
+                <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${formatPhoneForEmail(
+                  request.phone
+                )}</p>
               </div>
               <div style="margin-bottom: 16px;">
                 <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Submitted</p>
-                <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${new Date(request.createdAt).toLocaleString()}</p>
+                <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${new Date(
+                  request.createdAt
+                ).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -213,54 +286,82 @@ function generateEmailTemplate(request: RequestData): string {
           <!-- Details Section -->
           <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
             <h3 style="color: #1e293b; margin: 0 0 20px 0; font-size: 18px; font-weight: 600; display: flex; align-items: center;">
-              <span style="background: #0A438C; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-right: 12px;">${isRefill ? '1' : '1'}</span>
-              ${isRefill ? 'Prescription Details' : 'Consultation Details'}
+              <span style="background: #0A438C; color: white; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-right: 12px;">${
+                isRefill ? "1" : "1"
+              }</span>
+              ${isRefill ? "Prescription Details" : "Consultation Details"}
             </h3>
             
-            ${isRefill ? `
+            ${
+              isRefill
+                ? `
               <div style="margin-bottom: 20px;">
                 <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Prescriptions</p>
                 <div style="background: #f1f5f9; border-radius: 8px; padding: 16px;">
-                  ${(request as RefillRequest).prescriptions.filter(rx => rx.trim()).map(rx => `
+                  ${(request as RefillRequest).prescriptions
+                    .filter((rx) => rx.trim())
+                    .map(
+                      (rx) => `
                     <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center;">
                       <span style="color: #0A438C; margin-right: 8px; font-size: 16px;">💊</span>
                       <span style="color: #1e293b; font-size: 14px; font-weight: 500;">${rx}</span>
                     </div>
-                  `).join('')}
+                  `
+                    )
+                    .join("")}
                 </div>
               </div>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
                 <div style="margin-bottom: 16px;">
                   <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Delivery Type</p>
-                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500; text-transform: capitalize;">${(request as RefillRequest).deliveryType}</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500; text-transform: capitalize;">${
+                    (request as RefillRequest).deliveryType
+                  }</p>
                 </div>
                 <div style="margin-bottom: 16px;">
                   <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Estimated Time</p>
-                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${(request as RefillRequest).estimatedTime || 'Not specified'}</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${
+                    (request as RefillRequest).estimatedTime || "Not specified"
+                  }</p>
                 </div>
               </div>
               
-              ${(request as RefillRequest).comments ? `
+              ${
+                (request as RefillRequest).comments
+                  ? `
                 <div>
                   <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Comments</p>
                   <div style="background: #f1f5f9; border-radius: 8px; padding: 16px;">
-                    <p style="color: #1e293b; margin: 0; font-size: 14px; line-height: 1.5;">${(request as RefillRequest).comments}</p>
+                    <p style="color: #1e293b; margin: 0; font-size: 14px; line-height: 1.5;">${
+                      (request as RefillRequest).comments
+                    }</p>
                   </div>
                 </div>
-              ` : ''}
-            ` : `
+              `
+                  : ""
+              }
+            `
+                : `
               <div style="margin-bottom: 20px;">
                 <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Requested Service</p>
                 <div style="background: #f1f5f9; border-radius: 8px; padding: 16px;">
                   <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; display: flex; align-items: center;">
                     <span style="color: #0A438C; margin-right: 8px; font-size: 16px;">🩺</span>
-                    <span style="color: #1e293b; font-size: 14px; font-weight: 500;">${(request as ConsultationRequest).service === 'uti' ? 'Testing and treatment for UTI' : 
-                      (request as ConsultationRequest).service === 'strep' ? 'Testing and treatment for Strep A' :
-                      (request as ConsultationRequest).service === 'travel' ? 'Traveller\'s Health' :
-                      (request as ConsultationRequest).service === 'sinus' ? 'Sinus Infection' :
-                      (request as ConsultationRequest).service === 'allergies' ? 'Allergies Treatment' :
-                      (request as ConsultationRequest).service}</span>
+                    <span style="color: #1e293b; font-size: 14px; font-weight: 500;">${
+                      (request as ConsultationRequest).service === "uti"
+                        ? "Testing and treatment for UTI"
+                        : (request as ConsultationRequest).service === "strep"
+                        ? "Testing and treatment for Strep A"
+                        : (request as ConsultationRequest).service === "travel"
+                        ? "Traveller's Health"
+                        : (request as ConsultationRequest).service === "sinus"
+                        ? "Sinus Infection"
+                        : (request as ConsultationRequest).service ===
+                          "allergies"
+                        ? "Allergies Treatment"
+                        : (request as ConsultationRequest).service
+                    }</span>
                   </div>
                 </div>
               </div>
@@ -268,23 +369,38 @@ function generateEmailTemplate(request: RequestData): string {
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                 <div>
                   <p style="color: #64748b; margin: 0 0 4px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Preferred Date & Time</p>
-                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${(request as ConsultationRequest).preferredDateTime ? new Date((request as ConsultationRequest).preferredDateTime).toLocaleString() : 'Not specified'}</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${
+                    (request as ConsultationRequest).preferredDateTime
+                      ? new Date(
+                          (request as ConsultationRequest).preferredDateTime
+                        ).toLocaleString()
+                      : "Not specified"
+                  }</p>
                 </div>
                 <div>
                   <p style="color: #64748b; margin: 0 0 4px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Contact Information</p>
-                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${formatPhoneForEmail(request.phone)}</p>
+                  <p style="color: #1e293b; margin: 0; font-size: 14px; font-weight: 500;">${formatPhoneForEmail(
+                    request.phone
+                  )}</p>
                 </div>
               </div>
               
-              ${(request as ConsultationRequest).additionalNote ? `
+              ${
+                (request as ConsultationRequest).additionalNote
+                  ? `
                 <div>
                   <p style="color: #64748b; margin: 0 0 8px 0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Additional Notes</p>
                   <div style="background: #f1f5f9; border-radius: 8px; padding: 16px;">
-                    <p style="color: #1e293b; margin: 0; font-size: 14px; line-height: 1.5;">${(request as ConsultationRequest).additionalNote}</p>
+                    <p style="color: #1e293b; margin: 0; font-size: 14px; line-height: 1.5;">${
+                      (request as ConsultationRequest).additionalNote
+                    }</p>
                   </div>
                 </div>
-              ` : ''}
-            `}
+              `
+                  : ""
+              }
+            `
+            }
           </div>
 
           <!-- Action Button -->

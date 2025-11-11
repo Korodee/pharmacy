@@ -1,6 +1,8 @@
-import axios from 'axios';
-import FormData from 'form-data';
-import PDFDocument from 'pdfkit';
+import axios from "axios";
+import FormData from "form-data";
+import PDFDocument from "pdfkit";
+import path from "path";
+import fs from "fs";
 
 interface FaxData {
   recipientFax: string;
@@ -25,7 +27,7 @@ interface DocumoResponse {
  * Formats phone number for display (e.g., (450) 638-5760)
  */
 function formatPhoneDisplay(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
+  const digits = phone.replace(/\D/g, "");
   if (digits.length === 10) {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   }
@@ -37,22 +39,22 @@ function formatPhoneDisplay(phone: string): string {
  */
 function getServiceDisplayName(service: string): string {
   const serviceMap: { [key: string]: string } = {
-    'uti': 'Testing and Treatment for UTI',
-    'strep': 'Testing and Treatment for Strep A',
-    'travel': "Traveller's Health",
-    'sinus': 'Sinus Infection',
-    'allergies': 'Allergies Treatment',
-    'diabetes': 'Diabetes Management',
-    'contraception': 'Emergency Contraceptive Pill and Regular Contraception',
-    'hair-lice': 'Hair Lice Treatment',
-    'heartburn': 'Heartburn Treatment',
-    'malaria': 'Mountain Sickness and Malaria',
-    'pregnancy': 'Pregnancy Care',
-    'shingles': 'Shingles Treatment',
-    'throat': 'Throat Infection',
-    'tick': 'Tick Bite Treatment',
-    'travellers-diarrhea': "Traveller's Diarrhea",
-    'smoking': 'Smoking Cessation',
+    uti: "Testing and Treatment for UTI",
+    strep: "Testing and Treatment for Strep A",
+    travel: "Traveller's Health",
+    sinus: "Sinus Infection",
+    allergies: "Allergies Treatment",
+    diabetes: "Diabetes Management",
+    contraception: "Emergency Contraceptive Pill and Regular Contraception",
+    "hair-lice": "Hair Lice Treatment",
+    heartburn: "Heartburn Treatment",
+    malaria: "Mountain Sickness and Malaria",
+    pregnancy: "Pregnancy Care",
+    shingles: "Shingles Treatment",
+    throat: "Throat Infection",
+    tick: "Tick Bite Treatment",
+    "travellers-diarrhea": "Traveller's Diarrhea",
+    smoking: "Smoking Cessation",
   };
   return serviceMap[service] || service;
 }
@@ -60,21 +62,25 @@ function getServiceDisplayName(service: string): string {
 /**
  * Word wraps text to a maximum line length
  */
-function wordWrap(text: string, maxLength: number, indent: string = '  '): string {
+function wordWrap(
+  text: string,
+  maxLength: number,
+  indent: string = "  "
+): string {
   const words = text.trim().split(/\s+/);
-  let currentLine = '';
-  let result = '';
+  let currentLine = "";
+  let result = "";
 
   words.forEach((word) => {
     if ((currentLine + word).length <= maxLength) {
-      currentLine += (currentLine ? ' ' : indent) + word;
+      currentLine += (currentLine ? " " : indent) + word;
     } else {
-      if (currentLine) result += currentLine + '\n';
+      if (currentLine) result += currentLine + "\n";
       currentLine = indent + word;
     }
   });
 
-  if (currentLine) result += currentLine + '\n';
+  if (currentLine) result += currentLine + "\n";
   return result;
 }
 
@@ -84,10 +90,10 @@ function wordWrap(text: string, maxLength: number, indent: string = '  '): strin
  * @returns Formatted fax number (e.g., 14506385760)
  */
 export function formatFaxNumber(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
+  const digits = phone.replace(/\D/g, "");
 
   // If it starts with 1 and has 11 digits, it's already formatted
-  if (digits.length === 11 && digits[0] === '1') {
+  if (digits.length === 11 && digits[0] === "1") {
     return digits;
   }
 
@@ -107,38 +113,38 @@ export function formatFaxNumber(phone: string): string {
  */
 export async function sendFax(faxData: FaxData): Promise<DocumoResponse> {
   const DOCUMO_API_KEY = process.env.DOCUMO_API_KEY;
-  const DOCUMO_API_URL = 'https://api.documo.com/v1/fax/send';
+  const DOCUMO_API_URL = "https://api.documo.com/v1/fax/send";
 
   if (!DOCUMO_API_KEY) {
-    console.error('DOCUMO_API_KEY is not configured');
+    console.error("DOCUMO_API_KEY is not configured");
     return {
       success: false,
-      error: 'Fax service not configured: DOCUMO_API_KEY is missing',
+      error: "Fax service not configured: DOCUMO_API_KEY is missing",
     };
   }
 
   if (!faxData.recipientFax) {
     return {
       success: false,
-      error: 'Recipient fax number is required',
+      error: "Recipient fax number is required",
     };
   }
 
   try {
     const formData = new FormData();
-    formData.append('recipientFax', faxData.recipientFax);
-    formData.append('recipientName', faxData.recipientName || 'Recipient');
-    formData.append('subject', faxData.subject);
-    formData.append('notes', faxData.notes || '');
+    formData.append("recipientFax", faxData.recipientFax);
+    formData.append("recipientName", faxData.recipientName || "Recipient");
+    formData.append("subject", faxData.subject);
+    formData.append("notes", faxData.notes || "");
 
     // Add files if provided
     if (faxData.files && faxData.files.length > 0) {
       for (const file of faxData.files) {
         const buffer = Buffer.isBuffer(file.content)
           ? file.content
-          : Buffer.from(file.content as string, 'utf-8');
+          : Buffer.from(file.content as string, "utf-8");
 
-        formData.append('files', buffer, {
+        formData.append("files", buffer, {
           filename: file.filename,
           contentType: file.contentType,
         });
@@ -152,7 +158,7 @@ export async function sendFax(faxData: FaxData): Promise<DocumoResponse> {
     // - Or check Documo API documentation for the exact format
     const response = await axios.post(DOCUMO_API_URL, formData, {
       headers: {
-        'Authorization': `Basic ${DOCUMO_API_KEY}`,
+        Authorization: `Basic ${DOCUMO_API_KEY}`,
         ...formData.getHeaders(),
       },
       maxContentLength: Infinity,
@@ -162,10 +168,10 @@ export async function sendFax(faxData: FaxData): Promise<DocumoResponse> {
     return {
       success: true,
       faxId: response.data.faxId || response.data.id,
-      message: response.data.message || 'Fax sent successfully',
+      message: response.data.message || "Fax sent successfully",
     };
   } catch (error) {
-    console.error('Failed to send fax:', error);
+    console.error("Failed to send fax:", error);
     if (axios.isAxiosError(error)) {
       const errorMessage = error.response?.data?.message || error.message;
       return {
@@ -175,7 +181,7 @@ export async function sendFax(faxData: FaxData): Promise<DocumoResponse> {
     }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
@@ -187,86 +193,96 @@ export async function sendFax(faxData: FaxData): Promise<DocumoResponse> {
  */
 export function generateFaxDocument(requestData: {
   id: string;
-  type: 'refill' | 'consultation';
+  type: "refill" | "consultation";
   phone: string;
   createdAt: Date;
   [key: string]: any;
 }): string {
-  const isRefill = requestData.type === 'refill';
-  const title = isRefill ? 'PRESCRIPTION REFILL REQUEST' : 'CONSULTATION REQUEST';
+  const isRefill = requestData.type === "refill";
+  const title = isRefill
+    ? "PRESCRIPTION REFILL REQUEST"
+    : "CONSULTATION REQUEST";
   const submittedDate = new Date(requestData.createdAt);
 
-  const dateStr = submittedDate.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const dateStr = submittedDate.toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  const timeStr = submittedDate.toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
+  const timeStr = submittedDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: true,
   });
 
   // Pharmacy information
-  const pharmacyName = process.env.PHARMACY_NAME || 'Kateri Pharmacy';
-  const pharmacyPhone = process.env.PHARMACY_PHONE || '450-638-5760';
-  const pharmacyFax = process.env.PHARMACY_FAX_NUMBER || '450-635-8249';
+  const pharmacyName = process.env.PHARMACY_NAME || "Kateri Pharmacy";
+  const pharmacyPhone = process.env.PHARMACY_PHONE || "450-638-5760";
+  const pharmacyFax = process.env.PHARMACY_FAX_NUMBER || "450-635-8249";
   const formattedPatientPhone = formatPhoneDisplay(requestData.phone);
 
-  let document = '';
+  let document = "";
 
   // Header Section
-  document += '\n\n';
-  document += ' '.repeat(15) + '═'.repeat(70) + '\n';
-  document += ' '.repeat(15) + ' '.repeat(25) + pharmacyName.toUpperCase() + '\n';
-  document += ' '.repeat(15) + ' '.repeat(20) + 'Professional Healthcare Services' + '\n';
-  document += ' '.repeat(15) + '═'.repeat(70) + '\n';
-  document += '\n';
+  document += "\n\n";
+  document += " ".repeat(15) + "═".repeat(70) + "\n";
+  document +=
+    " ".repeat(15) + " ".repeat(25) + pharmacyName.toUpperCase() + "\n";
+  document +=
+    " ".repeat(15) + " ".repeat(20) + "Professional Healthcare Services" + "\n";
+  document += " ".repeat(15) + "═".repeat(70) + "\n";
+  document += "\n";
 
   // Document Title
-  document += ' '.repeat(20) + '─'.repeat(60) + '\n';
-  document += ' '.repeat(35) + title + '\n';
-  document += ' '.repeat(20) + '─'.repeat(60) + '\n';
-  document += '\n';
+  document += " ".repeat(20) + "─".repeat(60) + "\n";
+  document += " ".repeat(35) + title + "\n";
+  document += " ".repeat(20) + "─".repeat(60) + "\n";
+  document += "\n";
 
   // Request Information Section
-  document += 'REQUEST INFORMATION\n';
-  document += '═'.repeat(80) + '\n';
+  document += "REQUEST INFORMATION\n";
+  document += "═".repeat(80) + "\n";
   document += `  Request ID:        ${requestData.id}\n`;
   document += `  Date Submitted:    ${dateStr}\n`;
   document += `  Time Submitted:    ${timeStr}\n`;
   document += `  Patient Phone:     ${formattedPatientPhone}\n`;
-  document += `  Request Type:      ${isRefill ? 'Prescription Refill' : 'Consultation'}\n`;
-  document += '\n';
+  document += `  Request Type:      ${
+    isRefill ? "Prescription Refill" : "Consultation"
+  }\n`;
+  document += "\n";
 
   if (isRefill) {
     const refillData = requestData as any;
 
     // Prescription Details Section
-    document += 'PRESCRIPTION DETAILS\n';
-    document += '═'.repeat(80) + '\n';
+    document += "PRESCRIPTION DETAILS\n";
+    document += "═".repeat(80) + "\n";
 
     if (refillData.prescriptions?.length > 0) {
-      const validPrescriptions = refillData.prescriptions.filter((rx: string) => rx?.trim());
+      const validPrescriptions = refillData.prescriptions.filter((rx: string) =>
+        rx?.trim()
+      );
       if (validPrescriptions.length > 0) {
         validPrescriptions.forEach((rx: string, index: number) => {
           document += `  ${index + 1}. ${rx.trim()}\n`;
         });
       } else {
-        document += '  No prescriptions specified.\n';
+        document += "  No prescriptions specified.\n";
       }
     } else {
-      document += '  No prescriptions specified.\n';
+      document += "  No prescriptions specified.\n";
     }
-    document += '\n';
+    document += "\n";
 
     // Delivery Information Section
-    document += 'DELIVERY INFORMATION\n';
-    document += '═'.repeat(80) + '\n';
-    const deliveryType = refillData.deliveryType || 'Not specified';
-    document += `  Delivery Type:     ${deliveryType.charAt(0).toUpperCase() + deliveryType.slice(1)}\n`;
+    document += "DELIVERY INFORMATION\n";
+    document += "═".repeat(80) + "\n";
+    const deliveryType = refillData.deliveryType || "Not specified";
+    document += `  Delivery Type:     ${
+      deliveryType.charAt(0).toUpperCase() + deliveryType.slice(1)
+    }\n`;
 
     if (refillData.estimatedTime) {
       document += `  Estimated Time:    ${refillData.estimatedTime}\n`;
@@ -274,11 +290,11 @@ export function generateFaxDocument(requestData: {
 
     if (refillData.preferredDate) {
       const preferredDate = new Date(refillData.preferredDate);
-      const formattedDate = preferredDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      const formattedDate = preferredDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
       document += `  Preferred Date:    ${formattedDate}\n`;
     }
@@ -286,39 +302,41 @@ export function generateFaxDocument(requestData: {
     if (refillData.preferredTime) {
       document += `  Preferred Time:    ${refillData.preferredTime}\n`;
     }
-    document += '\n';
+    document += "\n";
 
     // Additional Comments Section
     if (refillData.comments?.trim()) {
-      document += 'ADDITIONAL COMMENTS\n';
-      document += '═'.repeat(80) + '\n';
+      document += "ADDITIONAL COMMENTS\n";
+      document += "═".repeat(80) + "\n";
       document += wordWrap(refillData.comments, 70);
-      document += '\n';
+      document += "\n";
     }
   } else {
     const consultationData = requestData as any;
 
     // Consultation Details Section
-    document += 'CONSULTATION DETAILS\n';
-    document += '═'.repeat(80) + '\n';
-    document += `  Service Requested: ${getServiceDisplayName(consultationData.service || 'Not specified')}\n`;
-    document += '\n';
+    document += "CONSULTATION DETAILS\n";
+    document += "═".repeat(80) + "\n";
+    document += `  Service Requested: ${getServiceDisplayName(
+      consultationData.service || "Not specified"
+    )}\n`;
+    document += "\n";
 
     // Preferred Date & Time Section
     if (consultationData.preferredDateTime) {
-      document += 'PREFERRED APPOINTMENT TIME\n';
-      document += '═'.repeat(80) + '\n';
+      document += "PREFERRED APPOINTMENT TIME\n";
+      document += "═".repeat(80) + "\n";
       try {
         const preferredDate = new Date(consultationData.preferredDateTime);
-        const formattedDate = preferredDate.toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
+        const formattedDate = preferredDate.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
         });
-        const formattedTime = preferredDate.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
+        const formattedTime = preferredDate.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
           hour12: true,
         });
         document += `  Date: ${formattedDate}\n`;
@@ -326,32 +344,32 @@ export function generateFaxDocument(requestData: {
       } catch {
         document += `  ${consultationData.preferredDateTime}\n`;
       }
-      document += '\n';
+      document += "\n";
     }
 
     // Additional Notes Section
     if (consultationData.additionalNote?.trim()) {
-      document += 'ADDITIONAL NOTES\n';
-      document += '═'.repeat(80) + '\n';
+      document += "ADDITIONAL NOTES\n";
+      document += "═".repeat(80) + "\n";
       document += wordWrap(consultationData.additionalNote, 70);
-      document += '\n';
+      document += "\n";
     }
   }
 
   // Footer Section
-  document += '\n';
-  document += '═'.repeat(80) + '\n';
-  document += 'ACTION REQUIRED\n';
-  document += '═'.repeat(80) + '\n';
+  document += "\n";
+  document += "═".repeat(80) + "\n";
+  document += "ACTION REQUIRED\n";
+  document += "═".repeat(80) + "\n";
   document += `  This is an automated request submitted through the ${pharmacyName} website.\n`;
   document += `  Please contact the patient at ${formattedPatientPhone} to proceed with this request.\n`;
-  document += '\n';
-  document += 'CONTACT INFORMATION\n';
-  document += '═'.repeat(80) + '\n';
+  document += "\n";
+  document += "CONTACT INFORMATION\n";
+  document += "═".repeat(80) + "\n";
   document += `  ${pharmacyName}\n`;
   document += `  Phone: ${pharmacyPhone}\n`;
   document += `  Fax: ${pharmacyFax}\n`;
-  document += '\n\n';
+  document += "\n\n";
 
   return document;
 }
@@ -363,203 +381,343 @@ export function generateFaxDocument(requestData: {
  */
 export async function generateFaxPDF(requestData: {
   id: string;
-  type: 'refill' | 'consultation';
+  type: "refill" | "consultation";
   phone: string;
   createdAt: Date;
   [key: string]: any;
 }): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     try {
+      // Fix for PDFKit font loading in Next.js
+      // PDFKit tries to load font files from a relative path that doesn't work in Next.js builds
+      // We need to override PDFKit's font path resolution
+      let fontDataPath: string | null = null;
+      
+      if (typeof process !== 'undefined') {
+        // Find the actual location of PDFKit font files
+        const possiblePaths = [
+          path.join(process.cwd(), 'node_modules', 'pdfkit', 'js', 'data'),
+          path.join(process.cwd(), 'node_modules', 'pdfkit', 'lib', 'data'),
+          path.join(process.cwd(), 'node_modules', 'pdfkit', 'data'),
+        ];
+        
+        for (const testPath of possiblePaths) {
+          try {
+            if (fs.existsSync(testPath) && fs.existsSync(path.join(testPath, 'Helvetica.afm'))) {
+              fontDataPath = testPath;
+              break;
+            }
+          } catch {
+            // Ignore errors when checking paths
+          }
+        }
+        
+        // PDFKit uses __dirname + '/data/Helvetica.afm' to load fonts
+        // In Next.js builds, __dirname points to .next/server/vendor-chunks/ which doesn't have the data folder
+        // We need to copy font files to where PDFKit expects them at runtime
+        if (fontDataPath) {
+          // Find where PDFKit will look for fonts (based on where it's bundled)
+          // PDFKit looks for fonts relative to its own __dirname
+          // We need to copy fonts to that location
+          try {
+            // Get the PDFKit module path to find where it's bundled
+            const pdfkitModulePath = require.resolve('pdfkit');
+            const pdfkitDir = path.dirname(pdfkitModulePath);
+            const expectedDataPath = path.join(pdfkitDir, 'data');
+            
+            // Create the data directory if it doesn't exist
+            if (!fs.existsSync(expectedDataPath)) {
+              fs.mkdirSync(expectedDataPath, { recursive: true });
+            }
+            
+            // Copy font files to where PDFKit expects them
+            const fontFiles = ['Helvetica.afm', 'Helvetica-Bold.afm', 'Helvetica-Oblique.afm', 'Helvetica-BoldOblique.afm'];
+            for (const fontFile of fontFiles) {
+              const sourcePath = path.join(fontDataPath, fontFile);
+              const destPath = path.join(expectedDataPath, fontFile);
+              
+              if (fs.existsSync(sourcePath) && !fs.existsSync(destPath)) {
+                fs.copyFileSync(sourcePath, destPath);
+              }
+            }
+          } catch (copyError) {
+            // If copying fails, log a warning but continue
+            // PDFKit might still work with built-in fonts
+            console.warn('Failed to copy PDFKit font files:', copyError);
+          }
+        }
+      }
+
       const doc = new PDFDocument({
-        size: 'LETTER',
+        size: "LETTER",
         margins: { top: 50, bottom: 50, left: 50, right: 50 },
+        autoFirstPage: true,
       });
 
       const buffers: Buffer[] = [];
-      doc.on('data', buffers.push.bind(buffers));
-      doc.on('end', () => {
+      doc.on("data", buffers.push.bind(buffers));
+      doc.on("end", () => {
         const pdfBuffer = Buffer.concat(buffers);
         resolve(pdfBuffer);
       });
-      doc.on('error', reject);
-
-      const isRefill = requestData.type === 'refill';
-      const title = isRefill ? 'PRESCRIPTION REFILL REQUEST' : 'CONSULTATION REQUEST';
-      const submittedDate = new Date(requestData.createdAt);
-
-      const dateStr = submittedDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+      doc.on("error", (error) => {
+        // If error is about font files, try to provide more helpful error
+        if (error.message && error.message.includes('.afm')) {
+          reject(new Error(`PDFKit font error: ${error.message}. Font path: ${fontDataPath || 'not found'}`));
+        } else {
+          reject(error);
+        }
       });
 
-      const timeStr = submittedDate.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
+      // Set font - PDFKit should find it now that we've copied the files
+      doc.font("Helvetica");
+
+      const isRefill = requestData.type === "refill";
+      const title = isRefill
+        ? "PRESCRIPTION REFILL REQUEST"
+        : "CONSULTATION REQUEST";
+      const submittedDate = new Date(requestData.createdAt);
+
+      const dateStr = submittedDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      const timeStr = submittedDate.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
         hour12: true,
       });
 
       // Pharmacy information
-      const pharmacyName = process.env.PHARMACY_NAME || 'Kateri Pharmacy';
-      const pharmacyPhone = process.env.PHARMACY_PHONE || '450-638-5760';
-      const pharmacyFax = process.env.PHARMACY_FAX_NUMBER || '450-635-8249';
+      const pharmacyName = process.env.PHARMACY_NAME || "Kateri Pharmacy";
+      const pharmacyPhone = process.env.PHARMACY_PHONE || "450-638-5760";
+      const pharmacyFax = process.env.PHARMACY_FAX_NUMBER || "450-635-8249";
       const formattedPatientPhone = formatPhoneDisplay(requestData.phone);
 
-      // Header Section
-      doc.fontSize(20)
-         .fillColor('#0A438C')
-         .text(pharmacyName.toUpperCase(), { align: 'center' });
+      // Header Section - More appealing and less formal
+      doc
+        .fontSize(28)
+        .fillColor("#0A438C")
+        .text(pharmacyName.toUpperCase(), { align: "center" });
 
-      doc.fontSize(11)
-         .fillColor('#666666')
-         .text('Professional Healthcare Services', { align: 'center' });
+      doc
+        .fontSize(14)
+        .fillColor("#666666")
+        .text("Professional Healthcare Services", { align: "center" });
+
+      doc.moveDown(2);
+
+      // Blue header line
+      doc
+        .strokeColor("#0A438C")
+        .lineWidth(3)
+        .moveTo(50, doc.y)
+        .lineTo(562, doc.y)
+        .stroke();
+
+      doc.moveDown(2);
+
+      // Document Title - Larger and more prominent, blue with underline
+      doc
+        .fontSize(24)
+        .fillColor("#0A438C")
+        .text(title, { align: "center", underline: true });
 
       doc.moveDown(1.5);
 
-      // Draw header line
-      doc.strokeColor('#0A438C')
-         .lineWidth(2)
-         .moveTo(50, doc.y)
-         .lineTo(562, doc.y)
-         .stroke();
+      // Request Information Section - Bigger and more appealing
+      doc
+        .fontSize(14)
+        .fillColor("#0A438C")
+        .text("REQUEST INFORMATION", { underline: true });
 
-      doc.moveDown(1);
+      doc.moveDown(0.3);
+      doc.fontSize(14).fillColor("#000000");
 
-      // Document Title
-      doc.fontSize(16)
-         .fillColor('#000000')
-         .text(title, { align: 'center', underline: true });
+      // Use fixed positions for proper alignment
+      const labelX = 50;
+      const valueX = 200;
+      const lineHeight = 16;
+      let currentY = doc.y;
+
+      doc.text("Request ID:", labelX, currentY);
+      doc.text(requestData.id, valueX, currentY);
+      currentY += lineHeight;
+
+      doc.text("Date Submitted:", labelX, currentY);
+      doc.text(dateStr, valueX, currentY);
+      currentY += lineHeight;
+
+      doc.text("Time Submitted:", labelX, currentY);
+      doc.text(timeStr, valueX, currentY);
+      currentY += lineHeight;
+
+      doc.text("Patient Phone:", labelX, currentY);
+      doc.text(formattedPatientPhone, valueX, currentY);
+      currentY += lineHeight;
+
+      doc.text("Request Type:", labelX, currentY);
+      doc.text(
+        isRefill ? "Prescription Refill" : "Consultation",
+        valueX,
+        currentY
+      );
+
+      doc.y = currentY;
+      // Reset x position to left margin for subsequent sections
+      doc.x = 50;
 
       doc.moveDown(1.5);
-
-      // Request Information Section
-      doc.fontSize(11)
-         .fillColor('#0A438C')
-         .text('REQUEST INFORMATION', { underline: true });
-
-      doc.moveDown(0.5);
-      doc.fontSize(10)
-         .fillColor('#000000')
-         .text(`Request ID:        ${requestData.id}`);
-      doc.text(`Date Submitted:    ${dateStr}`);
-      doc.text(`Time Submitted:    ${timeStr}`);
-      doc.text(`Patient Phone:     ${formattedPatientPhone}`);
-      doc.text(`Request Type:      ${isRefill ? 'Prescription Refill' : 'Consultation'}`);
-
-      doc.moveDown(1);
 
       if (isRefill) {
         const refillData = requestData as any;
 
-        // Prescription Details Section
-        doc.fontSize(11)
-           .fillColor('#0A438C')
-           .text('PRESCRIPTION DETAILS', { underline: true });
-
+        // Prescription Details Section - Bigger and more appealing
         doc.moveDown(0.5);
-        doc.fontSize(10)
-           .fillColor('#000000');
+        doc
+          .fontSize(14)
+          .fillColor("#0A438C")
+          .text("PRESCRIPTION DETAILS", { underline: true });
+
+        doc.moveDown(0.3);
+        doc.fontSize(14).fillColor("#000000");
 
         if (refillData.prescriptions?.length > 0) {
-          const validPrescriptions = refillData.prescriptions.filter((rx: string) => rx?.trim());
+          const validPrescriptions = refillData.prescriptions.filter(
+            (rx: string) => rx?.trim()
+          );
           if (validPrescriptions.length > 0) {
             validPrescriptions.forEach((rx: string, index: number) => {
               doc.text(`${index + 1}. ${rx.trim()}`);
             });
           } else {
-            doc.text('No prescriptions specified.');
+            doc.text("No prescriptions specified.");
           }
         } else {
-          doc.text('No prescriptions specified.');
+          doc.text("No prescriptions specified.");
         }
 
-        doc.moveDown(1);
+        doc.moveDown(1.5);
 
         // Delivery Information Section
-        doc.fontSize(11)
-           .fillColor('#0A438C')
-           .text('DELIVERY INFORMATION', { underline: true });
+        doc
+          .fontSize(14)
+          .fillColor("#0A438C")
+          .text("DELIVERY INFORMATION", { underline: true });
 
-        doc.moveDown(0.5);
-        doc.fontSize(10)
-           .fillColor('#000000');
-        const deliveryType = refillData.deliveryType || 'Not specified';
-        doc.text(`Delivery Type:     ${deliveryType.charAt(0).toUpperCase() + deliveryType.slice(1)}`);
+        doc.moveDown(0.3);
+        doc.fontSize(14).fillColor("#000000");
+
+        // Use fixed positions for proper alignment
+        const labelX = 50;
+        const valueX = 200;
+        const lineHeight = 16;
+        let currentY = doc.y;
+
+        const deliveryType = refillData.deliveryType || "Not specified";
+        doc.text("Delivery Type:", labelX, currentY);
+        doc.text(
+          deliveryType.charAt(0).toUpperCase() + deliveryType.slice(1),
+          valueX,
+          currentY
+        );
+        currentY += lineHeight;
 
         if (refillData.estimatedTime) {
-          doc.text(`Estimated Time:    ${refillData.estimatedTime}`);
+          doc.text("Estimated Time:", labelX, currentY);
+          doc.text(refillData.estimatedTime, valueX, currentY);
+          currentY += lineHeight;
         }
 
         if (refillData.preferredDate) {
           const preferredDate = new Date(refillData.preferredDate);
-          const formattedDate = preferredDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
+          const formattedDate = preferredDate.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
           });
-          doc.text(`Preferred Date:    ${formattedDate}`);
+          doc.text("Preferred Date:", labelX, currentY);
+          doc.text(formattedDate, valueX, currentY);
+          currentY += lineHeight;
         }
 
         if (refillData.preferredTime) {
-          doc.text(`Preferred Time:    ${refillData.preferredTime}`);
+          doc.text("Preferred Time:", labelX, currentY);
+          doc.text(refillData.preferredTime, valueX, currentY);
+          currentY += lineHeight;
         }
 
-        doc.moveDown(1);
+        doc.y = currentY;
+        // Reset x position to left margin for subsequent sections
+        doc.x = 50;
+
+        doc.moveDown(1.5);
 
         // Additional Comments Section
         if (refillData.comments?.trim()) {
-          doc.fontSize(11)
-             .fillColor('#0A438C')
-             .text('ADDITIONAL COMMENTS', { underline: true });
+          doc
+            .fontSize(14)
+            .fillColor("#0A438C")
+            .text("ADDITIONAL COMMENTS", { underline: true });
 
-          doc.moveDown(0.5);
-          doc.fontSize(10)
-             .fillColor('#000000')
-             .text(refillData.comments.trim(), {
-               align: 'left',
-               width: 462,
-             });
+          doc.moveDown(0.3);
+          doc
+            .fontSize(14)
+            .fillColor("#000000")
+            .text(refillData.comments.trim(), {
+              align: "left",
+              width: 462,
+            });
 
-          doc.moveDown(1);
+          doc.moveDown(1.5);
         }
       } else {
         const consultationData = requestData as any;
 
-        // Consultation Details Section
-        doc.fontSize(11)
-           .fillColor('#0A438C')
-           .text('CONSULTATION DETAILS', { underline: true });
-
+        // Consultation Details Section - Bigger and more appealing
         doc.moveDown(0.5);
-        doc.fontSize(10)
-           .fillColor('#000000')
-           .text(`Service Requested: ${getServiceDisplayName(consultationData.service || 'Not specified')}`);
+        doc
+          .fontSize(14)
+          .fillColor("#0A438C")
+          .text("CONSULTATION DETAILS", { underline: true });
 
-        doc.moveDown(1);
+        doc.moveDown(0.3);
+        doc
+          .fontSize(14)
+          .fillColor("#000000")
+          .text(
+            `Service Requested: ${getServiceDisplayName(
+              consultationData.service || "Not specified"
+            )}`
+          );
+
+        doc.moveDown(1.5);
 
         // Preferred Date & Time Section
         if (consultationData.preferredDateTime) {
-          doc.fontSize(11)
-             .fillColor('#0A438C')
-             .text('PREFERRED APPOINTMENT TIME', { underline: true });
+          doc
+            .fontSize(14)
+            .fillColor("#0A438C")
+            .text("PREFERRED APPOINTMENT TIME", { underline: true });
 
-          doc.moveDown(0.5);
-          doc.fontSize(10)
-             .fillColor('#000000');
+          doc.moveDown(0.3);
+          doc.fontSize(14).fillColor("#000000");
 
           try {
             const preferredDate = new Date(consultationData.preferredDateTime);
-            const formattedDate = preferredDate.toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+            const formattedDate = preferredDate.toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             });
-            const formattedTime = preferredDate.toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
+            const formattedTime = preferredDate.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
               hour12: true,
             });
             doc.text(`Date: ${formattedDate}`);
@@ -568,57 +726,62 @@ export async function generateFaxPDF(requestData: {
             doc.text(`${consultationData.preferredDateTime}`);
           }
 
-          doc.moveDown(1);
+          doc.moveDown(1.5);
         }
 
         // Additional Notes Section
         if (consultationData.additionalNote?.trim()) {
-          doc.fontSize(11)
-             .fillColor('#0A438C')
-             .text('ADDITIONAL NOTES', { underline: true });
+          doc
+            .fontSize(14)
+            .fillColor("#0A438C")
+            .text("ADDITIONAL NOTES", { underline: true });
 
-          doc.moveDown(0.5);
-          doc.fontSize(10)
-             .fillColor('#000000')
-             .text(consultationData.additionalNote.trim(), {
-               align: 'left',
-               width: 462,
-             });
+          doc.moveDown(0.3);
+          doc
+            .fontSize(14)
+            .fillColor("#000000")
+            .text(consultationData.additionalNote.trim(), {
+              align: "left",
+              width: 462,
+            });
 
-          doc.moveDown(1);
+          doc.moveDown(1.5);
         }
       }
 
-      // Footer Section
-      doc.moveDown(1);
-      doc.strokeColor('#0A438C')
-         .lineWidth(1)
-         .moveTo(50, doc.y)
-         .lineTo(562, doc.y)
-         .stroke();
+      // Footer Section - Smaller and less formal
+      doc.moveDown(2);
+      doc
+        .strokeColor("#E5E7EB")
+        .lineWidth(0.5)
+        .moveTo(50, doc.y)
+        .lineTo(562, doc.y)
+        .stroke();
 
       doc.moveDown(1);
-      doc.fontSize(11)
-         .fillColor('#0A438C')
-         .text('ACTION REQUIRED', { underline: true });
+      doc
+        .fontSize(11)
+        .fillColor("#666666")
+        .text(
+          `This request was submitted through the ${pharmacyName} website.`,
+          { align: "center" }
+        );
+      doc
+        .fontSize(11)
+        .fillColor("#666666")
+        .text(
+          `Please contact the patient at ${formattedPatientPhone} to proceed.`,
+          { align: "center" }
+        );
 
-      doc.moveDown(0.5);
-      doc.fontSize(10)
-         .fillColor('#000000')
-         .text(`This is an automated request submitted through the ${pharmacyName} website.`);
-      doc.text(`Please contact the patient at ${formattedPatientPhone} to proceed with this request.`);
-
-      doc.moveDown(1);
-      doc.fontSize(11)
-         .fillColor('#0A438C')
-         .text('CONTACT INFORMATION', { underline: true });
-
-      doc.moveDown(0.5);
-      doc.fontSize(10)
-         .fillColor('#000000')
-         .text(pharmacyName);
-      doc.text(`Phone: ${pharmacyPhone}`);
-      doc.text(`Fax: ${pharmacyFax}`);
+      doc.moveDown(0.8);
+      doc
+        .fontSize(10)
+        .fillColor("#999999")
+        .text(
+          `${pharmacyName} • Phone: ${pharmacyPhone} • Fax: ${pharmacyFax}`,
+          { align: "center" }
+        );
 
       doc.end();
     } catch (error) {
