@@ -22,24 +22,24 @@ export default function Navigation({
     setCurrentPath(window.location.pathname);
 
     const handleScroll = () => {
-      // Check which section is currently in view
-      const sections = items.map((item) => item.href);
+      const scrollPosition = window.scrollY + 120; // Offset for sticky nav height
       let currentSection = "#home";
 
-      for (const section of sections) {
-        const element = document.querySelector(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            currentSection = section;
-            break;
-          }
+      items.forEach((item) => {
+        const element = document.querySelector(item.href);
+        if (!element) return;
+
+        const elementTop = element instanceof HTMLElement ? element.offsetTop : 0;
+
+        if (elementTop <= scrollPosition) {
+          currentSection = item.href;
         }
-      }
+      });
 
       setActiveSection(currentSection);
     };
 
+    handleScroll();
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [items]);
@@ -76,6 +76,8 @@ export default function Navigation({
 
             // Handle navigation - if on services page and not services link, go to main page
             const handleClick = (e: React.MouseEvent) => {
+              setActiveSection(item.href);
+
               if (currentPath === "/services" && item.href !== "#services") {
                 e.preventDefault();
                 window.location.href = `/${item.href}`;
